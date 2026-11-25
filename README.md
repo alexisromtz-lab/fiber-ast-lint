@@ -229,7 +229,7 @@ flake8 7.5.0 .:
 black 26.10.1 .:
   identico: files=42 stores=23 pierde=2 candidates=2 admitted=0 column_loci=2
 
-REPLAY IDENTICO · 13 filas · instrumento 0.4.3
+REPLAY IDENTICO · 13 filas · instrumento 0.4.4
 ```
 
 The three trailing rows are the out-of-sample population measured below: they were **added to the
@@ -481,7 +481,7 @@ repository in about 54 s, which is the intended use.
 ```yaml
 repos:
   - repo: https://github.com/alexisromtz-lab/fiber-ast-lint
-    rev: v0.4.3
+    rev: v0.4.4
     hooks:
       - id: fiber-ast-lint
 ```
@@ -594,7 +594,7 @@ After `0.4.2`, the pin grew and the wheel did not: thirteen rows, `instrument_ve
 `0.4.2`. That is deliberate — the version names the **binary that produced a row**, not the number
 of rows, and a documentation-and-pin change that leaves `src/` untouched should not mint a version
 whose artifact is byte-identical to the previous one. The three out-of-sample rows reproduce from
-PyPI like the rest (`REPLAY IDENTICO · 13 filas · instrumento 0.4.3`, RC 0), and `totals_seven` still
+PyPI like the rest (`REPLAY IDENTICO · 13 filas · instrumento 0.4.4`, RC 0), and `totals_seven` still
 describes only the seven, which is why it is called `totals_seven` and not `total`.
 
 `0.4.3` publishes the terms instead of the verdict. Every row of `censo.json` declared
@@ -630,6 +630,14 @@ The same window closed the other half of the out-of-sample question. Precision o
 cannot say whether a defect is *caught*, so three losing forms and two controls were planted inside
 the pinned `flake8` tree: `stores` 3 → 8 (exactly the plants), both guards silent, and the row that
 was already there unchanged. Three tests now hold the classifier to that matrix offline.
+
+`0.4.4` makes the JSON name its author. `--json` reported what it measured and never which binary
+measured it, so a receipt copied out of a CI log could not be traced to a version, and a receipt
+that had aged was indistinguishable from one that had been edited. Every document now carries
+`instrument` and `instrument_version` at the root, stamped by the package that ran. The census was
+re-run over all thirteen pinned artifacts with `0.4.4` before its `instrument_version` moved: every
+cell identical, `totals_seven` unchanged — a stamp is only a measurement if the run that produced it
+is the run that wrote it.
 
 ## License
 

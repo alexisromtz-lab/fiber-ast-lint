@@ -17,7 +17,7 @@ import argparse
 import json
 import sys
 
-from . import graph
+from . import __version__, graph
 from .detect import RC_CANDIDATO, RC_CONSERVACION, RC_OK, RC_VACIO, Analisis, analizar
 from .rc import combinar_rc
 
@@ -84,6 +84,7 @@ def _payload(r: dict) -> dict:
     a = r["analisis"]
     c = r["consumos"]
     return {
+        "instrument": "fiber-ast-lint", "instrument_version": __version__,
         "raiz": r["raiz"], "archivos": r["archivos"], "fallas": r["fallas"],
         "for_medidos": r["for_medidos"], "almacenes": r["almacenes"],
         "pierde": r["pierde"], "guardadas": r["guardadas"],

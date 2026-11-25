@@ -1,7 +1,7 @@
 {
   "schema": "fiber-ast-lint/censo/1",
   "instrument": "fiber-ast-lint",
-  "instrument_version": "0.4.3",
+  "instrument_version": "0.4.4",
   "measured_at": "2026-11-25",
   "interpreter": "CPython 3.12.13",
   "method": "PyPI wheel downloaded, SHA-256 checked against PyPI's own digest, unzipped, and the subtree named in `scope` analysed. No install, no site-packages, no network during analysis.",

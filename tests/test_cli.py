@@ -99,3 +99,14 @@ def test_el_payload_publica_de_donde_salio_cada_identidad(capsys):
         assert isinstance(salida[clave], int), clave
     assert salida["consumidores_por_self"] >= 0
     assert salida["llamadas_self_ajenas"] >= 0
+
+
+def test_el_payload_nombra_el_binario_que_lo_escribio(capsys):
+    """Un recibo sin autor no se puede fechar: se confunde con uno editado."""
+    import fiber_ast_lint
+
+    rc = main([FIXTURES, "--json"])
+    salida = json.loads(capsys.readouterr().out)
+    assert rc == 1
+    assert salida["instrument"] == "fiber-ast-lint"
+    assert salida["instrument_version"] == fiber_ast_lint.__version__
