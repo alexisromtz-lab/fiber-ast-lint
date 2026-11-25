@@ -96,6 +96,23 @@ A candidate is **admitted** only when the accumulator escapes its function *and*
 analysed universe calls that function. Otherwise the report says `LATENTE` instead of spending a
 reader's time on a defect that cannot change a decision.
 
+## A column is not the row
+
+`acc[fila.codigo] = fila` fails exactly like `acc[fila["codigo"].strip()] = fila` one syntactic
+layer down: the key space is **one column of the row**, so any two rows that share the column fuse.
+It gets its own form and its own family, because filing it as plain `SELECCION` published the
+family as `IDENTIDAD` — "the key is the row" — and that hid the projection while the loss stayed:
+
+```
+CANDIDATO columna_no_transversal.py:10  op=pierde  fam=COLUMNA  forma=SELECCION_COLUMNA_BUCLE
+```
+
+The detector fires only when the attribute's **root is the loop variable**. `acc[cfg.clave]`,
+whose root is a parameter, is a *constant key* — every iteration writes the same slot, a different
+defect that this pass does not claim to see — and is reported as `SELECCION`, not as a column.
+Whether the column is unique is not knowable statically, so the verdict is `CANDIDATO`; a prior
+`if fila.codigo in acc:` turns it into a counted bucket (`guardadas`) and the run goes clean.
+
 ## The second pass: who reads the cardinal one hop away?
 
 `len(acc)` is often written by the caller, not by the builder. A second AST pass closes one hop
@@ -139,15 +156,60 @@ Own corpus (239 files of Python tooling):
 |---|---|---|---|---|---|---|---|---|
 | 3 032 | 408 | 13 | 53 | 85 | 21 | 236 | 25 | 22 |
 
-Seven third-party packages (599 files, 308 stores): 6 lossy writes, **2 admitted, both in `mypy`**.
-Across the other six — `pylint` (189 files), `astroid` (97), `isort` (45), `platformdirs` (15),
-`tomlkit` (12), `dill` (46) — **zero admitted loci over 359 files**. Two more in place, without
-copying them out of `site-packages`: `jsonschema` (37 files, 98 loops, 0 lossy) and `pydantic`
-(105 files, 341 loops, 0 lossy).
+Seven third-party packages, **599 files, 308 stores**, measured 2026-11-26 with this version:
 
-Density of lossy projection per store: **1.95 % foreign vs 6.13 % own**. The density is not a
-property of Python; it is a property of the codebase — the style that normalises session names,
-paths and tool names by trade.
+| package | files | stores | pierde | candidates | admitted | column loci |
+|---|---|---|---|---|---|---|
+| `mypy` | 195 | 173 | 4 | 18 | **5** | 16 |
+| `pylint` | 189 | 55 | 1 | 2 | 0 | 2 |
+| `astroid` | 97 | 37 | 0 | 5 | 0 | 5 |
+| `dill` | 46 | 16 | 4 | 0 | 0 | 0 |
+| `isort` | 45 | 21 | 0 | 4 | 0 | 0 |
+| `platformdirs` | 15 | 0 | 0 | 0 | 0 | 0 |
+| `tomlkit` | 12 | 6 | 0 | 1 | 0 | 1 |
+| **total** | **599** | **308** | **9** | **30** | **5** | **24** |
+
+All five admitted loci are in `mypy`: `applytype.py:127` (`tvar.id`), `config_parser.py:543`
+(`report_type`), `config_parser.py:666` (`name`), `expandtype.py:113` (`binder.id`) and
+`join.py:781` (`tv.id`). The other six packages hold **zero admitted over 404 files**. Two more
+packages were measured in place, without copying them out of `site-packages`: `jsonschema` (37
+files, 98 loops, 0 lossy) and `pydantic` (105 files, 341 loops, 0 lossy).
+
+### A density that reversed when the instrument improved
+
+The previous version of this file reported *1.95 % foreign vs 6.13 % own* lossy density and
+concluded the style was a property of the codebase. **That comparison is retracted.** Both figures
+came from a classifier that could not see column keys (`acc[fila.columna]`), and 24 of the 30
+foreign candidates are exactly that form. Measured today, with one instrument on both sides:
+
+| universe | candidates / stores |
+|---|---|
+| foreign (7 packages) | 30 / 308 = **9.74 %** |
+| own (240 files of tooling) | 25 / 413 = **6.05 %** |
+
+The relation reverses. A density measured with a blinder is not a density, and the two numbers are
+not reconciled here because reconciling them would mean pretending one instrument produced both.
+
+### What the column form found: 24 loci, 5 admitted, zero accidents
+
+Every one of the 24 is a real column projection — the key is an attribute of the loop variable, not
+a syntactic accident — and each is adjudicable in a line:
+
+| column | loci | why it does not merge |
+|---|---|---|
+| `tvar.id`, `binder.id`, `tv.id`, `v.id` | 9 | `mypy` allocates `TypeVarId` monotonically: one id, one binder |
+| `tv.fullname`, `n.fullname` | 3 | qualified name, unique per definition |
+| `item_name.value`, `arg.value`, `keyword.value` | 4 | the key is an AST node: one node, one slot |
+| `posonly.name`, `arg.name`, `kwarg.name` | 3 | the grammar forbids two parameters with one name |
+| `base.type` | 2 | the key is the type object itself |
+| `key.key` (`tomlkit`) | 1 | TOML forbids duplicate keys in a table |
+| `decorator.name` (`pylint`) | 1 | `@overload` twice is legal — **this collision is real**, at a cost of one lint message |
+| `module.fig_id` (`pylint`) | 1 | unique per diagram node |
+
+One genuine hole, and it costs a repeated lint message. Zero accidental hits. Nineteen of the 24
+stay `LATENTE` not because the detector doubts them but because nobody calls `len()` on the
+accumulator — and the verdict stays `CANDIDATO` because the tool cannot read the contract that
+makes a column unique. That contract is the reader's, and adjudicating it is not a false positive.
 
 ### The one real defect found so far
 
@@ -161,7 +223,36 @@ syntax and blind to the kernel. Reduction to a pure function lives in
 
 The second `mypy` locus (`config_parser.py:666`) is an **intentional** kernel: it maps CLI option
 names onto internal keys and knows the collision is a merge. This tool does not claim to read
-intent — it says `CANDIDATO`, and a human adjudicates. Two admitted, two adjudicated, one defect.
+intent — it says `CANDIDATO`, and a human adjudicates. Five admitted, four adjudicated benign,
+one defect.
+
+## Cost, measured before optimising anything
+
+An honest baseline first: a benchmark published *after* the fix cannot predict anything.
+
+| universe | files | wall | **CPU** | load average |
+|---|---|---|---|---|
+| `pylint` 3.x | 189 | 37.8 s | **5.24 s** | 53 |
+
+The 30-second gap is the machine, not the algorithm — the run shared a host at load 53. The
+algorithmic cost here is **27.7 ms of CPU per file**. It is *not* linear by construction: every
+module is parsed once, but the name censuses (`nombres_de_secuencia`, `nombres_con_len`) walk each
+statement with `ast.walk`, which descends into nested scopes and re-walks them when their own
+`_ambito` pass runs. Nesting depth, not file count, is the hidden multiplier — and that is exactly
+the term a memoised post-order pass would remove, which is why the hypothesis below is stated in
+CPU seconds and not in "it feels faster".
+
+The obvious next hypothesis is registered with its falsifier instead of being announced as an
+improvement:
+
+- **Claim under test.** A memoised post-order pass (name censuses, `len` census, scope parent
+  tables) brings `pylint` under **3 s of CPU**.
+- **Falsifier.** If the CPU cost does not at least halve, the hypothesis dies and gets published
+  dead — a 1.3× win is not worth the risk of a rewrite.
+- **Invariant it may not break.** The frozen oracle over the 239-file corpus measured on
+  2026-11-25: 22 admitted loci, identical before and after, zero divergence in either direction.
+
+Until that lands, treat the tool as a batch and pre-commit check, not an editor keystroke.
 
 ## Library use
 
