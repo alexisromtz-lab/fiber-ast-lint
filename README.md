@@ -482,3 +482,11 @@ blindness ending, not about the density moving.
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Field notes
+
+This repository belongs to an audit corpus whose measurements are published as
+field notes. Two of them come from the same work:
+
+- [Auditar un escáner de secretos con un escáner de secretos no mide nada](https://dev.to/alexisromtz7/auditar-un-escaner-de-secretos-con-un-escaner-de-secretos-no-mide-nada-3f5o)
+- [Casi la mitad del código de 22 proyectos depende de un ciclo, y el indicador habitual premia al que peor está](https://dev.to/alexisromtz7/casi-la-mitad-del-codigo-de-22-proyectos-depende-de-un-ciclo-y-el-indicador-habitual-premia-al-que-3ecn)
