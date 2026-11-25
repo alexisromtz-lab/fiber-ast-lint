@@ -46,6 +46,40 @@ def test_escritura_posicional_no_cambia_cardinalidad(copia):
     assert a.pierde == 0
 
 
+def test_columna_de_la_fila_es_proyeccion_no_identidad(copia):
+    """``acc[fila.codigo]`` is a column of the row, not the row.
+
+    The family had to change: ``familia_de`` only sums operators applied to the
+    key, so an attribute answers ``IDENTIDAD`` and the projection disappears
+    from the report while the loss stays real.
+    """
+    a = analizar(copia("columna_no_transversal.py"))
+    loc = a.loci[0]
+    assert loc.forma == "SELECCION_COLUMNA_BUCLE"
+    assert loc.familia == "COLUMNA"
+    assert loc.op == "pierde"
+    assert a.candidatos == [loc]
+    assert loc.escapa is True
+    assert loc.severidad == "CANDIDATO"
+
+
+def test_columna_con_guarda_no_es_perdida(copia):
+    """A uniqueness check on the same column turns the loss into a bucket."""
+    a = analizar(copia("columna_guardada.py"))
+    assert a.candidatos == []
+    assert a.guardadas == 1
+    assert a.pierde == 0
+
+
+def test_atributo_que_no_es_la_fila_no_finge_columna(copia):
+    """``out[cfg.clave]`` is a constant key, not a column: the root is a parameter."""
+    a = analizar(copia("seleccion_invariante.py"))
+    loc = a.loci[0]
+    assert loc.forma == "SELECCION"
+    assert loc.familia != "COLUMNA"
+    assert a.candidatos == []
+
+
 def test_sin_acumulador_no_hay_loci(copia):
     a = analizar(copia("limpio.py"))
     assert a.archivos == 1
@@ -63,7 +97,9 @@ def test_ningun_almacen_se_cuenta_dos_veces(copia):
     """
     for nombre in ("espacio_no_transversal.py", "grafo_consumidores.py",
                    "monoidal_conserva.py", "guardada_conserva.py",
-                   "posicional_conserva.py", "limpio.py"):
+                   "posicional_conserva.py", "limpio.py",
+                   "columna_no_transversal.py", "columna_guardada.py",
+                   "seleccion_invariante.py"):
         a = analizar(copia(nombre))
         assert a.for_medidos == len(_lineas_de_for(nombre)), nombre
         assert len(a.loci) <= a.almacenes, nombre
@@ -78,16 +114,16 @@ def _lineas_de_for(nombre: str) -> set[int]:
 
 
 def test_reconcilia_sobre_un_universo_conocido():
-    """Six loops and six stores over the whole battery, buckets disjoint."""
+    """Nine loops and nine stores over the whole battery, buckets disjoint."""
     from conftest import FIXTURES
     a = analizar(FIXTURES)
     assert a.fallas == 0
-    assert a.for_medidos == 6
-    assert a.almacenes == 6
+    assert a.for_medidos == 9
+    assert a.almacenes == 9
     assert a.almacenes == (a.pierde + a.guardadas + a.acumulacion
                            + a.posicional + a.sin_len)
     assert a.reconcilia()
-    assert (a.pierde, a.guardadas, a.acumulacion, a.posicional) == (0, 1, 1, 1)
+    assert (a.pierde, a.guardadas, a.acumulacion, a.posicional) == (0, 2, 1, 1)
 
 
 def test_universo_vacio_no_es_cero(tmp_path):

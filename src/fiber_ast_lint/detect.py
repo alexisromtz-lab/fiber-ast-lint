@@ -338,10 +338,24 @@ def tiene_rebanada(nodo: ast.AST) -> bool:
     return any(isinstance(x, ast.Slice) for x in ast.walk(nodo))
 
 
+def raiz_de(cadena: ast.AST) -> ast.Name | None:
+    """Root ``Name`` of an attribute chain: ``a.b.c`` -> ``a``; else ``None``."""
+    while isinstance(cadena, ast.Attribute):
+        cadena = cadena.value
+    return cadena if isinstance(cadena, ast.Name) else None
+
+
 def forma_de_clave(clave: ast.AST, objetivo: set[str]) -> str:
     """The ladder, decided only by the syntactic shape of the key."""
     if isinstance(clave, ast.Name):
         return "IDENTIDAD_BUCLE" if clave.id in objetivo else "PROCEDENCIA_OCULTA"
+    if isinstance(clave, ast.Attribute) and (
+            r := raiz_de(clave)) is not None and r.id in objetivo:
+        # ``acc[fila.codigo] = fila``: the key is ONE COLUMN of the row, not the
+        # row. Two rows that share the column fuse, so the key space is the
+        # column's image, not the domain. ``SELECCION`` alone cannot say this:
+        # it also covers ``acc[cfg.key]``, whose root is not the loop variable.
+        return "SELECCION_COLUMNA_BUCLE"
     if isinstance(clave, (ast.Subscript, ast.Attribute)):
         return "SELECCION"
     if tiene_rebanada(clave) or (llamadas_de(clave) & LETALES):
@@ -491,7 +505,8 @@ class Locus:
     def candidato(self) -> bool:
         """Actionable: destructive write on a visible projection."""
         return self.op == "pierde" and self.forma in (
-            "PROYECCION_VISIBLE", "PROYECCION_ARRIBA_CON_PERDIDA")
+            "PROYECCION_VISIBLE", "PROYECCION_ARRIBA_CON_PERDIDA",
+            "SELECCION_COLUMNA_BUCLE")
 
     @property
     def admitido(self) -> bool:
@@ -586,9 +601,13 @@ def _ambito(cuerpo: list[ast.stmt], rel: str, locales: dict[str, ast.AST],
                 nota = ""
                 if forma == "PROCEDENCIA_OCULTA" and isinstance(clave, ast.Name):
                     forma, nota, resuelto = resolver_arriba(clave, n, cuerpo, locales)
+                # A column of the row is not an operator applied to the key, so
+                # ``familia_de`` would answer IDENTIDAD and hide the projection.
+                familia = ("COLUMNA" if forma == "SELECCION_COLUMNA_BUCLE"
+                           else familia_de(clave, resuelto))
                 loc = Locus(
                     rel=rel, linea=nodo.lineno, texto=txt, poblacion=poblacion,
-                    op=clase, forma=forma, familia=familia_de(clave, resuelto),
+                    op=clase, forma=forma, familia=familia,
                     fn=getattr(fn, "name", ""), escapa=escapa(fn, acc),
                     llamadas=0, qn=qn,
                     publica=(publicacion(cuerpo, acc) if poblacion == "pierde" else "SIN_LEN"),

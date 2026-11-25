@@ -57,11 +57,11 @@ def test_fixtures_como_universo(capsys):
     rc = main([FIXTURES, "--json", "--sin-interproc"])
     salida = json.loads(capsys.readouterr().out)
     assert rc == 1
-    assert salida["for_medidos"] == 6
-    assert salida["almacenes"] == 6
+    assert salida["for_medidos"] == 9
+    assert salida["almacenes"] == 9
     assert salida["consumidores"] == {}
     assert salida["llamadas_sin_identidad"] == 0
-    assert len(salida["candidatos"]) == 3
+    assert len(salida["candidatos"]) == 4
 
 
 def test_varios_universos_gana_el_supremo(tmp_path, copia):
