@@ -92,6 +92,8 @@ def _payload(r: dict) -> dict:
         "rc": rc_de(a), "candidatos": r["candidatos"],
         "consumidores": {k: [str(x) for x in v] for k, v in c.exactos.items()},
         "consumidores_por_nombre": c.sitios_por_nombre,
+        "consumidores_por_self": c.sitios_por_self,
+        "llamadas_self_ajenas": c.ajenas_por_self,
         "llamadas_sin_identidad": c.no_resueltos,
     }
 
@@ -115,6 +117,7 @@ def _informe(r: dict, solo_candidatos: bool) -> None:
     print(f"INTERPROC con_consumidor={len(con_consumidor)} de {len(cand)}"
           f" · productores_con_sitio={c.productores_con_sitio}"
           f" · sitios_por_identidad={c.sitios_exactos}"
+          f" · sitios_por_self={c.sitios_por_self}"
           f" · sitios_por_nombre={c.sitios_por_nombre}"
           f" · llamadas_sin_identidad={c.no_resueltos}")
     for clave, lista in sorted(c.exactos.items()):

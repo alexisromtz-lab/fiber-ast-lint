@@ -175,3 +175,86 @@ def test_nombre_no_resuelto_se_publica_como_poblacion_aparte(tmp_path):
     assert out.no_resueltos == 1
     assert out.sitios_por_nombre == 1
     assert list(out.por_nombre) == ["medir"]
+
+
+def test_una_llamada_a_self_resuelve_al_metodo_y_no_a_la_funcion_homonima(tmp_path):
+    """The trap: a module function and a method share a name.
+
+    ``mypy`` has exactly this shape (``applytype.apply_generic_arguments`` next to
+    a method of the same name). A name-based rule would credit every ``self.``
+    call to the module function; the enclosing class is read from the tree.
+    """
+    (tmp_path / "k.py").write_text(
+        "def medir(x):\n"
+        "    return {i: i for i in x}\n"
+        "\n"
+        "class Caja:\n"
+        "    def medir(self, x):\n"
+        "        return {i: i for i in x}\n"
+        "\n"
+        "    def usa(self, x):\n"
+        "        tabla = self.medir(x)\n"
+        "        return len(tabla)\n",
+        encoding="utf-8",
+    )
+    out = consumos(tmp_path, {"k::medir", "k::Caja.medir"})
+    assert [(c.forma, c.via) for c in out.de("k::Caja.medir")] == [("VINCULO", "SELF")]
+    assert out.de("k::medir") == []
+    assert out.sitios_por_nombre == 0
+    assert out.no_resueltos == 0
+
+
+def test_un_metodo_heredado_queda_sin_resolver(tmp_path):
+    """Declared limit: the base class is not consulted, so the site stays unknown."""
+    (tmp_path / "h.py").write_text(
+        "class Base:\n"
+        "    def medir(self, x):\n"
+        "        return {i: i for i in x}\n"
+        "\n"
+        "class Hija(Base):\n"
+        "    def usa(self, x):\n"
+        "        return len(self.medir(x))\n",
+        encoding="utf-8",
+    )
+    out = consumos(tmp_path, {"h::Base.medir"})
+    assert out.de("h::Base.medir") == []
+    assert out.sitios_por_nombre == 1
+    assert list(out.por_nombre) == ["medir"]
+
+
+def test_self_resuelto_sin_lector_es_conocido_y_no_es_consumo(tmp_path):
+    """Identity is not a measurement: a resolved call with no ``len`` adds nothing."""
+    (tmp_path / "k.py").write_text(
+        "class Caja:\n"
+        "    def medir(self, x):\n"
+        "        return {i: i for i in x}\n"
+        "\n"
+        "    def usa(self, x):\n"
+        "        return self.medir(x)\n",
+        encoding="utf-8",
+    )
+    out = consumos(tmp_path, {"k::Caja.medir"})
+    assert out.de("k::Caja.medir") == []
+    assert out.sitios_llamada == 1
+    assert out.sitios_por_self == 1
+    assert out.sitios_por_nombre == 0
+
+
+def test_una_llamada_self_a_un_metodo_ajeno_cuenta_pero_no_se_atribuye(tmp_path):
+    """Identity known, verdict irrelevant: counted so the populations stay closed."""
+    (tmp_path / "k.py").write_text(
+        "class Caja:\n"
+        "    def medir(self, x):\n"
+        "        return {i: i for i in x}\n"
+        "\n"
+        "    def otro(self, x):\n"
+        "        return len(x)\n"
+        "\n"
+        "    def usa(self, x):\n"
+        "        return self.otro(x)\n",
+        encoding="utf-8",
+    )
+    out = consumos(tmp_path, {"k::Caja.medir"})
+    assert out.sitios_por_self == 0
+    assert out.ajenas_por_self == 1
+    assert out.sitios_por_nombre == 0

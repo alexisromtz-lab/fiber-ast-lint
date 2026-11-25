@@ -88,3 +88,14 @@ def test_json_de_varios_universos_es_lista(copia, capsys):
     assert isinstance(salida, list) and len(salida) == 2
     assert [d["rc"] for d in salida] == [1, 0]
     assert rc == 1
+
+
+def test_el_payload_publica_de_donde_salio_cada_identidad(capsys):
+    """A reader must be able to tell the two resolution rules apart."""
+    rc = main([FIXTURES, "--json"])
+    salida = json.loads(capsys.readouterr().out)
+    assert rc == 1
+    for clave in ("consumidores_por_self", "llamadas_self_ajenas", "consumidores_por_nombre"):
+        assert isinstance(salida[clave], int), clave
+    assert salida["consumidores_por_self"] >= 0
+    assert salida["llamadas_self_ajenas"] >= 0

@@ -18,11 +18,21 @@ Forms, all measured after the call line:
   VINCULO    ``x = f(...)`` then ``len(x)`` afterwards in the same scope
   PARAMETRO  ``f(x)`` and later ``len(x)`` in the caller
 
+The identity comes from two rules, and the evidence says which one spoke:
+``EXACTO`` when the name binds through the import table, ``SELF`` when the call
+is ``self.m(...)``/``cls.m(...)`` and the enclosing class defines ``m``. The
+second rule reads the receiver from the syntax tree, so it cannot be fooled by
+a homonym: it is also the reason the published residuals are small enough to
+inspect — before it existed, every ``self.`` call in a corpus fell into
+``por_nombre`` and was counted as unknown even though nothing was unknown.
+
 Declared limits (each returns ``NO_MEDIDO``, never 0): no attribute form of the
 measurement (``len(x.keys())``), no aliasing through containers, no propagation
 beyond one hop, no rebinding analysis (a name reassigned after its ``def`` is
-still read as the ``def``), and no resolution of first-class values passed as
-arguments. ``*`` imports are not expanded.
+still read as the ``def``), no resolution of first-class values passed as
+arguments, no inherited or ``super()`` method (``SELF`` requires the enclosing
+class to define the method), no receiver other than ``self``/``cls``.
+``*`` imports are not expanded.
 """
 from __future__ import annotations
 
@@ -59,6 +69,11 @@ class Consumos:
     por_nombre: dict[str, list[Consumidor]] = field(default_factory=dict)
     no_resueltos: int = 0
     sitios_llamada: int = 0
+    #: Call sites resolved by the enclosing-class rule (``self.m(...)``).
+    sitios_por_self: int = 0
+    #: ``self.m(...)`` sites whose method is not one of the producers asked for:
+    #: identity known, verdict irrelevant. Counted so the sum stays closed.
+    ajenas_por_self: int = 0
 
     @property
     def productores_con_sitio(self) -> int:
@@ -98,6 +113,52 @@ def _padres(arbol: ast.AST) -> dict[int, ast.AST]:
         for h in ast.iter_child_nodes(n):
             out[id(h)] = n
     return out
+
+
+def _clases(arbol: ast.AST, padres: dict[int, ast.AST]) -> dict[int, str]:
+    """``id(ClassDef) -> dotted name``, nested classes included."""
+    out: dict[int, str] = {}
+    for n in ast.walk(arbol):
+        if not isinstance(n, ast.ClassDef):
+            continue
+        partes, p = [n.name], padres.get(id(n))
+        while p is not None:
+            if isinstance(p, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                partes.append(p.name)
+            p = padres.get(id(p))
+        out[id(n)] = ".".join(reversed(partes))
+    return out
+
+
+def _identidad_self(n: ast.Call, padres: dict[int, ast.AST],
+                    clases: dict[int, str], modulo: str) -> tuple[str, str] | None:
+    """``(module, Clase.metodo)`` for a ``self.m(...)``/``cls.m(...)`` call.
+
+    The receiver to resolve here is the *enclosing class*, which is read from the
+    syntax tree, not from a name binding: no alias, no import table, nothing to
+    guess. The alternative — attributing the call because some producer shares
+    its bare name — is the homonymy this pass exists to refuse: ``mypy`` defines
+    both ``applytype.apply_generic_arguments`` and a method of the same name, so
+    a name-based rule would credit every ``self.`` call to the module function.
+
+    Returns ``None`` when the enclosing class does not define the method. That
+    covers three declared limits, all left as ``NO_MEDIDO`` rather than resolved:
+    inheritance (the method lives in a base class), ``super().m(...)``, and a
+    receiver other than ``self``/``cls`` (a local object, whose type is unknown).
+    """
+    f = n.func
+    if not (isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name)
+            and f.value.id in ("self", "cls")):
+        return None
+    p = padres.get(id(n))
+    while p is not None and not isinstance(p, ast.ClassDef):
+        p = padres.get(id(p))
+    if p is None:
+        return None
+    if not any(isinstance(s, SIN_DESCENSO_FN) and s.name == f.attr for s in p.body):
+        return None
+    clase = clases.get(id(p))
+    return (modulo, f"{clase}.{f.attr}") if clase else None
 
 
 def _es_len(n: ast.AST | None) -> bool:
@@ -235,7 +296,12 @@ def consumos(raiz: str | Path, productores: set[str]) -> Consumos:
     out = Consumos(exactos={k: [] for k in productores})
     if not productores:
         return out
-    colas = {k.rsplit(SEP, 1)[-1] for k in productores}
+    # The bare name of a method producer is its last dotted segment: ``a::C.m``
+    # is called as ``m``. Keying on ``C.m`` here (as this did) meant a method
+    # producer could never be matched by name, so an unresolved ``self.m(...)``
+    # was not attributed *and not counted* — the published blindness was scoped
+    # to module-level producers only.
+    colas = {k.rsplit(SEP, 1)[-1].rsplit(".", 1)[-1] for k in productores}
     base, fuentes = _fuentes(raiz)
     for p in fuentes:
         relp = p.relative_to(base)
@@ -249,10 +315,15 @@ def consumos(raiz: str | Path, productores: set[str]) -> Consumos:
         modulo = modulo_de(rel)
         tabla = tabla_de_enlaces(arbol, modulo, p.name == "__init__.py")
         padres = _padres(arbol)
+        clases = _clases(arbol, padres)
         for n in ast.walk(arbol):
             if not isinstance(n, ast.Call):
                 continue
+            via = "EXACTO"
             ident = identidad_de_llamada(n, tabla)
+            if ident is None:
+                ident = _identidad_self(n, padres, clases, modulo)
+                via = "SELF"
             if ident is None:
                 pelo = _nombre_pelado(n)
                 if pelo in colas:
@@ -262,9 +333,13 @@ def consumos(raiz: str | Path, productores: set[str]) -> Consumos:
                 continue
             clave = f"{ident[0]}{SEP}{ident[1]}"
             if clave not in productores:
+                if via == "SELF":
+                    out.ajenas_por_self += 1
                 continue
             out.sitios_llamada += 1
+            if via == "SELF":
+                out.sitios_por_self += 1
             for linea, consumo, forma in _sitios(n, arbol, padres):
                 out.exactos[clave].append(
-                    Consumidor(clave, rel, linea, consumo, forma, "EXACTO"))
+                    Consumidor(clave, rel, linea, consumo, forma, via))
     return out

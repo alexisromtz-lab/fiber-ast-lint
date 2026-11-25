@@ -364,7 +364,7 @@ repository in about 54 s, which is the intended use.
 ```yaml
 repos:
   - repo: https://github.com/alexisromtz-lab/fiber-ast-lint
-    rev: v0.4.1
+    rev: v0.4.2
     hooks:
       - id: fiber-ast-lint
 ```
@@ -395,6 +395,50 @@ verificar_conservacion(dominio=67, imagen=68, rechazos=0, colisiones=-1)
 counts are incompatible: `68 + 0 + (−1) = 67`. The arithmetic agrees; the census is a lie. Only
 `bucket >= 0` refutes it.
 
+### `self.m(...)` was invisible, and resolving it changed no verdict
+
+The second pass resolves a call by identity, not by name. Until 0.4.2 the identity
+came only from the import table, so a call written `self.medir(x)` resolved to
+nothing — and, worse, was not even *counted* as unresolved, because the bare-name
+matching compared the callee against `Caja.medir` instead of `medir`. The
+published blindness was therefore scoped to module-level producers while method
+producers were silently dropped: not attributed, not counted, not visible.
+
+Both halves are fixed. The bare name of a method producer is its last segment,
+and a `self.m(...)`/`cls.m(...)` call whose enclosing class defines `m` resolves
+to `(module, Clase.m)` with evidence `SELF`, read from the syntax tree rather
+than from a binding. Inheritance, `super()`, and any other receiver stay
+`NO_MEDIDO` on purpose: a name that matches is not an identity.
+
+Measured on the ten pinned corpora of `censo.json`, before → after:
+
+| population | before | after |
+|---|---|---|
+| call sites attributed by identity (`EXACTO`) | 4 | 4 |
+| call sites attributed by the new `SELF` rule | — | 15 |
+| unknown sites (`por_nombre`) | 38 | 32 |
+| of which, `mypy` | 38 | 6 |
+| of which, discarded entirely by the old key | 0 | 26 |
+| sites whose reader was found | 0 | 0 |
+
+The two populations close by hand: 38 seen before + 26 revealed by the key fix =
+64; of those, 32 left the unknown population (15 now attributed to a producer,
+17 resolved to a method that is not one) and 32 remain. The residual is entirely
+`mypy` — inherited or aliased receivers, which stay `NO_MEDIDO` by design.
+
+The counter-intuitive row is the last one. Resolving identity is not measuring:
+of the 15 newly attributed call sites, **not one** calls `len()` on the value
+within one hop, so no reader appeared and no verdict moved — all ten pinned rows
+re-derive identical under `bench/replay_censo.py`, which CI runs on every push.
+
+That is the useful result, and it points the other way from the one I expected:
+the 9.74 % foreign density is **not** an artifact of a resolver that gave up. It
+was measured with a resolver that could not see `self.` and it did not move when
+the resolver learned to. The unknown population also shrank while growing — 26
+sites now appear that the old key silently discarded — which is the honest
+direction for a census: a smaller number obtained by counting fewer places is
+not an improvement.
+
 ## Known limits
 
 - A static pass names candidates; it cannot decide intent. `CANDIDATO` is where review starts.
@@ -419,6 +463,13 @@ own-corpus row (`239` files, `413` stores) is explicitly marked as not pinnable 
 from all cross-package arithmetic. Two of the published rows were also wrong in a way that no
 amount of care would have caught: `mypy` was scoped to `mypy/` (the wheel has 336 `.py` files,
 the package 195) and `pydantic` had moved a version. Pinning the artifact is what made both visible.
+
+`0.4.2` gives the second pass a second identity rule and changes no verdict. `self.m(...)`
+calls to a method of the enclosing class now resolve to `(module, Clase.m)` with evidence `SELF`;
+the bare-name key that matched them against `Clase.m` instead of `m` is fixed, which reveals 26
+sites it had been discarding. All ten rows of `censo.json` re-derive identical, and the number of
+candidates whose reader is found stays at zero — the section above is about the instrument's
+blindness ending, not about the density moving.
 
 ## License
 
