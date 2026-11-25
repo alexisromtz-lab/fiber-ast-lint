@@ -35,12 +35,18 @@ import zipfile
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RAIZ / "src"))
+
+from fiber_ast_lint.rc import DEFECTO, RUPTURA, VACIO, combinar_rc  # noqa: E402
+
 CENSO = RAIZ / "censo.json"
 UA = {"User-Agent": "fiber-ast-lint-censo-replay/1"}
 CAMPOS = ("files", "stores", "pierde", "candidates", "admitted", "column_loci")
 
-OK, DIVERGE, NO_MEDIDO, RUPTURA = 0, 1, 2, 4
-ORDEN = {OK: 0, NO_MEDIDO: 1, DIVERGE: 2, RUPTURA: 3}
+# The verdicts are this package's own codes, not a private ladder: 1 is a proven
+# defect, 2 is blindness, 4 is a broken premise, and the operator is the one the
+# CLI already uses so a batch of rows cannot compose differently here than there.
+OK, DIVERGE, NO_MEDIDO = 0, DEFECTO, VACIO
 VEREDICTO = {OK: "REPLAY IDENTICO", DIVERGE: "REPLAY CON DIVERGENCIA",
              NO_MEDIDO: "NO_MEDIDO", RUPTURA: "PIN ROTO"}
 
@@ -109,7 +115,7 @@ def main(argv: list[str] | None = None) -> int:
                 raiz = Path(a.desde) / f"{r['package']}-{r['version']}" / r["scope"]
                 if not raiz.is_dir():
                     print(f"  NO_MEDIDO: falta {raiz}")
-                    peor = max((peor, NO_MEDIDO), key=ORDEN.get)
+                    peor = combinar_rc(peor, NO_MEDIDO)
                     continue
                 real = _medir(raiz)
                 medidas[r["artifact"]] = real
@@ -117,22 +123,22 @@ def main(argv: list[str] | None = None) -> int:
                 if difs:
                     print("  DIVERGE: " + ", ".join(f"{k} medido={m} pin={p}"
                                                     for k, (m, p) in difs.items()))
-                    peor = max((peor, DIVERGE), key=ORDEN.get)
+                    peor = combinar_rc(peor, DIVERGE)
                 else:
                     print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS))
                 continue
             rueda, dig_pypi, rc = _traer(r["package"], r["artifact"], base / r["artifact"])
             if rc:
-                peor = max((peor, rc), key=ORDEN.get)
+                peor = combinar_rc(peor, rc)
                 continue
             dig_local = hashlib.sha256(rueda.read_bytes()).hexdigest()
             if dig_local != r["sha256"]:
                 print(f"  RUPTURA: sha256 {dig_local[:16]} != pin {r['sha256'][:16]}")
-                peor = max((peor, RUPTURA), key=ORDEN.get)
+                peor = combinar_rc(peor, RUPTURA)
                 continue
             if dig_pypi and dig_pypi != dig_local:
                 print("  RUPTURA: PyPI declara otro digest para su propio artefacto")
-                peor = max((peor, RUPTURA), key=ORDEN.get)
+                peor = combinar_rc(peor, RUPTURA)
                 continue
             destino = base / f"{r['package']}-{r['version']}"
             if not destino.is_dir():
@@ -141,7 +147,7 @@ def main(argv: list[str] | None = None) -> int:
             raiz = destino / r["scope"]
             if not raiz.is_dir():
                 print(f"  RUPTURA: el artefacto no contiene {r['scope']}/")
-                peor = max((peor, RUPTURA), key=ORDEN.get)
+                peor = combinar_rc(peor, RUPTURA)
                 continue
             real = _medir(raiz)
             medidas[r["artifact"]] = real
@@ -149,7 +155,7 @@ def main(argv: list[str] | None = None) -> int:
             if difs:
                 print("  DIVERGE: " + ", ".join(f"{k} medido={m} pin={p}"
                                                 for k, (m, p) in difs.items()))
-                peor = max((peor, DIVERGE), key=ORDEN.get)
+                peor = combinar_rc(peor, DIVERGE)
             else:
                 print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS))
 
@@ -158,7 +164,7 @@ def main(argv: list[str] | None = None) -> int:
             suma = {k: sum(medidas[r["artifact"]][k] for r in siete) for k in CAMPOS}
             if suma != censo["totals_seven"]:
                 print(f"  DIVERGE: totals_seven medido={suma} pin={censo['totals_seven']}")
-                peor = max((peor, DIVERGE), key=ORDEN.get)
+                peor = combinar_rc(peor, DIVERGE)
             else:
                 print(f"totales de siete paquetes identicos: {suma}")
 
