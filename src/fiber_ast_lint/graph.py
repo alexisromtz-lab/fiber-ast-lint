@@ -1,29 +1,41 @@
-"""Second pass: who measures the cardinal outside the producing function?
+"""Second pass: which call sites measure the producer's cardinal?
 
-The local pass (``detect``) can only see a ``len(acc)`` written in the same
-scope. When the accumulator is returned, or when it arrives as a parameter, the
-reader lives one hop away and the local pass honestly says ``SIN_LEN``. This
-module walks the call sites and closes that hop:
+Identity, not name. The local pass (``detect``) only sees a ``len(acc)`` written
+in the same scope; when the accumulator is returned or arrives as a parameter,
+the reader lives one hop away. This module closes that hop, but only through a
+resolved identity: a call is attributed to a producer when the call site binds
+to the same ``(module, qualname)`` the producer was defined at, either by a
+module-level ``def``/``class``, an ``import``/``from ... import`` binding, or an
+attribute form whose receiver is an imported module or a module-level class.
+
+A bare name that does not resolve is **not** an identity. It is published in its
+own population (``por_nombre``) so a reader can see the size of the homonymy,
+and it never fills ``Locus.consumidor``.
+
+Forms, all measured after the call line:
 
   DIRECTO    ``len(f(...))``                the consumer is the call itself
   VINCULO    ``x = f(...)`` then ``len(x)`` afterwards in the same scope
   PARAMETRO  ``f(x)`` and later ``len(x)`` in the caller
 
-Declared limits (all of them return ``NO_MEDIDO``, never 0): no attribute form
-(``len(x.keys())``), no aliasing through containers, no propagation beyond one
-hop, and no cross-module resolution beyond a name match in the analysed
-universe. A name match is a *candidate* consumer: it is evidence that a reader
-exists, not that the two functions are the same object.
+Declared limits (each returns ``NO_MEDIDO``, never 0): no attribute form of the
+measurement (``len(x.keys())``), no aliasing through containers, no propagation
+beyond one hop, no rebinding analysis (a name reassigned after its ``def`` is
+still read as the ``def``), and no resolution of first-class values passed as
+arguments. ``*`` imports are not expanded.
 """
 from __future__ import annotations
 
 import ast
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
-from .detect import IGNORADOS, PUBLICADORES
+from .detect import IGNORADOS, PUBLICADORES, _fuentes
 
 SIN_DESCENSO_FN = (ast.FunctionDef, ast.AsyncFunctionDef)
+
+#: Separator between module and qualname in a producer key.
+SEP = "::"
 
 
 @dataclass
@@ -33,10 +45,51 @@ class Consumidor:
     linea_llamada: int
     linea_consumo: int
     forma: str
+    via: str = "EXACTO"
 
     def __str__(self) -> str:
         return (f"{self.productor}() {self.archivo}:{self.linea_llamada}"
-                f" -> len en :{self.linea_consumo} [{self.forma}]")
+                f" -> len en :{self.linea_consumo} [{self.forma}/{self.via}]")
+
+
+@dataclass
+class Consumos:
+    """Two populations that must never be added together."""
+    exactos: dict[str, list[Consumidor]] = field(default_factory=dict)
+    por_nombre: dict[str, list[Consumidor]] = field(default_factory=dict)
+    no_resueltos: int = 0
+    sitios_llamada: int = 0
+
+    @property
+    def productores_con_sitio(self) -> int:
+        return sum(1 for v in self.exactos.values() if v)
+
+    @property
+    def sitios_exactos(self) -> int:
+        return sum(len(v) for v in self.exactos.values())
+
+    @property
+    def sitios_por_nombre(self) -> int:
+        return sum(len(v) for v in self.por_nombre.values())
+
+    def de(self, clave: str) -> list[Consumidor]:
+        return self.exactos.get(clave) or []
+
+
+def modulo_de(rel: str) -> str:
+    """Dotted module path of a repo-relative file (``__init__.py`` is its dir)."""
+    partes = [p for p in rel.replace("\\", "/").split("/") if p]
+    if not partes:
+        return ""
+    if partes[-1] == "__init__.py":
+        partes = partes[:-1]
+    else:
+        partes[-1] = partes[-1][:-3]
+    return ".".join(partes)
+
+
+def clave_de(rel: str, qualname: str) -> str:
+    return f"{modulo_de(rel)}{SEP}{qualname}"
 
 
 def _padres(arbol: ast.AST) -> dict[int, ast.AST]:
@@ -87,44 +140,131 @@ def _lecturas_de(nombre: str, cuerpo: list[ast.stmt], desde: int) -> list[int]:
     return sorted(set(lineas))
 
 
-def consumidores(raiz: str | Path, productores: set[str]) -> dict[str, list[Consumidor]]:
-    """Maps each producer name to the call sites that measure its cardinal."""
+def _base_de_import(n: ast.ImportFrom, modulo: str, es_paquete: bool) -> str | None:
+    """Absolute module a ``from ... import`` reads from (``None`` if unknowable)."""
+    if n.level == 0:
+        return n.module or None
+    paquete = modulo if es_paquete else (modulo.rsplit(".", 1)[0] if "." in modulo else "")
+    partes = [p for p in paquete.split(".") if p]
+    salto = n.level - 1
+    if salto > len(partes):
+        return None
+    if salto:
+        partes = partes[:-salto]
+    base = ".".join(partes)
+    if n.module:
+        base = f"{base}.{n.module}" if base else n.module
+    return base or None
+
+
+def tabla_de_enlaces(arbol: ast.AST, modulo: str, es_paquete: bool) -> dict[str, tuple[str, str]]:
+    """Module-level name -> ``(module, qualname)``; ``qualname == ""`` is a module.
+
+    Only module-level statements are read: a binding made inside a function is
+    not visible to a call site in another function, and pretending otherwise
+    would resolve to the wrong object.
+    """
+    tabla: dict[str, tuple[str, str]] = {}
+    for n in getattr(arbol, "body", []):
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            tabla[n.name] = (modulo, n.name)
+        elif isinstance(n, ast.Import):
+            for al in n.names:
+                if al.asname:
+                    tabla[al.asname] = (al.name, "")
+                else:
+                    raiz = al.name.split(".")[0]
+                    tabla[raiz] = (raiz, "")
+        elif isinstance(n, ast.ImportFrom):
+            base = _base_de_import(n, modulo, es_paquete)
+            if base is None:
+                continue
+            for al in n.names:
+                if al.name == "*":
+                    continue
+                tabla[al.asname or al.name] = (base, al.name)
+    return tabla
+
+
+def identidad_de_llamada(n: ast.Call, tabla: dict[str, tuple[str, str]]) -> tuple[str, str] | None:
+    """``(module, qualname)`` of the callee, or ``None`` when it cannot be resolved."""
+    f = n.func
+    if isinstance(f, ast.Name):
+        return tabla.get(f.id)
+    if isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name):
+        base = tabla.get(f.value.id)
+        if base is None:
+            return None
+        modulo, cual = base
+        return (modulo, f.attr) if cual == "" else (modulo, f"{cual}.{f.attr}")
+    return None
+
+
+def _sitios(n: ast.Call, arbol: ast.AST, padres: dict[int, ast.AST]):
+    """Yield ``(linea_llamada, linea_consumo, forma)`` for one call site."""
+    padre = padres.get(id(n))
+    if _es_len(padre):
+        yield n.lineno, padre.lineno, "DIRECTO"
+        return
+    if isinstance(padre, (ast.Assign, ast.AnnAssign)):
+        objetivos = padre.targets if isinstance(padre, ast.Assign) else [padre.target]
+        if len(objetivos) == 1 and isinstance(objetivos[0], ast.Name):
+            cuerpo = _cuerpo_que_contiene(arbol, padre)
+            for ln in _lecturas_de(objetivos[0].id, cuerpo, padre.lineno):
+                yield n.lineno, ln, "VINCULO"
+        return
+    cuerpo = _cuerpo_que_contiene(arbol, n)
+    for arg in n.args:
+        if isinstance(arg, ast.Name):
+            for ln in _lecturas_de(arg.id, cuerpo, n.lineno):
+                yield n.lineno, ln, "PARAMETRO"
+
+
+def _nombre_pelado(n: ast.Call) -> str:
+    f = n.func
+    if isinstance(f, ast.Name):
+        return f.id
+    if isinstance(f, ast.Attribute):
+        return f.attr
+    return ""
+
+
+def consumos(raiz: str | Path, productores: set[str]) -> Consumos:
+    """Maps each producer key (``modulo::qualname``) to its identity-matched sites."""
     raiz = Path(raiz)
-    out: dict[str, list[Consumidor]] = {k: [] for k in productores}
-    if not productores or not raiz.is_dir():
+    out = Consumos(exactos={k: [] for k in productores})
+    if not productores:
         return out
-    for p in sorted(raiz.rglob("*.py")):
-        relp = p.relative_to(raiz)
+    colas = {k.rsplit(SEP, 1)[-1] for k in productores}
+    base, fuentes = _fuentes(raiz)
+    for p in fuentes:
+        relp = p.relative_to(base)
         if any(part in IGNORADOS for part in relp.parts):
             continue
         try:
             arbol = ast.parse(p.read_text(encoding="utf-8"), filename=str(p))
         except (SyntaxError, UnicodeDecodeError, OSError):
             continue
+        rel = str(relp)
+        modulo = modulo_de(rel)
+        tabla = tabla_de_enlaces(arbol, modulo, p.name == "__init__.py")
         padres = _padres(arbol)
         for n in ast.walk(arbol):
-            if not (isinstance(n, ast.Call) and isinstance(n.func, ast.Name)):
+            if not isinstance(n, ast.Call):
                 continue
-            nombre = n.func.id
-            if nombre not in productores:
+            ident = identidad_de_llamada(n, tabla)
+            if ident is None:
+                pelo = _nombre_pelado(n)
+                if pelo in colas:
+                    out.no_resueltos += 1
+                    out.por_nombre.setdefault(pelo, []).append(
+                        Consumidor(f"?{SEP}{pelo}", rel, n.lineno, n.lineno, "SIN_IDENTIDAD", "NOMBRE"))
                 continue
-            padre = padres.get(id(n))
-            if _es_len(padre):
-                out[nombre].append(Consumidor(nombre, str(relp), n.lineno,
-                                              padre.lineno, "DIRECTO"))
+            clave = f"{ident[0]}{SEP}{ident[1]}"
+            if clave not in productores:
                 continue
-            if isinstance(padre, (ast.Assign, ast.AnnAssign)):
-                objetivos = padre.targets if isinstance(padre, ast.Assign) else [padre.target]
-                if len(objetivos) == 1 and isinstance(objetivos[0], ast.Name):
-                    cuerpo = _cuerpo_que_contiene(arbol, padre)
-                    for ln in _lecturas_de(objetivos[0].id, cuerpo, padre.lineno):
-                        out[nombre].append(Consumidor(nombre, str(relp), n.lineno,
-                                                      ln, "VINCULO"))
-                continue
-            cuerpo = _cuerpo_que_contiene(arbol, n)
-            for arg in n.args:
-                if isinstance(arg, ast.Name):
-                    for ln in _lecturas_de(arg.id, cuerpo, n.lineno):
-                        out[nombre].append(Consumidor(nombre, str(relp), n.lineno,
-                                                      ln, "PARAMETRO"))
+            out.sitios_llamada += 1
+            for linea, consumo, forma in _sitios(n, arbol, padres):
+                out.exactos[clave].append(
+                    Consumidor(clave, rel, linea, consumo, forma, "EXACTO"))
     return out

@@ -20,12 +20,28 @@ def test_json_salida_completa(copia, capsys):
     assert salida["reconcilia"] is True
     assert salida["archivos"] == 1
     assert [c["funcion"] for c in salida["candidatos"]] == ["construir_reporteros"]
-    assert salida["consumidores"]["construir_reporteros"]
+    assert salida["consumidores"]["espacio_no_transversal::construir_reporteros"]
 
 
 def test_sin_candidatos_sale_cero(copia):
     rc = main([str(copia("limpio.py")), "-q"])
     assert rc == 0
+
+
+def test_un_fichero_es_un_universo(copia, capsys):
+    """A linter is called with a single file from an editor or a pre-commit hook."""
+    fichero = copia("espacio_no_transversal.py") / "espacio_no_transversal.py"
+    assert main([str(fichero), "--json"]) == 1
+    salida = json.loads(capsys.readouterr().out)
+    assert salida["archivos"] == 1
+    assert [c["funcion"] for c in salida["candidatos"]] == ["construir_reporteros"]
+    assert salida["consumidores"]["espacio_no_transversal::construir_reporteros"]
+
+
+def test_fichero_ajeno_no_finge_universo(tmp_path):
+    otro = tmp_path / "notas.txt"
+    otro.write_text("hola", encoding="utf-8")
+    assert main([str(otro), "-q"]) == 2
 
 
 def test_universo_vacio_no_sale_cero(tmp_path):
@@ -44,4 +60,31 @@ def test_fixtures_como_universo(capsys):
     assert salida["for_medidos"] == 6
     assert salida["almacenes"] == 6
     assert salida["consumidores"] == {}
+    assert salida["llamadas_sin_identidad"] == 0
     assert len(salida["candidatos"]) == 3
+
+
+def test_varios_universos_gana_el_supremo(tmp_path, copia):
+    """An empty path must not hide a candidate found in another path."""
+    vacio = tmp_path / "vacio"
+    vacio.mkdir()
+    assert main([str(vacio), str(copia("espacio_no_transversal.py")), "-q"]) == 1
+
+
+def test_varios_universos_ruptura_manda(tmp_path, copia):
+    roto = tmp_path / "roto"
+    roto.mkdir()
+    (roto / "x.py").write_text("def f(:\n", encoding="utf-8")
+    assert main([str(copia("limpio.py")), str(roto), "-q"]) == 4
+
+
+def test_universo_vacio_solo_sigue_siendo_dos(tmp_path):
+    assert main([str(tmp_path), str(tmp_path), "-q"]) == 2
+
+
+def test_json_de_varios_universos_es_lista(copia, capsys):
+    rc = main([FIXTURES, str(copia("limpio.py")), "--json", "--sin-interproc"])
+    salida = json.loads(capsys.readouterr().out)
+    assert isinstance(salida, list) and len(salida) == 2
+    assert [d["rc"] for d in salida] == [1, 0]
+    assert rc == 1

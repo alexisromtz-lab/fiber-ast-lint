@@ -484,7 +484,8 @@ class Locus:
     publica: str
     clave: str
     nota: str = ""
-    consumidor: str = ""    # filled by graph.consumidores
+    qn: str = ""            # qualified name inside the module (``C.m``)
+    consumidor: str = ""    # filled by graph.consumos
 
     @property
     def candidato(self) -> bool:
@@ -537,7 +538,8 @@ class Analisis:
 
 
 def _ambito(cuerpo: list[ast.stmt], rel: str, locales: dict[str, ast.AST],
-            a: Analisis, firma: list[ast.arg] = (), fn: ast.AST | None = None) -> None:
+            a: Analisis, firma: list[ast.arg] = (), fn: ast.AST | None = None,
+            qn: str = "") -> None:
     medido = nombres_con_len(cuerpo)
     secuencias = nombres_de_secuencia(cuerpo)
     # ast.arg nodes hang off the FunctionDef, not off its body: without this a
@@ -588,21 +590,54 @@ def _ambito(cuerpo: list[ast.stmt], rel: str, locales: dict[str, ast.AST],
                     rel=rel, linea=nodo.lineno, texto=txt, poblacion=poblacion,
                     op=clase, forma=forma, familia=familia_de(clave, resuelto),
                     fn=getattr(fn, "name", ""), escapa=escapa(fn, acc),
-                    llamadas=0,
+                    llamadas=0, qn=qn,
                     publica=(publicacion(cuerpo, acc) if poblacion == "pierde" else "SIN_LEN"),
                     clave=ast.unparse(clave), nota=nota,
                 )
                 a.loci.append(loc)
 
 
+def _qualnames(arbol: ast.AST) -> dict[int, str]:
+    """id(FunctionDef) -> dotted name inside its module, with enclosing classes."""
+    padres: dict[int, ast.AST] = {}
+    for n in ast.walk(arbol):
+        for h in ast.iter_child_nodes(n):
+            padres[id(h)] = n
+    out: dict[int, str] = {}
+    for n in ast.walk(arbol):
+        if not isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        partes = [n.name]
+        p = padres.get(id(n))
+        while p is not None:
+            if isinstance(p, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                partes.append(p.name)
+            p = padres.get(id(p))
+        out[id(n)] = ".".join(reversed(partes))
+    return out
+
+
+def _fuentes(raiz: Path) -> tuple[Path, list[Path]]:
+    """``(base, files)``: a directory is searched, an explicit ``.py`` is taken as is.
+
+    Accepting a file matters for a linter: ``fiber-ast-lint src/app.py`` is how
+    the tool gets called from an editor or a pre-commit hook, and answering
+    "empty universe" there was a wrong zero, not a small one.
+    """
+    if raiz.is_file():
+        return raiz.parent, [raiz] if raiz.suffix == ".py" else []
+    if raiz.is_dir():
+        return raiz, sorted(raiz.rglob("*.py"))
+    return raiz, []
+
+
 def analizar(raiz: str | Path) -> Analisis:
     """Analyses every ``*.py`` under ``raiz`` and returns the census."""
     raiz = Path(raiz)
     a = Analisis(raiz=str(raiz))
-    if not raiz.is_dir():
-        return a
-    for p in sorted(raiz.rglob("*.py")):
-        relp = p.relative_to(raiz)
+    base, fuentes = _fuentes(raiz)
+    for p in fuentes:
+        relp = p.relative_to(base)
         if any(part in IGNORADOS for part in relp.parts):
             continue
         try:
@@ -618,10 +653,12 @@ def analizar(raiz: str | Path) -> Analisis:
                 a.llamadas[n.func.id] = a.llamadas.get(n.func.id, 0) + 1
         locales = {n.name: n for n in ast.walk(arbol)
                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+        qns = _qualnames(arbol)
         for fn in [n for n in ast.walk(arbol)
                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]:
             _ambito(fn.body, rel, locales, a,
-                    [*fn.args.posonlyargs, *fn.args.args, *fn.args.kwonlyargs], fn)
+                    [*fn.args.posonlyargs, *fn.args.args, *fn.args.kwonlyargs], fn,
+                    qns.get(id(fn), fn.name))
         _ambito(arbol.body, rel, locales, a)
     # The consumer count is taken over the already-walked universe: "called"
     # means nothing before this pass. Kept here so importers never get silent

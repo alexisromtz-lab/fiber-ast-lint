@@ -15,13 +15,16 @@ then answers the question that decides whether the loss can ever be caught at ru
 anyone measure the cardinal that would betray it?**
 
 ```console
-$ uvx fiber-ast-lint src/
-CANDIDATO config_parser.py:31  op=pierde  fam=ESPACIO+NORMALIZA  forma=PROYECCION_ARRIBA_CON_PERDIDA fn=construir_reporteros  nombre [nombre_de_reporter() linea 28 proyecta]
+$ uvx fiber-ast-lint tests/fixtures/espacio_no_transversal.py
+CANDIDATO espacio_no_transversal.py:31  op=pierde      fam=ESPACIO+NORMALIZA      forma=PROYECCION_ARRIBA_CON_PERDIDA fn=construir_reporteros  nombre [nombre_de_reporter() linea 28 proyecta]
 CENSO archivos=1 fallas=0 for_medidos=1
 CONSERVACION almacenes=1 == pierde=0 + guardadas=0 + acumulacion=0 + posicional=0 + cardinal_sin_medir=1
-CANDIDATOS total=1 == admitidos=1 + latentes=0
-INTERPROC con_consumidor=1 de 1 · productores_con_sitio=1
+CANDIDATOS total=1 == admitidos=1 + latentes=0  (admitido = proyecta con perdida, escapa y alguien la llama)
+INTERPROC con_consumidor=1 de 1 · productores_con_sitio=1 · sitios_por_identidad=1 · sitios_por_nombre=0 · llamadas_sin_identidad=0
+  consumidor espacio_no_transversal::construir_reporteros() espacio_no_transversal.py:41 -> len en :41 [DIRECTO/EXACTO]
 ```
+
+Paths are files or directories; several of them are allowed (`fiber-ast-lint src tests`).
 
 ## The law
 
@@ -72,6 +75,11 @@ Python ≥ 3.11, zero runtime dependencies (stdlib `ast` only).
 acumulacion + posicional + cardinal_sin_medir`) and refuses to emit a report when those buckets
 do not add up. A detector whose own numbers do not close is a detector whose silence means nothing.
 
+With several paths (`fiber-ast-lint src tests`) the run's code is the **supremum** of the
+individual codes under `4 > 1 > 2 > 0`, not the maximum of the integers: an empty path (`2`) must
+not hide a candidate proven in another path (`1`), and nothing outranks a broken bucket (`4`).
+`max(1, 2) == 2` — that is why the operator is spelled out instead of inferred.
+
 ## What it classifies
 
 For every `for` loop, each write into an accumulator falls in exactly one class:
@@ -100,11 +108,25 @@ PARAMETRO  build(x)          then len(x)         accumulator arrived as a parame
 ```
 
 **Declared limits, never reported as zero:** no attribute form (`len(x.keys())`), no aliasing
-through containers, nothing beyond one hop, and no cross-module resolution beyond a name match in
-the analysed universe. That last one is the weak spot and it is measured rather than hidden — on a
-real 239-file corpus the producer named `medir` attracted 104 sites while the honest reading was
-one, because a parameter named `medir` matches by name and not by identity. Treat `INTERPROC` as
-*a hint that a reader exists*, not as a proof.
+through containers, nothing beyond one hop, and no `*`-import expansion (such a call is published
+as unresolved instead of being resolved by guess).
+
+Cross-module consumers are resolved by **qualified identity** — `(module, qualname)` built from
+the module's own binding table, with `import`/`from ... import`/relative-import aliases and
+attribute forms (`mod.f()`, `Cls.m()`). Name matching alone is not identity, and the difference is
+measured on the same 239-file corpus:
+
+| resolution | call sites attributed to a producer |
+|---|---|
+| bare name (what a naive pass does) | **434**, spread over 19 names — `main` alone accounts for 227, `medir` for 35 |
+| qualified identity | **9** sites, **2** producing functions |
+
+Of the 25 candidates, exactly **2** have an identity-matched consumer that reaches `len()`:
+`medir_tax_mcp.py:156` (`medir` → `medir_tax_mcp.py:757`, `len` at `:763`) and
+`poda_mcp_hostinger.py:1019` (`_claves_enablement` → `:1394`, `len` at `:1400`). Two call sites
+that could not be resolved at all are published under `por_nombre` and are **never** promoted to
+identity. Treat `INTERPROC` as *a reader exists*, not as *losses are observable*: the remaining 23
+candidates keep their honest `SIN_LEN` verdict.
 
 ## Evidence
 
