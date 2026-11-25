@@ -226,33 +226,96 @@ names onto internal keys and knows the collision is a merge. This tool does not 
 intent — it says `CANDIDATO`, and a human adjudicates. Five admitted, four adjudicated benign,
 one defect.
 
+## Fixtures census, recomputed by the test suite
+
+Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the
+census with the real code and fails if any cell of this table disagrees. The larger censuses further
+down need corpora that do not live in this repository, so they are dated and their provenance is
+stated; this one is not a claim, it is an assertion.
+
+| universe | files | stores | lose | guarded | aggregate | positional | unmeasured | candidates |
+|---|---|---|---|---|---|---|---|---|
+| `tests/fixtures` | 9 | 9 | 0 | 2 | 1 | 1 | 5 | 4 |
+
+`stores` is `fallas + guarded + aggregate + positional + unmeasured`, and the run refuses to report
+(RC 4) if it does not close. Note the size of `unmeasured`: five of nine stores have no cardinal
+anybody reads, so the tool stays silent about them instead of inventing a verdict.
+
 ## Cost, measured before optimising anything
 
 An honest baseline first: a benchmark published *after* the fix cannot predict anything.
 
-| universe | files | wall | **CPU** | load average |
+| universe | files | **CPU** (median of 7) | CPU min | CPU per file |
 |---|---|---|---|---|
-| `pylint` 3.x | 189 | 37.8 s | **5.24 s** | 53 |
+| `pylint` 4.1.4 | 189 | **2.05 s** | 1.65 s | 10.8 ms |
 
-The 30-second gap is the machine, not the algorithm — the run shared a host at load 53. The
-algorithmic cost here is **27.7 ms of CPU per file**. It is *not* linear by construction: every
-module is parsed once, but the name censuses (`nombres_de_secuencia`, `nombres_con_len`) walk each
-statement with `ast.walk`, which descends into nested scopes and re-walks them when their own
-`_ambito` pass runs. Nesting depth, not file count, is the hidden multiplier — and that is exactly
-the term a memoised post-order pass would remove, which is why the hypothesis below is stated in
-CPU seconds and not in "it feels faster".
+**Retraction of a previously published number.** This table used to read `37.8 s wall / 5.24 s
+CPU`, taken on a host at load average 53. That figure does not reproduce: the same code, same 189
+files, measures 1.65–2.05 s of CPU today. A wall clock under contention is not a measurement, and
+neither is a CPU time read from a machine where every other tab is compiling — the process spends
+its slices in page faults and in the scheduler, and both are billed to it. The number is withdrawn,
+not adjusted.
 
-The obvious next hypothesis is registered with its falsifier instead of being announced as an
-improvement:
+### `H_memo_ast`: a pre-registered hypothesis, killed by its own falsifier
 
-- **Claim under test.** A memoised post-order pass (name censuses, `len` census, scope parent
-  tables) brings `pylint` under **3 s of CPU**.
-- **Falsifier.** If the CPU cost does not at least halve, the hypothesis dies and gets published
+The hypothesis was registered here *before* any code was written, with the falsifier attached:
+
+- **Claim.** A memoised post-order pass (name censuses, `len` census, scope parent tables) brings
+  `pylint` under **3 s of CPU**.
+- **Falsifier.** If the CPU cost does not at least *halve*, the hypothesis dies and gets published
   dead — a 1.3× win is not worth the risk of a rewrite.
-- **Invariant it may not break.** The frozen oracle over the 239-file corpus measured on
-  2026-11-25: 22 admitted loci, identical before and after, zero divergence in either direction.
+- **Invariant it may not break.** Every locus of the 189-file census identical before and after.
 
-Until that lands, treat the tool as a batch and pre-commit check, not an editor keystroke.
+The rewrite was built in full — one post-order traversal per module computing all seven censuses
+(writes, reads, rebinds, measured cardinals, born sequences, born dicts, membership questions), the
+per-scope assignment table made lazy, and the per-`FunctionDef` return census folded into the same
+pass — and then measured against the untouched original, interleaved, seven rounds each:
+
+| | node visits | visits / node | CPU median | CPU min |
+|---|---|---|---|---|
+| original | 2 552 987 | 11.61 | 2.05 s | 1.65 s |
+| post-order | 925 953 | 4.21 | 1.57 s | 1.45 s |
+
+Node visits fall by 64 %. CPU falls by **1.31×** (median) / 1.14× (min). Output is identical: the
+37 loci of the `pylint` census match byte for byte, and the whole test suite passes unchanged.
+
+**The falsifier is met, so the hypothesis is dead and the rewrite was reverted.** Two things it
+taught, both worth more than the 24 %:
+
+1. **The diagnosis was wrong.** `visits / node` measured over corpus fractions of 25 %, 50 % and
+   100 % is flat — 9.72, 9.60, 10.04 — so the original analysis is *already linear in nodes*. It was
+   never quadratic and nesting depth was never "the hidden multiplier"; the earlier text here said
+   it was, and that sentence is retracted. The truth is a constant: ~10 walks per node, all of them
+   cheap C-level traversals.
+2. **Node visits are a proxy that overstates the work.** Cutting 64 % of the visits bought 24 % of
+   the CPU, because each removed visit was a tight specialised loop and each replacement does seven
+   `isinstance` checks to rebuild the same answer. Any future claim about this instrument has to be
+   stated in CPU seconds; a visit counter will lie to you by a factor of nearly three.
+
+A profiled run is worse than useless for this question: under `cProfile` the same original reports
+`29.6 s` of wall and `2 214 631` `ast.walk` calls, because the profiler charges every generator
+resume. The baseline above was taken without it.
+
+The tool is a batch and pre-commit check. At 10.8 ms of CPU per file it will audit a 5 000-file
+repository in about 54 s, which is the intended use.
+
+### Adopting it without PyPI
+
+`.pre-commit-hooks.yaml` is in the repository root:
+
+```yaml
+repos:
+  - repo: https://github.com/alexisromtz-lab/fiber-ast-lint
+    rev: v0.4.0
+    hooks:
+      - id: fiber-ast-lint
+```
+
+The hook passes the staged files to the binary, so the run's code is the supremum of their
+individual codes under `4 > 1 > 2 > 0`. Exit `1` stops the commit with candidates to adjudicate —
+that is the intended friction, and it is why the finding is *named* rather than called a defect.
+`--sin-interproc` skips the second pass when you only want the local census; `-q` prints the code
+and nothing else.
 
 ## Library use
 
@@ -286,6 +349,11 @@ counts are incompatible: `68 + 0 + (−1) = 67`. The arithmetic agrees; the cens
 
 `0.1.0` files an aggregation (`acumulacion`) in its own bucket whatever the population, instead of
 filing it under `cardinal_sin_medir`. The *loci* are unchanged; only the census wording is.
+
+`0.4.0` adds no detector and changes no locus. It adds the reader this README was missing
+(`tests/test_readme.py` recomputes the fixtures census and the exit-code contract and fails if this
+file disagrees with the code), ships `.pre-commit-hooks.yaml`, and publishes the `H_memo_ast`
+refutation above instead of the 24 % it bought.
 
 ## License
 

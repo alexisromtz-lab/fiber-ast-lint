@@ -1,0 +1,12 @@
+- id: fiber-ast-lint
+  name: fiber-ast-lint (non-injective key projections)
+  description: Names loops that store into a container under a lossy key projection.
+  entry: fiber-ast-lint
+  language: python
+  types: [python]
+  # The binary takes paths, so pre-commit passes the staged files straight
+  # through. Exit 1 means "candidates to review" -- a finding, not a crash --
+  # so the hook stops the commit until a human adjudicates; so do 2 (empty
+  # universe) and 4 (does not reconcile), both by design.
+  pass_filenames: true
+  require_serial: false
