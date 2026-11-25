@@ -205,6 +205,34 @@ The own-corpus row further up (239 files, 413 stores) **cannot be pinned**: it i
 that does not ship. It is evidence about us, not a reproducible claim about this tool, and it is not
 used here for any cross-package arithmetic.
 
+### The pin has a reader, and the reader runs in CI
+
+A pin nothing exercises is a testimony with extra fields. `bench/replay_censo.py` fetches each
+artifact from PyPI, refuses to measure if its SHA-256 differs from the pinned one **or** from the
+digest PyPI publishes for it, unpacks it, and recomputes the six published fields:
+
+```console
+$ python bench/replay_censo.py
+mypy 2.4.1 mypy:
+  identico: files=195 stores=173 pierde=4 candidates=18 admitted=5 column_loci=16
+...
+REPLAY IDENTICO · 10 filas · instrumento 0.4.1
+```
+
+Its exit code says which of four things happened, and the ladder is a supremum, not first-error-wins:
+
+| code | meaning | what it means for the reader |
+|---|---|---|
+| `0` | every row reproduced | the tables are still claims about artifacts |
+| `1` | a published cell did not reproduce | either the code moved or a row is wrong; both are defects |
+| `2` | a corpus could not be fetched | `NO_MEDIDO`; **it never masks a `1`** |
+| `4` | the bytes are not the pinned artifact | nothing below it is interpretable |
+
+The `replay-censo` job in `.github/workflows/ci.yml` runs it on every push, so the census is checked
+on a machine that is not this one — which is the only thing that made the `mypy` and `pydantic`
+corrections possible in the first place. `tests/test_replay_censo.py` drives the ladder offline with
+a toy corpus, because a reader that can only say "identical" is a mirror.
+
 ### A density that reversed when the instrument improved
 
 The previous version of this file reported *1.95 % foreign vs 6.13 % own* lossy density and

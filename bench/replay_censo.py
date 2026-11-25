@@ -1,0 +1,174 @@
+"""Re-derive `censo.json` from the artifacts it names.
+
+The census is a claim about wheels, so the only honest way to check it is to go
+and get the wheels. This script fetches each row's artifact from PyPI, checks
+its SHA-256 against both the pin and PyPI's own digest, unpacks it, runs the
+analyzer on the declared subtree, and compares the six measured fields.
+
+    python bench/replay_censo.py            # temp dir, deleted at the end
+    python bench/replay_censo.py --dir /tmp/censo --keep
+    python bench/replay_censo.py --solo mypy
+
+Exit codes follow the same ladder the package uses, extended with the one case
+the package cannot have: the premise itself broke.
+
+    0  every row reproduced exactly
+    1  a published cell did not reproduce (our code moved, or the row is wrong)
+    2  NO_MEDIDO -- PyPI unreachable, nothing was checked
+    4  the pin ruptured -- the artifact is not the one the census names, so no
+       divergence below it can be interpreted
+
+4 outranks 1 on purpose: a wrong artifact makes every other verdict unreadable.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import shutil
+import subprocess
+import sys
+import tempfile
+import urllib.error
+import urllib.request
+import zipfile
+from pathlib import Path
+
+RAIZ = Path(__file__).resolve().parents[1]
+CENSO = RAIZ / "censo.json"
+UA = {"User-Agent": "fiber-ast-lint-censo-replay/1"}
+CAMPOS = ("files", "stores", "pierde", "candidates", "admitted", "column_loci")
+
+OK, DIVERGE, NO_MEDIDO, RUPTURA = 0, 1, 2, 4
+ORDEN = {OK: 0, NO_MEDIDO: 1, DIVERGE: 2, RUPTURA: 3}
+VEREDICTO = {OK: "REPLAY IDENTICO", DIVERGE: "REPLAY CON DIVERGENCIA",
+             NO_MEDIDO: "NO_MEDIDO", RUPTURA: "PIN ROTO"}
+
+
+def _get(url: str) -> bytes:
+    peticion = urllib.request.Request(url, headers=UA)
+    with urllib.request.urlopen(peticion, timeout=120) as r:
+        return r.read()
+
+
+def _traer(package: str, artifact: str, destino: Path) -> tuple[Path | None, str, int]:
+    """Return (path, digest declared by PyPI, rc). rc is 0, 2 or 4."""
+    try:
+        meta = json.loads(_get(f"https://pypi.org/pypi/{package}/json"))
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+        print(f"  NO_MEDIDO: PyPI sin respuesta para {package}: {exc}")
+        return None, "", NO_MEDIDO
+    for entrada in meta.get("urls", []):
+        if entrada.get("filename") != artifact:
+            continue
+        datos = _get(entrada["url"])
+        destino.write_bytes(datos)
+        return destino, entrada.get("digests", {}).get("sha256", ""), OK
+    print(f"  RUPTURA: {package} ya no publica {artifact}")
+    return None, "", RUPTURA
+
+
+def _medir(raiz: Path) -> dict:
+    p = subprocess.run([sys.executable, "-m", "fiber_ast_lint", str(raiz), "--json"],
+                       capture_output=True, text=True, cwd=RAIZ)
+    if not p.stdout.strip():
+        raise RuntimeError(f"sin JSON para {raiz}: {p.stderr.strip()[:400]}")
+    d = json.loads(p.stdout)
+    cand = d["candidatos"]
+    return {"files": d["archivos"], "stores": d["almacenes"], "pierde": d["pierde"],
+            "candidates": len(cand),
+            "admitted": sum(1 for c in cand if c["severidad"] == "CANDIDATO"),
+            "column_loci": sum(1 for c in cand if c["forma"] == "SELECCION_COLUMNA_BUCLE")}
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="Replay the census from its artifacts.")
+    ap.add_argument("--dir", help="cache directory (default: a temporary one)")
+    ap.add_argument("--keep", action="store_true", help="do not delete the cache")
+    ap.add_argument("--solo", action="append", default=None,
+                    help="only this package (repeatable)")
+    ap.add_argument("--censo", help="read this census file instead of ./censo.json")
+    ap.add_argument("--desde", help="measure from this cache dir; download nothing")
+    a = ap.parse_args(argv)
+
+    censo = json.loads(Path(a.censo or CENSO).read_text(encoding="utf-8"))
+    filas = [r for r in censo["rows"] if not a.solo or r["package"] in a.solo]
+    if not filas:
+        print("NO_MEDIDO: el filtro no selecciona ninguna fila")
+        return NO_MEDIDO
+
+    propio = a.dir is None
+    base = Path(a.dir) if a.dir else Path(tempfile.mkdtemp(prefix="censo-"))
+    base.mkdir(parents=True, exist_ok=True)
+
+    try:
+        peor, medidas = OK, {}
+        for r in filas:
+            print(f"{r['package']} {r['version']} {r['scope']}:")
+            if a.desde:
+                raiz = Path(a.desde) / f"{r['package']}-{r['version']}" / r["scope"]
+                if not raiz.is_dir():
+                    print(f"  NO_MEDIDO: falta {raiz}")
+                    peor = max((peor, NO_MEDIDO), key=ORDEN.get)
+                    continue
+                real = _medir(raiz)
+                medidas[r["artifact"]] = real
+                difs = {k: (real[k], r[k]) for k in CAMPOS if real[k] != r[k]}
+                if difs:
+                    print("  DIVERGE: " + ", ".join(f"{k} medido={m} pin={p}"
+                                                    for k, (m, p) in difs.items()))
+                    peor = max((peor, DIVERGE), key=ORDEN.get)
+                else:
+                    print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS))
+                continue
+            rueda, dig_pypi, rc = _traer(r["package"], r["artifact"], base / r["artifact"])
+            if rc:
+                peor = max((peor, rc), key=ORDEN.get)
+                continue
+            dig_local = hashlib.sha256(rueda.read_bytes()).hexdigest()
+            if dig_local != r["sha256"]:
+                print(f"  RUPTURA: sha256 {dig_local[:16]} != pin {r['sha256'][:16]}")
+                peor = max((peor, RUPTURA), key=ORDEN.get)
+                continue
+            if dig_pypi and dig_pypi != dig_local:
+                print("  RUPTURA: PyPI declara otro digest para su propio artefacto")
+                peor = max((peor, RUPTURA), key=ORDEN.get)
+                continue
+            destino = base / f"{r['package']}-{r['version']}"
+            if not destino.is_dir():
+                with zipfile.ZipFile(rueda) as z:
+                    z.extractall(destino)
+            raiz = destino / r["scope"]
+            if not raiz.is_dir():
+                print(f"  RUPTURA: el artefacto no contiene {r['scope']}/")
+                peor = max((peor, RUPTURA), key=ORDEN.get)
+                continue
+            real = _medir(raiz)
+            medidas[r["artifact"]] = real
+            difs = {k: (real[k], r[k]) for k in CAMPOS if real[k] != r[k]}
+            if difs:
+                print("  DIVERGE: " + ", ".join(f"{k} medido={m} pin={p}"
+                                                for k, (m, p) in difs.items()))
+                peor = max((peor, DIVERGE), key=ORDEN.get)
+            else:
+                print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS))
+
+        siete = [r for r in filas if r["package"] != "fiber-ast-lint"]
+        if len(siete) == len(censo["rows"]) - 1 and all(r["artifact"] in medidas for r in siete):
+            suma = {k: sum(medidas[r["artifact"]][k] for r in siete) for k in CAMPOS}
+            if suma != censo["totals_seven"]:
+                print(f"  DIVERGE: totals_seven medido={suma} pin={censo['totals_seven']}")
+                peor = max((peor, DIVERGE), key=ORDEN.get)
+            else:
+                print(f"totales de siete paquetes identicos: {suma}")
+
+        print(f"\n{VEREDICTO[peor]} · {len(filas)} filas"
+              f" · instrumento {censo['instrument_version']}")
+        return peor
+    finally:
+        if propio and not a.keep:
+            shutil.rmtree(base, ignore_errors=True)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
