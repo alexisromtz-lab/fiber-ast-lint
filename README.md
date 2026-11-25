@@ -156,24 +156,54 @@ Own corpus (239 files of Python tooling):
 |---|---|---|---|---|---|---|---|---|
 | 3 032 | 408 | 13 | 53 | 85 | 21 | 236 | 25 | 22 |
 
-Seven third-party packages, **599 files, 308 stores**, measured 2026-11-26 with this version:
+Seven third-party packages, **599 files, 308 stores**, re-measured 2026-11-25 and pinned in
+[`censo.json`](censo.json): each row names the **wheel**, its SHA-256, and the **subtree** that was
+analysed. `tests/test_censo.py` fails if any cell of this table stops matching that file.
 
-| package | files | stores | pierde | candidates | admitted | column loci |
-|---|---|---|---|---|---|---|
-| `mypy` | 195 | 173 | 4 | 18 | **5** | 16 |
-| `pylint` | 189 | 55 | 1 | 2 | 0 | 2 |
-| `astroid` | 97 | 37 | 0 | 5 | 0 | 5 |
-| `dill` | 46 | 16 | 4 | 0 | 0 | 0 |
-| `isort` | 45 | 21 | 0 | 4 | 0 | 0 |
-| `platformdirs` | 15 | 0 | 0 | 0 | 0 | 0 |
-| `tomlkit` | 12 | 6 | 0 | 1 | 0 | 1 |
-| **total** | **599** | **308** | **9** | **30** | **5** | **24** |
+| package | version | scope | files | stores | pierde | candidates | admitted | column loci |
+|---|---|---|---|---|---|---|---|---|
+| `mypy` | 2.4.1 | `mypy/` | 195 | 173 | 4 | 18 | **5** | 16 |
+| `pylint` | 4.1.4 | `.` | 189 | 55 | 1 | 2 | 0 | 2 |
+| `astroid` | 4.3.4 | `.` | 97 | 37 | 0 | 5 | 0 | 5 |
+| `dill` | 0.4.1 | `.` | 46 | 16 | 4 | 0 | 0 | 0 |
+| `isort` | 9.0.2 | `.` | 45 | 21 | 0 | 4 | 0 | 0 |
+| `platformdirs` | 4.14.8 | `.` | 15 | 0 | 0 | 0 | 0 | 0 |
+| `tomlkit` | 0.15.3 | `.` | 12 | 6 | 0 | 1 | 0 | 1 |
+| **total** | | | **599** | **308** | **9** | **30** | **5** | **24** |
 
 All five admitted loci are in `mypy`: `applytype.py:127` (`tvar.id`), `config_parser.py:543`
 (`report_type`), `config_parser.py:666` (`name`), `expandtype.py:113` (`binder.id`) and
-`join.py:781` (`tv.id`). The other six packages hold **zero admitted over 404 files**. Two more
-packages were measured in place, without copying them out of `site-packages`: `jsonschema` (37
-files, 98 loops, 0 lossy) and `pydantic` (105 files, 341 loops, 0 lossy).
+`join.py:781` (`tv.id`). The other six packages hold **zero admitted over 404 files**.
+
+### What the pin cost: two rows were talking about a different object
+
+The earlier version of this table said `mypy 195 files` without saying *which mypy*, and the number
+does not come from a wheel: no published mypy release between 1.13 and 2.4.1 has 195 `.py` files
+(292–336, probed individually). It is the `mypy/` subtree of **2.4.1**, excluding `mypyc/` — a scope,
+not a version. The row was right and unfalsifiable at the same time; now it is neither.
+
+Measured on the whole wheel instead, `mypy 2.4.1` is **336 files / 226 stores / 26 candidates / 6
+admitted**, and the sixth admits a locus the subtree could not see:
+`mypyc/irbuild/main.py:124` (`module.fullname`) — `result[fq] = module_ir` keyed by a module's
+fullname, which mypy refuses to let two modules share. Benign, same family as `tv.fullname`.
+
+| package | version | files | stores | pierde | loops | candidates | admitted | column loci |
+|---|---|---|---|---|---|---|---|---|
+| `mypy` (whole wheel) | 2.4.1 | 336 | 226 | 4 | 2 561 | 26 | 6 | 24 |
+| `pydantic` | 2.14.4 | 106 | 143 | 0 | 342 | 10 | **2** | 10 |
+| `jsonschema` | 4.26.0 | 37 | 2 | 0 | 98 | 0 | 0 | 0 |
+
+`jsonschema` reproduces the earlier line exactly (37 files, 98 loops). `pydantic` had been quoted as
+105 files / 341 loops, which is an earlier 2.14.x; at 2.14.4 it is 106 / 342. And "0 lossy" was
+true and incomplete: `pydantic` admits **two** loci, both `param.name` —
+`_internal/_signature.py:114` and `v1/utils.py:255`, `merged_params[param.name] = param` over
+`inspect.signature(init).parameters`. A `Signature` cannot hold two parameters with one name, so
+these are adjudicated benign by the same reasoning already applied to `posonly.name`. Zero
+accidents, one package wider.
+
+The own-corpus row further up (239 files, 413 stores) **cannot be pinned**: it is internal tooling
+that does not ship. It is evidence about us, not a reproducible claim about this tool, and it is not
+used here for any cross-package arithmetic.
 
 ### A density that reversed when the instrument improved
 
@@ -306,7 +336,7 @@ repository in about 54 s, which is the intended use.
 ```yaml
 repos:
   - repo: https://github.com/alexisromtz-lab/fiber-ast-lint
-    rev: v0.4.0
+    rev: v0.4.1
     hooks:
       - id: fiber-ast-lint
 ```
@@ -354,6 +384,13 @@ filing it under `cardinal_sin_medir`. The *loci* are unchanged; only the census 
 (`tests/test_readme.py` recomputes the fixtures census and the exit-code contract and fails if this
 file disagrees with the code), ships `.pre-commit-hooks.yaml`, and publishes the `H_memo_ast`
 refutation above instead of the 24 % it bought.
+
+`0.4.1` publishes the census instead of quoting it. `censo.json` pins every corpus by wheel,
+SHA-256 and analysed subtree, so a reader who never had my disk can re-derive the tables; the
+own-corpus row (`239` files, `413` stores) is explicitly marked as not pinnable and is excluded
+from all cross-package arithmetic. Two of the published rows were also wrong in a way that no
+amount of care would have caught: `mypy` was scoped to `mypy/` (the wheel has 336 `.py` files,
+the package 195) and `pydantic` had moved a version. Pinning the artifact is what made both visible.
 
 ## License
 
