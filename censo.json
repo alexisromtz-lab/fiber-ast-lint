@@ -6,6 +6,11 @@
   "interpreter": "CPython 3.12.13",
   "method": "PyPI wheel downloaded, SHA-256 checked against PyPI's own digest, unzipped, and the subtree named in `scope` analysed. No install, no site-packages, no network during analysis.",
   "reproduce": "for each corpus: download <artifact>, check sha256, unzip, then run `fiber-ast-lint <unzipped>/<scope> --json` and compare the six fields.",
+  "out_of_sample": {
+    "rule": "the other analyzers of the ecosystem the seven rows already sample, at their latest PyPI release on 2026-11-25, chosen without reading their code. Densest available population on purpose: it measures precision of the verdicts, not recall.",
+    "packages": ["pyflakes", "flake8", "black"],
+    "in_totals_seven": false
+  },
   "rows": [
     {
       "package": "mypy",
@@ -176,6 +181,57 @@
       "column_loci": 0,
       "reconciles": true,
       "rc": 0
+    },
+    {
+      "package": "pyflakes",
+      "version": "4.1.0",
+      "artifact": "pyflakes-4.1.0-py2.py3-none-any.whl",
+      "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+      "bytes": 66258,
+      "scope": ".",
+      "files": 23,
+      "stores": 0,
+      "pierde": 0,
+      "loops": 73,
+      "candidates": 0,
+      "admitted": 0,
+      "column_loci": 0,
+      "reconciles": true,
+      "rc": 0
+    },
+    {
+      "package": "flake8",
+      "version": "7.5.0",
+      "artifact": "flake8-7.5.0-py2.py3-none-any.whl",
+      "sha256": "637ea1a443a78ed6ee461725cdf71ca93bc5cde0abf25436dbebdc3880b4e078",
+      "bytes": 57487,
+      "scope": ".",
+      "files": 33,
+      "stores": 3,
+      "pierde": 0,
+      "loops": 48,
+      "candidates": 1,
+      "admitted": 1,
+      "column_loci": 1,
+      "reconciles": true,
+      "rc": 1
+    },
+    {
+      "package": "black",
+      "version": "26.10.1",
+      "artifact": "black-26.10.1-py3-none-any.whl",
+      "sha256": "28842f9a8207cc1df6eb983a35a14c5a0dfcd603d214fe82d84bef552afd2e3a",
+      "bytes": 239267,
+      "scope": ".",
+      "files": 42,
+      "stores": 23,
+      "pierde": 2,
+      "loops": 276,
+      "candidates": 2,
+      "admitted": 0,
+      "column_loci": 2,
+      "reconciles": true,
+      "rc": 1
     }
   ],
   "totals_seven": {

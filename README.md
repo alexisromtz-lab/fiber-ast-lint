@@ -222,8 +222,19 @@ $ python bench/replay_censo.py
 mypy 2.4.1 mypy:
   identico: files=195 stores=173 pierde=4 candidates=18 admitted=5 column_loci=16
 ...
-REPLAY IDENTICO · 10 filas · instrumento 0.4.1
+pyflakes 4.1.0 .:
+  identico: files=23 stores=0 pierde=0 candidates=0 admitted=0 column_loci=0
+flake8 7.5.0 .:
+  identico: files=33 stores=3 pierde=0 candidates=1 admitted=1 column_loci=1
+black 26.10.1 .:
+  identico: files=42 stores=23 pierde=2 candidates=2 admitted=0 column_loci=2
+
+REPLAY IDENTICO · 13 filas · instrumento 0.4.2
 ```
+
+The three trailing rows are the out-of-sample population measured below: they were **added to the
+pin after being chosen for density**, so their presence here proves the pin reproduces, not that the
+7-package totals grew.
 
 Its exit code says which of four things happened, and the ladder is a supremum, not first-error-wins:
 
@@ -289,6 +300,75 @@ The second `mypy` locus (`config_parser.py:666`) is an **intentional** kernel: i
 names onto internal keys and knows the collision is a merge. This tool does not claim to read
 intent — it says `CANDIDATO`, and a human adjudicates. Five admitted, four adjudicated benign,
 one defect.
+
+### A population nobody had read: three linters, one defect
+
+Every figure above comes from ten rows, and those rows have been read more than once. That is a
+training set wearing a census's clothes, and it is the first thing a critical reader will say. So
+the prediction was written down **before any artifact was fetched** (it travels in the commit
+message that publishes this section):
+
+> **H_out_of_sample.** Over `pyflakes`, `flake8` and `black` at their latest PyPI release — chosen
+> by a rule that never looks at code: *the other analyzers of the ecosystem the seven rows already
+> sample*, which is the **densest** population available, so the test runs in the hard direction —
+> **100 % of the emitted candidates, adjudicated one by one, are non-injective key projections**;
+> `reconciles` closes on all three; **no new classifier rule is needed**. Recall is *not* claimed: a
+> dense population measures precision, not what the tool misses.
+
+| project | version | files | stores | candidates | admitted | `reconciles` |
+|---|---|---|---|---|---|---|
+| `pyflakes` | 4.1.0 | 23 | 0 | 0 | 0 | yes |
+| `flake8` | 7.5.0 | 33 | 3 | 1 | **1** | yes |
+| `black` | 26.10.1 | 42 | 23 | 2 | 0 | yes |
+| **added** | | **98** | **26** | **3** | **1** | 3/3 |
+
+The three rows are pinned in [`censo.json`](censo.json) by wheel and SHA-256 like the rest, and they
+are **not** folded into the `599 files / 308 stores` above. The percentages are not recomputed
+either: adding rows to a denominator *after choosing them for their density* is the same selection
+the table exists to refuse.
+
+Three candidates, three adjudications, no surprises:
+
+| locus | key | what would make the key unique | verdict |
+|---|---|---|---|
+| `flake8/plugins/finder.py:327` | `loaded.entry_name` | the reporter's entry-point name — and nothing tests it | **real loss**, silent |
+| `black/parsing.py:113` | `grammar.version` | one version per grammar object | benign, and `LATENTE` |
+| `black/parsing.py:132` | `grammar.version` | same dict, second `except` arm | same locus, filed twice by design |
+
+**The `flake8` one is a defect.** `_classify_plugins` writes `reporters[loaded.entry_name] = loaded`
+inside a loop, and nothing tests membership first:
+
+```console
+$ grep -rn "reporters" --include=*.py flake8
+flake8/plugins/finder.py:317:    reporters = {}
+flake8/plugins/finder.py:327:            reporters[loaded.entry_name] = loaded
+flake8/plugins/finder.py:350:        reporters=reporters,
+flake8/plugins/reporter.py:34:        format_plugin = reporters[format_name]
+flake8/options/parse_args.py:48:        formatter_names=list(plugins.reporters),
+```
+
+No `in reporters`, no `setdefault`, no post-hoc duplicate check. Two plugins registered under
+`flake8.report` with one entry-point name leave one reporter **unreachable**: it never reaches
+`reporter_names()`, so it does not even appear among the `--format` choices, and nothing is
+reported. The dict escapes the function (`Plugins(reporters=…)`), `_classify_plugins` has one
+caller, and nobody calls `len(reporters)` — which is exactly why this locus is `CANDIDATO` while the
+two `black` ones are `LATENTE` at the same shape. Severity here is about whether a loss can reach a
+consumer, not about how suspicious the line looks.
+
+`black` is the control in the other direction: `errors[grammar.version] = InvalidInput(…)` appears
+once per `except` arm, and the keys *are* distinct in the population actually instantiated
+(`python_grammar`, `python_grammar_async_keywords`, `python_grammar_soft_keywords`). The tool files
+both anyway — it cannot read the grammar table — and demotes them because `errors` never leaves
+`lib2to3_parse` and its only observer is `max(errors)`. Same adjudication line as the 24 column loci,
+reached without special-casing anything.
+
+`pyflakes` is the negative control: 73 loops and **zero** stores, because its dict writes go through
+the loop target itself (`for scope in …: scope[k] = v`) or through attributes, and neither is an
+accumulator. Zero stores, therefore zero candidates — a measured zero, not a missing one.
+
+The three shapes are distilled into `tests/test_out_of_sample.py`, which recomputes the split
+(`CANDIDATO` / `LATENTE` / no store) on every run, offline. The upstream disclosure for `flake8` is
+drafted in [`docs/FLAKE8_REPORT_DRAFT.md`](docs/FLAKE8_REPORT_DRAFT.md) and is **not filed**.
 
 ## Fixtures census, recomputed by the test suite
 
@@ -478,6 +558,13 @@ as `239 files / 408 stores` in one place and `239 files / 413 stores` in another
 `240 / 413` — one file added, four stores with it. All ten rows of `censo.json` re-derive identical, and the number of
 candidates whose reader is found stays at zero — the section above is about the instrument's
 blindness ending, not about the density moving.
+
+After `0.4.2`, the pin grew and the wheel did not: thirteen rows, `instrument_version` still
+`0.4.2`. That is deliberate — the version names the **binary that produced a row**, not the number
+of rows, and a documentation-and-pin change that leaves `src/` untouched should not mint a version
+whose artifact is byte-identical to the previous one. The three out-of-sample rows reproduce from
+PyPI like the rest (`REPLAY IDENTICO · 13 filas · instrumento 0.4.2`, RC 0), and `totals_seven` still
+describes only the seven, which is why it is called `totals_seven` and not `total`.
 
 ## License
 
