@@ -25,6 +25,11 @@ fiber-ast-lint = "fiber_ast_lint.cli:main"
 [project.optional-dependencies]
 dev = ["pytest>=8"]
 
+[project.urls]
+Homepage = "https://github.com/alexisromtz-lab/fiber-ast-lint"
+Repository = "https://github.com/alexisromtz-lab/fiber-ast-lint"
+Issues = "https://github.com/alexisromtz-lab/fiber-ast-lint/issues"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
