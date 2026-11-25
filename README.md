@@ -370,6 +370,37 @@ The three shapes are distilled into `tests/test_out_of_sample.py`, which recompu
 (`CANDIDATO` / `LATENTE` / no store) on every run, offline. The upstream disclosure for `flake8` is
 drafted in [`docs/FLAKE8_REPORT_DRAFT.md`](docs/FLAKE8_REPORT_DRAFT.md) and is **not filed**.
 
+### Does it fire when the defect is planted?
+
+Three candidates establish precision and nothing else — a sample that small cannot say whether a
+defect of a given class is *caught*. So the other direction, measured on truth I constructed, which
+is weaker than the wild and stronger than nothing: five plants appended to real modules of the pinned
+`flake8` 7.5.0 tree, each accumulator returned by its function and called once from a helper.
+
+| plant | what the body does | form the tool names | verdict |
+|---|---|---|---|
+| `statistics.py:137` | `indice[entry.code] = entry` | `SELECCION_COLUMNA_BUCLE` | **`CANDIDATO`** |
+| `processor.py:461` | `clave = linea.strip()` then `indice[clave] = linea` | `PROYECCION_ARRIBA_CON_PERDIDA` | **`CANDIDATO`** |
+| `processor.py:468` | `indice[linea.lower()] = linea` | `PROYECCION_VISIBLE` | **`CANDIDATO`** |
+| `statistics.py:146` | `if entry.code not in indice: indice[entry.code] = entry` | — | silent, `guardadas` |
+| `statistics.py:154` | `cuenta[entry.code] = cuenta.get(entry.code, 0) + 1` | — | silent, `acumulacion` |
+
+Totals on the mutated tree against the pristine one: `almacenes` 3 → 8 — exactly the five plants, no
+more — `guardadas` 0 → 1, `acumulacion` 0 → 1, candidates 1 → 4, and `archivos` **33 → 33**. The row
+that was already there (`finder.py:327`) reports the same locus, same form, same escape. The buckets
+still close and `reconciles` is true on both sides: `8 = 0 + 1 + 1 + 0 + 6`.
+
+The triplet is the point, and it is why the two controls are keyed by `entry.code` like the first
+plant instead of by something obviously safe. Three bodies, one key expression, three verdicts:
+the classifier is not reacting to the *shape of the key*, it is reacting to whether a lost row can
+reach a consumer. A rule that fired on all three would pass any fixture suite that only plants
+defects.
+
+**Limit, stated rather than implied:** the truth here is mine. A plant shows that the classifier
+*can* fire on each form in a real module; it says nothing about how often the shape occurs in the
+wild. That is what the seven-row census and the out-of-sample rows measure — and neither of them is
+recall. `tests/test_kill_matrix.py` recomputes the matrix offline on the five shapes.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the
@@ -565,6 +596,11 @@ of rows, and a documentation-and-pin change that leaves `src/` untouched should 
 whose artifact is byte-identical to the previous one. The three out-of-sample rows reproduce from
 PyPI like the rest (`REPLAY IDENTICO · 13 filas · instrumento 0.4.2`, RC 0), and `totals_seven` still
 describes only the seven, which is why it is called `totals_seven` and not `total`.
+
+The same window closed the other half of the out-of-sample question. Precision on three candidates
+cannot say whether a defect is *caught*, so three losing forms and two controls were planted inside
+the pinned `flake8` tree: `stores` 3 → 8 (exactly the plants), both guards silent, and the row that
+was already there unchanged. Three tests now hold the classifier to that matrix offline.
 
 ## License
 
