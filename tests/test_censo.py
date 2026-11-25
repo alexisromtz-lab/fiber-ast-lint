@@ -54,6 +54,11 @@ def test_every_row_is_pinned():
         assert r["version"] and r["scope"], r
         assert r["version"] in r["artifact"], r
         assert r["bytes"] > 0, r
+        # The flag is not evidence. The row now publishes the buckets, so the
+        # equation is recomputed here instead of believed.
+        suma = r["pierde"] + r["guardadas"] + r["acumulacion"] + r["posicional"] + r["sin_len"]
+        assert suma == r["stores"], (
+            f"{r['package']} {r['scope']}: {r['stores']} != {suma} (residuo {r['stores'] - suma})")
         assert r["reconciles"] is True, f"{r['package']}: el censo de descartes no cuadra"
 
 
@@ -82,7 +87,11 @@ def test_seven_package_total_matches_censo():
     assert total[0] == "total"
     medido = dict(zip(("files", "stores", "pierde", "candidates",
                        "admitted", "column_loci"), (_num(c) for c in total[3:])))
-    assert medido == CENSO["totals_seven"], (medido, CENSO["totals_seven"])
+    publicado = {k: CENSO["totals_seven"][k] for k in medido}
+    assert medido == publicado, (medido, publicado)
+    t = CENSO["totals_seven"]
+    suma = t["pierde"] + t["guardadas"] + t["acumulacion"] + t["posicional"] + t["sin_len"]
+    assert suma == t["stores"], f"el total de siete no cuadra: {t['stores']} != {suma}"
 
 
 def test_wide_table_matches_censo():

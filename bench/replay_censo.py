@@ -41,7 +41,17 @@ from fiber_ast_lint.rc import DEFECTO, RUPTURA, VACIO, combinar_rc  # noqa: E402
 
 CENSO = RAIZ / "censo.json"
 UA = {"User-Agent": "fiber-ast-lint-censo-replay/1"}
-CAMPOS = ("files", "stores", "pierde", "candidates", "admitted", "column_loci")
+# The first six are what the census has always compared. The four after them are
+# the buckets that make `reconciles` checkable by somebody who is not this
+# script: without them a reader has to believe the flag.
+CUBETAS = ("guardadas", "acumulacion", "posicional", "sin_len")
+
+# The seven-package table in README.md is a declared population, not "every row
+# that is not the instrument": the census also carries an out-of-sample batch and
+# a second mypy row over the whole wheel, and neither belongs in this total.
+SIETE = (("mypy", "mypy"), ("pylint", "."), ("astroid", "."), ("dill", "."),
+         ("isort", "."), ("platformdirs", "."), ("tomlkit", "."))
+CAMPOS = ("files", "stores", "pierde", "candidates", "admitted", "column_loci") + CUBETAS
 
 # The verdicts are this package's own codes, not a private ladder: 1 is a proven
 # defect, 2 is blindness, 4 is a broken premise, and the operator is the one the
@@ -82,6 +92,7 @@ def _medir(raiz: Path) -> dict:
     d = json.loads(p.stdout)
     cand = d["candidatos"]
     return {"files": d["archivos"], "stores": d["almacenes"], "pierde": d["pierde"],
+            **{k: d[k] for k in CUBETAS},
             "candidates": len(cand),
             "admitted": sum(1 for c in cand if c["severidad"] == "CANDIDATO"),
             "column_loci": sum(1 for c in cand if c["forma"] == "SELECCION_COLUMNA_BUCLE")}
@@ -95,6 +106,9 @@ def main(argv: list[str] | None = None) -> int:
                     help="only this package (repeatable)")
     ap.add_argument("--censo", help="read this census file instead of ./censo.json")
     ap.add_argument("--desde", help="measure from this cache dir; download nothing")
+    ap.add_argument("--anotar", action="store_true",
+                    help="write the measured buckets back into the census, so the "
+                         "row can be reconciled by someone else")
     a = ap.parse_args(argv)
 
     censo = json.loads(Path(a.censo or CENSO).read_text(encoding="utf-8"))
@@ -118,8 +132,9 @@ def main(argv: list[str] | None = None) -> int:
                     peor = combinar_rc(peor, NO_MEDIDO)
                     continue
                 real = _medir(raiz)
-                medidas[r["artifact"]] = real
-                difs = {k: (real[k], r[k]) for k in CAMPOS if real[k] != r[k]}
+                medidas[(r["artifact"], r["scope"])] = real
+                difs = {k: (real[k], r[k]) for k in CAMPOS
+                        if k in r and real[k] != r[k]}
                 if difs:
                     print("  DIVERGE: " + ", ".join(f"{k} medido={m} pin={p}"
                                                     for k, (m, p) in difs.items()))
@@ -150,8 +165,13 @@ def main(argv: list[str] | None = None) -> int:
                 peor = combinar_rc(peor, RUPTURA)
                 continue
             real = _medir(raiz)
-            medidas[r["artifact"]] = real
-            difs = {k: (real[k], r[k]) for k in CAMPOS if real[k] != r[k]}
+            medidas[(r["artifact"], r["scope"])] = real
+            sin_anotar = [k for k in CUBETAS if k not in r]
+            if sin_anotar:
+                print("  SIN ANOTAR: " + ", ".join(sin_anotar)
+                      + " (reconciles no es comprobable por un tercero)")
+            difs = {k: (real[k], r[k]) for k in CAMPOS
+                    if k in r and real[k] != r[k]}
             if difs:
                 print("  DIVERGE: " + ", ".join(f"{k} medido={m} pin={p}"
                                                 for k, (m, p) in difs.items()))
@@ -159,14 +179,44 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS))
 
-        siete = [r for r in filas if r["package"] != "fiber-ast-lint"]
-        if len(siete) == len(censo["rows"]) - 1 and all(r["artifact"] in medidas for r in siete):
-            suma = {k: sum(medidas[r["artifact"]][k] for r in siete) for k in CAMPOS}
-            if suma != censo["totals_seven"]:
-                print(f"  DIVERGE: totals_seven medido={suma} pin={censo['totals_seven']}")
+        if a.anotar:
+            tocadas = 0
+            for r in censo["rows"]:
+                real = medidas.get((r["artifact"], r["scope"]))
+                if real is None:
+                    continue
+                for k in CUBETAS:
+                    r[k] = real[k]
+                residuo = r["stores"] - r["pierde"] - sum(real[k] for k in CUBETAS)
+                if residuo:
+                    print(f"  RUPTURA: {r['package']} {r['scope']}: "
+                          f"residuo {residuo} tras anotar")
+                    peor = combinar_rc(peor, RUPTURA)
+                tocadas += 1
+            import fiber_ast_lint
+
+            censo["instrument_version"] = fiber_ast_lint.__version__
+            print(f"ANOTADO {tocadas} filas · instrumento {censo['instrument_version']}")
+
+        siete = [r for r in filas if (r["package"], r["scope"]) in SIETE]
+        claves = [(r["artifact"], r["scope"]) for r in siete]
+        if len(siete) == len(SIETE) and all(c in medidas for c in claves):
+            suma = {k: sum(medidas[c][k] for c in claves) for k in CAMPOS}
+            pin = {k: v for k, v in censo["totals_seven"].items() if k in suma}
+            if suma != pin:
+                print(f"  DIVERGE: totals_seven medido={suma} pin={pin}")
                 peor = combinar_rc(peor, DIVERGE)
             else:
-                print(f"totales de siete paquetes identicos: {suma}")
+                print(f"totales de siete paquetes identicos: {pin}")
+            if a.anotar:
+                censo["totals_seven"] = suma
+
+        if a.anotar:
+            destino_censo = Path(a.censo or CENSO)
+            destino_censo.write_text(
+                json.dumps(censo, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8")
+            print(f"ESCRITO {destino_censo}")
 
         print(f"\n{VEREDICTO[peor]} · {len(filas)} filas"
               f" · instrumento {censo['instrument_version']}")

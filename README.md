@@ -229,7 +229,7 @@ flake8 7.5.0 .:
 black 26.10.1 .:
   identico: files=42 stores=23 pierde=2 candidates=2 admitted=0 column_loci=2
 
-REPLAY IDENTICO · 13 filas · instrumento 0.4.2
+REPLAY IDENTICO · 13 filas · instrumento 0.4.3
 ```
 
 The three trailing rows are the out-of-sample population measured below: they were **added to the
@@ -481,7 +481,7 @@ repository in about 54 s, which is the intended use.
 ```yaml
 repos:
   - repo: https://github.com/alexisromtz-lab/fiber-ast-lint
-    rev: v0.4.2
+    rev: v0.4.3
     hooks:
       - id: fiber-ast-lint
 ```
@@ -594,8 +594,37 @@ After `0.4.2`, the pin grew and the wheel did not: thirteen rows, `instrument_ve
 `0.4.2`. That is deliberate — the version names the **binary that produced a row**, not the number
 of rows, and a documentation-and-pin change that leaves `src/` untouched should not mint a version
 whose artifact is byte-identical to the previous one. The three out-of-sample rows reproduce from
-PyPI like the rest (`REPLAY IDENTICO · 13 filas · instrumento 0.4.2`, RC 0), and `totals_seven` still
+PyPI like the rest (`REPLAY IDENTICO · 13 filas · instrumento 0.4.3`, RC 0), and `totals_seven` still
 describes only the seven, which is why it is called `totals_seven` and not `total`.
+
+`0.4.3` publishes the terms instead of the verdict. Every row of `censo.json` declared
+`"reconciles": true` and carried `stores` and `pierde` — and **none of the four buckets**
+(`guardadas`, `acumulacion`, `posicional`, `sin_len`) whose sum makes `reconciles` true. A third
+party could read the claim and could not check it: the equation was computed, then thrown away.
+
+| package | version | scope | stores | = | pierde | guardadas | acumulacion | posicional | sin_len |
+|---|---|---|---:|---|---:|---:|---:|---:|---:|
+| `mypy` | 2.4.1 | `mypy/` | 173 | = | 4 | 25 | 7 | 12 | 125 |
+| `pylint` | 4.1.4 | `.` | 55 | = | 1 | 14 | 4 | 4 | 32 |
+| `astroid` | 4.3.4 | `.` | 37 | = | 0 | 10 | 0 | 1 | 26 |
+| `dill` | 0.4.1 | `.` | 16 | = | 4 | 1 | 1 | 1 | 9 |
+| `isort` | 9.0.2 | `.` | 21 | = | 0 | 2 | 2 | 3 | 14 |
+| `platformdirs` | 4.14.8 | `.` | 0 | = | 0 | 0 | 0 | 0 | 0 |
+| `tomlkit` | 0.15.3 | `.` | 6 | = | 0 | 2 | 1 | 0 | 3 |
+| **seven** | | | **308** | = | **9** | **54** | **15** | **21** | **209** |
+
+`bench/replay_censo.py --anotar` writes the buckets back and refuses the row if the residual is not
+zero, so the table above cannot be produced by a script that disagrees with it. Re-running it is
+what found the defect it was written to prevent: measurements were keyed by `artifact` alone, and
+the two `mypy` rows share one wheel (`mypy-2.4.1-py3-none-any.whl`) with two scopes, so the
+wheel-root row (226 stores) overwrote the package row (173) and the annotation reported a rupture
+that existed only in the writing. Keyed by `(artifact, scope)`, all thirteen rows reconcile.
+
+`tests/test_censo.py` no longer believes the flag either: it recomputes
+`pierde + guardadas + acumulacion + posicional + sin_len == stores` per row and on `totals_seven`,
+so a row that says `reconciles: true` and does not close fails the suite. The `instrument_version`
+of the rows stays `0.4.2` for the reason above — the *analyzer* that produced the numbers did not
+change; only the part of the script that recorded them did.
 
 The same window closed the other half of the out-of-sample question. Precision on three candidates
 cannot say whether a defect is *caught*, so three losing forms and two controls were planted inside
