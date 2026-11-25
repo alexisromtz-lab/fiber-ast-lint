@@ -131,7 +131,7 @@ as unresolved instead of being resolved by guess).
 Cross-module consumers are resolved by **qualified identity** — `(module, qualname)` built from
 the module's own binding table, with `import`/`from ... import`/relative-import aliases and
 attribute forms (`mod.f()`, `Cls.m()`). Name matching alone is not identity, and the difference is
-measured on the same 239-file corpus:
+measured on the same own-tooling corpus:
 
 | resolution | call sites attributed to a producer |
 |---|---|
@@ -150,11 +150,15 @@ candidates keep their honest `SIN_LEN` verdict.
 Measured 2026-11-25 with this package; every number is reproducible with
 `fiber-ast-lint <ruta> --json`.
 
-Own corpus (239 files of Python tooling):
+Own corpus — the sibling tree's `tools/`, 240 `.py` files, content manifest `d8f332778664c35c`:
 
 | loops | stores | pierde | guardadas | acumulacion | posicional | sin medir | candidates | admitted |
 |---|---|---|---|---|---|---|---|---|
-| 3 032 | 408 | 13 | 53 | 85 | 21 | 236 | 25 | 22 |
+| 3 051 | 413 | 13 | 53 | 85 | 23 | 239 | 25 | 22 |
+
+Recomputed 2026-11-26 with `fiber-ast-lint <tree>/tools --json`. The digest is the SHA-256 of
+`sha256(content)  path` over the sorted file list, so the row names a subject even though that
+subject cannot be fetched.
 
 Seven third-party packages, **599 files, 308 stores**, re-measured 2026-11-25 and pinned in
 [`censo.json`](censo.json): each row names the **wheel**, its SHA-256, and the **subtree** that was
@@ -201,9 +205,11 @@ true and incomplete: `pydantic` admits **two** loci, both `param.name` —
 these are adjudicated benign by the same reasoning already applied to `posonly.name`. Zero
 accidents, one package wider.
 
-The own-corpus row further up (239 files, 413 stores) **cannot be pinned**: it is internal tooling
-that does not ship. It is evidence about us, not a reproducible claim about this tool, and it is not
-used here for any cross-package arithmetic.
+The own-corpus row further up **cannot be pinned the way the others are**: it is internal tooling
+that does not ship, so there is no artifact to fetch and no SHA-256 to compare. It is pinned by
+**subject** instead — 240 files, manifest `d8f332778664c35c`, recomputable on any checkout of that
+tree with the command above. It is evidence about us, not a reproducible claim about this tool, and
+it is not used here for any cross-package arithmetic.
 
 ### The pin has a reader, and the reader runs in CI
 
@@ -243,7 +249,7 @@ foreign candidates are exactly that form. Measured today, with one instrument on
 | universe | candidates / stores |
 |---|---|
 | foreign (7 packages) | 30 / 308 = **9.74 %** |
-| own (240 files of tooling) | 25 / 413 = **6.05 %** |
+| own (240 files of tooling, `d8f332778664c35c`) | 25 / 413 = **6.05 %** |
 
 The relation reverses. A density measured with a blinder is not a density, and the two numbers are
 not reconciled here because reconciling them would mean pretending one instrument produced both.
@@ -459,7 +465,7 @@ refutation above instead of the 24 % it bought.
 
 `0.4.1` publishes the census instead of quoting it. `censo.json` pins every corpus by wheel,
 SHA-256 and analysed subtree, so a reader who never had my disk can re-derive the tables; the
-own-corpus row (`239` files, `413` stores) is explicitly marked as not pinnable and is excluded
+own-corpus row (240 files, `413` stores) is marked as pinnable by subject digest only and is excluded
 from all cross-package arithmetic. Two of the published rows were also wrong in a way that no
 amount of care would have caught: `mypy` was scoped to `mypy/` (the wheel has 336 `.py` files,
 the package 195) and `pydantic` had moved a version. Pinning the artifact is what made both visible.
@@ -467,7 +473,9 @@ the package 195) and `pydantic` had moved a version. Pinning the artifact is wha
 `0.4.2` gives the second pass a second identity rule and changes no verdict. `self.m(...)`
 calls to a method of the enclosing class now resolve to `(module, Clase.m)` with evidence `SELF`;
 the bare-name key that matched them against `Clase.m` instead of `m` is fixed, which reveals 26
-sites it had been discarding. All ten rows of `censo.json` re-derive identical, and the number of
+sites it had been discarding. `0.4.2` also gives the own-corpus row a subject: it had been copied
+as `239 files / 408 stores` in one place and `239 files / 413 stores` in another, and the tree is
+`240 / 413` — one file added, four stores with it. All ten rows of `censo.json` re-derive identical, and the number of
 candidates whose reader is found stays at zero — the section above is about the instrument's
 blindness ending, not about the density moving.
 
