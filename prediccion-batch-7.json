@@ -1,0 +1,101 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 7,
+ "title": "el ruido del instrumento por sujeto",
+ "declared_before_computation": true,
+ "declared_at": "2026-11-26",
+ "why": "El lote 6 comparo la semianchura de la banda contra el jitter del instrumento, pero sobre un solo sujeto: el arbol local. Una afirmacion de publicabilidad es por sujeto, y un sujeto no puede decir si vale en general. Si el jitter es una propiedad de la maquina y la semianchura una fraccion del tiempo predicho, el cociente entre las dos depende solo del tamano del sujeto: la banda sobra en los grandes y no alcanza en los pequenos. Si el cociente no depende del tamano, la hipotesis es falsa y el jitter es una constante que se puede declarar una vez.",
+ "what_is_new": "Nada se vuelve a ajustar ni se vuelve a cronometrar para el modelo: los coeficientes y los veinte relojes son los del lote 6. Lo que se mide es el reloj del instrumento sobre cinco sujetos ya fijados, con el mismo protocolo de nueve bloques de diez lecturas que el lote 6 uso en un solo arbol.",
+ "method": {
+  "sujetos": "cinco de las veinte filas del lote 6, elegidas por tiempo predicho y no por reloj medido",
+  "protocolo": "9 bloques de 10 lecturas de cpu_min con cotizar._tiempo(arbol, 3) por bloque",
+  "estadistico": "jitter por bloque = max - min de sus diez lecturas; jitter del sujeto = max de los nueve",
+  "banda": "q = 0,3018 del lote 6, sin reajustar",
+  "advertencia": "elegir los sujetos por tiempo predicho es elegirlos por la regresora, que es una funcion de bytes_py: no hay reloj de estos cinco en la eleccion"
+ },
+ "subjects": [
+  {
+   "package": "attrs",
+   "scope": "attrs",
+   "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+   "bytes_py": 1557,
+   "predicho_s": 0.1713,
+   "por_que": "el sujeto mas pequeno por tiempo predicho"
+  },
+  {
+   "package": "tomli",
+   "scope": "tomli",
+   "sha256": "32a7b79ac57a2e83670ce329ccf675798bc5a2094783a63676866b70503f2e2b",
+   "bytes_py": 30691,
+   "predicho_s": 0.2364,
+   "por_que": "el segundo mas pequeno"
+  },
+  {
+   "package": "pyflakes",
+   "scope": "pyflakes",
+   "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+   "bytes_py": 296870,
+   "predicho_s": 0.8318,
+   "por_que": "la mediana de los veinte por tiempo predicho"
+  },
+  {
+   "package": "setuptools",
+   "scope": "setuptools",
+   "sha256": "ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2",
+   "bytes_py": 2611450,
+   "predicho_s": 6.0093,
+   "por_que": "el segundo mas grande"
+  },
+  {
+   "package": "pygments",
+   "scope": "pygments",
+   "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9",
+   "bytes_py": 4577209,
+   "predicho_s": 10.4064,
+   "por_que": "el mas grande"
+  }
+ ],
+ "predictions": [
+  {
+   "id": "J1",
+   "kind": "cualitativa",
+   "claim": "En el sujeto mas pequeno por tiempo predicho (attrs/attrs), el jitter relativo —jitter del sujeto dividido por su tiempo predicho— supera q: alli el intervalo es ruido con formato de intervalo y no se publica.",
+   "ratio_orientation": "jitter_s / predicho_s contra q",
+   "cota_error": "el jitter es un maximo sobre 9 bloques; un bloque lento lo infla y favorece J1",
+   "falsifier": "jitter_relativo <= q en attrs/attrs"
+  },
+  {
+   "id": "J2",
+   "kind": "cuantitativa",
+   "claim": "En los dos sujetos mas grandes (setuptools y pygments) el jitter relativo es menor que 0,05: la banda tiene grados de libertad de sobra.",
+   "umbral": 0.05,
+   "cota_error": "0,05 no sale de una medicion de estos sujetos, sale de que la semianchura es 0,30",
+   "falsifier": "jitter_relativo >= 0,05 en cualquiera de los dos"
+  },
+  {
+   "id": "J3",
+   "kind": "cuantitativa",
+   "claim": "La mediana del jitter por bloque no escala con el sujeto: en los cinco sujetos cae entre 0,003 s y 0,05 s.",
+   "umbral": [
+    0.003,
+    0.05
+   ],
+   "cota_error": "banda ancha a proposito: lo que se afirma es la invariancia de escala, no un valor",
+   "falsifier": "una mediana fuera de [0,003, 0,05] en cualquiera de los cinco"
+  }
+ ],
+ "falsification": "Cada prediccion nombra su falsador arriba. El lote se publica igual si las tres caen: lo que cambia es la conclusion, no la entrega. Lo que no se admite es cambiar el estadistico despues de ver los numeros.",
+ "what_it_would_mean": {
+  "J1_J2_sobreviven": "el minimo publicable deja de ser una cifra del lote y pasa a ser una funcion del sujeto: el recibo puede decir, por arbol, si su intervalo tiene grados de libertad",
+  "J1_cae": "el jitter no domina ni en el sujeto mas pequeno: la banda manda en todo el rango y la comparacion del lote 6 era un caso, no una ley",
+  "J3_cae": "el ruido del instrumento depende del sujeto —cache, numero de ficheros, arranque— y entonces hay que medirlo por sujeto antes de cotizar, no heredarlo"
+ },
+ "cost": {
+  "sujetos": 5,
+  "bloques": 9,
+  "lecturas": 10,
+  "relojes_por_sujeto": 90,
+  "clones_externos": 0,
+  "escrituras_en_platino_labs": 0
+ }
+}

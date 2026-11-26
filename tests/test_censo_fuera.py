@@ -531,12 +531,12 @@ def _modelo(filas, clave, reloj):
     return a, b, 1 - sum((y - (a + b * x)) ** 2 for x, y in zip(xs, ys)) / ss
 
 
-def _loo(filas, reloj):
+def _loo(filas, reloj, clave="bytes"):
     """Error relativo leave-one-out contra el modelo que excluye esa fila."""
     out = []
     for i, r in enumerate(filas):
-        a, b, _ = _modelo([x for j, x in enumerate(filas) if j != i], "bytes", reloj)
-        predicho = a + b * r["bytes"]
+        a, b, _ = _modelo([x for j, x in enumerate(filas) if j != i], clave, reloj)
+        predicho = a + b * r[clave]
         out.append(abs(r[reloj] - predicho) / predicho)
     return sorted(out)
 
@@ -866,3 +866,319 @@ def test_la_tabla_de_cobertura_del_lote_5_es_el_archivo():
         assert publicada[3] == f"{fila['predicho']:.4f}".replace(".", ","), fila["package"]
         assert publicada[4] == f"{fila['error_relativo']:.4f}".replace(".", ","), fila["package"]
         assert publicada[5] == ("yes" if fila["dentro"] else "no"), fila["package"]
+
+
+# --- Lote 6: el sujeto del modelo -------------------------------------------
+#
+# El lote 5 se nego a cotizar un arbol porque su modelo se habia ajustado sobre
+# bytes de artefacto. Este lote mueve solo la regresora, y lo hace sobre los
+# veinte relojes del lote 4 sin volver a cronometrar: por eso la comparacion es
+# pareada y toda diferencia de error es atribuible al cambio de `x`. Lo que estas
+# pruebas separan: que el emparejamiento sea real, que ambos ajustes y las dos
+# coberturas se recompongan desde las filas, y que el intervalo publicado se
+# compare contra el ruido del instrumento y no solo contra el error del modelo.
+SEXTO = json.loads((RAIZ / "fuera-de-dominio-6.json").read_text(encoding="utf-8"))
+PREDICCION_6 = RAIZ / "prediccion-batch-6.json"
+SECCION_6 = "### The model's subject"
+
+
+def _tabla_6(encabezado):
+    lineas = README[README.index(SECCION_6):].splitlines()
+    inicio = next(i for i, l in enumerate(lineas) if l.startswith(encabezado))
+    filas = []
+    for linea in lineas[inicio + 1:]:
+        if not linea.startswith("|"):
+            break
+        celdas = [c.strip().replace("**", "").replace("`", "")
+                  for c in linea.strip().strip("|").split("|")]
+        if all(set(c) <= set("-: ") for c in celdas):
+            continue
+        filas.append(celdas)
+    return filas
+
+
+def _coma(x, n=4):
+    return f"{x:.{n}f}".replace(".", ",")
+
+
+def test_el_pin_del_lote_6_es_el_archivo_que_viaja():
+    assert SEXTO["prediction"]["sha256"] == _sha(PREDICCION_6)
+    declarado = json.loads(PREDICCION_6.read_text(encoding="utf-8"))
+    assert declarado["declared_before_computation"] is True
+    assert declarado["batch"] == SEXTO["lote"] == 6
+    assert [p["id"] for p in declarado["predictions"]] == [v["id"] for v in SEXTO["veredictos"]]
+    # El pin del codigo viaja al lado del sha256: un blob de git es otro objeto.
+    assert re.fullmatch(r"[0-9a-f]{40}", SEXTO["prediction"]["git_blob"])
+
+
+def test_el_lote_6_es_pareado_sobre_los_veinte_relojes_del_lote_4():
+    assert len(SEXTO["rows"]) == len(CUARTO["rows"]) == 20
+    for nuevo, viejo in zip(SEXTO["rows"], CUARTO["rows"]):
+        assert (nuevo["package"], nuevo["scope"]) == (viejo["package"], viejo["scope"])
+        assert nuevo["sha256"] == viejo["sha256"]
+        # Si un solo reloj se hubiera vuelto a medir, la comparacion dejaria de
+        # ser pareada y la mejora no seria atribuible a la regresora.
+        assert nuevo["cpu_min"] == viejo["cpu_min"], nuevo["package"]
+        assert nuevo["wall_min"] == viejo["wall_min"], nuevo["package"]
+        assert nuevo["bytes"] == viejo["bytes"], nuevo["package"]
+
+
+def test_los_dos_ajustes_se_recomponen_desde_las_filas():
+    filas = SEXTO["rows"]
+    for nombre, clave in (("artefacto", "bytes"), ("codigo", "bytes_py")):
+        m = SEXTO["modelos"][nombre]
+        assert m["clave"] == clave, nombre
+        a, b, r2 = _modelo(filas[:15], clave, "cpu_min")
+        assert abs(a - m["a"]) / m["a"] < 1e-4, nombre
+        assert abs(b - m["b"]) / m["b"] < 1e-4, nombre
+        assert abs(r2 - m["r2"]) < 5e-4, nombre
+        residuos = _loo(filas[:15], "cpu_min", clave)
+        assert m["residuos"] == [round(x, 4) for x in residuos], nombre
+        assert m["loo_max"] == round(residuos[-1], 4), nombre
+        assert m["loo_p50"] == round(statistics.median(residuos), 4), nombre
+        # La mediana no es el maximo: si coincidieran, el lote seria un solo sujeto.
+        assert m["loo_p50"] < m["loo_max"], nombre
+
+
+def test_el_lote_6_reproduce_el_lote_5_antes_de_mejorarlo():
+    # La primera fila de la tabla es una reproduccion, no una afirmacion nueva:
+    # el ajuste sobre bytes de artefacto devuelve el q y el max del lote 5.
+    cal = QUINTO["banda"]["calibracion"]
+    artefacto = SEXTO["modelos"]["artefacto"]
+    assert SEXTO["banda"]["artefacto"]["q"] == cal["q"] == 0.4258
+    assert artefacto["loo_max"] == cal["max_residuo"] == 0.8147
+    assert artefacto["residuos"][12] == cal["q"], "el cuantil del lote 5 y el de aqui no son el mismo"
+
+
+def test_la_banda_del_lote_6_recompone_q_indice_y_frontera():
+    q = SEXTO["banda"]["codigo"]["q"]
+    assert q == SEXTO["modelos"]["codigo"]["residuos"][12]
+    assert q < SEXTO["modelos"]["codigo"]["loo_max"]
+    # La frontera se declara, no se redondea: wcwidth cae fuera por 9 partes en
+    # un millon y el archivo la nombra en vez de contarla como acierto o fallo.
+    assert SEXTO["banda"]["codigo"]["frontera"] == ["wcwidth"]
+    fila = next(f for f in SEXTO["banda"]["codigo"]["filas"] if f["package"] == "wcwidth")
+    assert fila["frontera"] is True and fila["dentro"] is False
+    assert fila["residuo"] > q
+    assert fila["residuo"] - q < 1e-4
+
+
+def test_la_cobertura_del_lote_6_se_recompone_fila_a_fila():
+    m = SEXTO["modelos"]["codigo"]
+    q = SEXTO["banda"]["codigo"]["q"]
+    retenidos = SEXTO["rows"][15:]
+    filas = SEXTO["banda"]["codigo"]["filas"]
+    assert len(filas) == len(retenidos) == 5
+    for publicada, r in zip(filas, retenidos):
+        assert publicada["package"] == r["package"]
+        predicho = m["a"] + m["b"] * r["bytes_py"]
+        assert abs(publicada["predicho_s"] - predicho) < 1e-3, r["package"]
+        error = abs(r["cpu_min"] - predicho) / predicho
+        assert abs(publicada["residuo"] - error) < 1e-4, r["package"]
+        assert publicada["dentro"] == (publicada["residuo"] <= q), r["package"]
+    assert SEXTO["banda"]["codigo"]["dentro"] == sum(1 for f in filas if f["dentro"]) == 2
+    assert SEXTO["banda"]["codigo"]["total"] == 5
+    # La cobertura baja al cambiar la regresora; que baje no es un defecto del
+    # lote, es el resultado, y por eso el archivo publica las dos.
+    assert SEXTO["banda"]["artefacto"]["dentro"] > SEXTO["banda"]["codigo"]["dentro"]
+
+
+def test_attrs_se_ordena_con_bytes_py_y_no_con_bytes_de_artefacto():
+    at = SEXTO["attrs"]
+    assert at["bytes"][0] == at["bytes"][1], "sin el defecto no hay nada que curar"
+    assert at["bytes_py"][0] > at["bytes_py"][1] * 100
+    assert at["medido_s"][0] > at["medido_s"][1]
+    assert at["artefacto"]["ordena"] is False
+    assert at["artefacto"]["razon"] == 1.0
+    assert at["codigo"]["ordena"] is True
+    m = SEXTO["modelos"]["codigo"]
+    predichos = [m["a"] + m["b"] * x for x in at["bytes_py"]]
+    assert at["codigo"]["razon"] == round(predichos[0] / predichos[1], 3)
+    assert at["codigo"]["razon"] > 2.0
+    # Y el sujeto de attrs es la fila 0 y 1 del lote, no otra pareja.
+    assert at["medido_s"] == [SEXTO["rows"][0]["cpu_min"], SEXTO["rows"][1]["cpu_min"]]
+
+
+def test_cada_fila_declara_bytes_py_positivos_y_acotados():
+    for r in SEXTO["rows"]:
+        assert r["bytes_py"] > 0, r["package"]
+        assert r["ficheros_py"] >= 1, r["package"]
+        assert r["bytes_py"] <= 5.3 * r["bytes"], r["package"]
+    minimo = min(r["bytes_py"] / r["bytes"] for r in SEXTO["rows"])
+    maximo = max(r["bytes_py"] / r["bytes"] for r in SEXTO["rows"])
+    assert SEXTO["covarianza"]["py_sobre_wheel_min"] == round(minimo, 4)
+    assert SEXTO["covarianza"]["py_sobre_wheel_max"] == round(maximo, 4)
+    assert maximo / minimo > 100, "si el cociente no varia, la regresora no cambia de sujeto"
+
+
+def test_los_dos_instrumentos_cuentan_el_mismo_universo():
+    # El conteo del escaner y un glob de .py son dos instrumentos: que coincidan
+    # fila a fila dice que miden el mismo universo, no que compartan calculo.
+    assert all(r["files"] == r["ficheros_py"] for r in SEXTO["rows"])
+    assert SEXTO["coherencia"]["files_igual_ficheros_py"] == SEXTO["coherencia"]["filas"] == 20
+
+
+def test_la_cotizacion_del_arbol_local_es_medida_y_cae_en_su_intervalo():
+    t = SEXTO["cotizacion"]["tiempo"]
+    assert t["estado"] == "MEDIDO"
+    assert t["modelo"]["clave"] == "bytes_py"
+    m = SEXTO["modelos"]["codigo"]
+    predicho = m["a"] + m["b"] * t["bytes_py"]
+    assert t["predicho_s"] == round(predicho, 4)
+    q = SEXTO["banda"]["codigo"]["q"]
+    # Las cotas se comprueban como ancho y no como digitos: el artefacto las
+    # calcula con el ajuste sin redondear, y exigir el mismo redondeo aqui seria
+    # medir el redondeo, no la banda.
+    assert t["semicerco_relativo"] == q
+    assert abs((t["intervalo_s"][1] - t["intervalo_s"][0]) - 2 * t["predicho_s"] * q) < 1e-3
+    assert t["intervalo_s"][0] < t["predicho_s"] < t["intervalo_s"][1]
+    medido = SEXTO["cotizacion"]["reloj"]["cpu_min"]
+    assert t["intervalo_s"][0] <= medido <= t["intervalo_s"][1]
+    assert SEXTO["cotizacion"]["reloj"]["determinista"] is True
+    # El sujeto del arbol no se recompone aqui: la suite no tiene el arbol de esa
+    # hora y un digest recalculado sobre el de hoy seria una medicion de otro
+    # objeto. Lo que si se comprueba es que el intervalo sale del modelo publicado.
+    assert HEX64.match(SEXTO["cotizacion"]["arbol"]["manifiesto_sha256"])
+    assert SEXTO["cotizacion"]["arbol"]["bytes_py"] == t["bytes_py"] > 0
+    assert SEXTO["cotizacion"]["precio"]["estado"] == "NO_COTIZADO"
+
+
+def test_el_reloj_del_instrumento_se_mide_en_el_mismo_acto_que_la_banda():
+    r = SEXTO["reloj_del_instrumento"]
+    assert r["n_bloques"] == len(r["bloques"]) == 9
+    assert all(len(b["lecturas"]) == b["n"] == 10 for b in r["bloques"])
+    for b in r["bloques"]:
+        assert b["min_s"] == min(b["lecturas"])
+        assert b["max_s"] == max(b["lecturas"])
+        assert b["jitter_s"] == round(b["max_s"] - b["min_s"], 4)
+    assert r["jitter_por_bloque_s"] == [b["jitter_s"] for b in r["bloques"]]
+    assert r["jitter_s"] == max(r["jitter_por_bloque_s"])
+    assert r["jitter_min_s"] == min(r["jitter_por_bloque_s"])
+    assert r["jitter_p50_s"] == round(statistics.median(r["jitter_por_bloque_s"]), 4)
+    assert r["p50_min_s"] == min(b["p50_s"] for b in r["bloques"])
+    assert r["p50_max_s"] == max(b["p50_s"] for b in r["bloques"])
+    todos = [x for b in r["bloques"] for x in b["lecturas"]]
+    assert r["dispersion"] == round(max(todos) / min(todos), 4)
+    # El intervalo no hereda la banda sin mirar la maquina: se compara la
+    # semianchura contra el jitter del mismo acto, y el juicio es esa comparacion.
+    q = SEXTO["banda"]["codigo"]["q"]
+    assert r["semianchura_s"] == round(r["predicho_s"] * q, 4)
+    assert r["publicable"] == (r["semianchura_s"] > r["jitter_s"])
+    assert r["minimo_publicable_s"] == round(r["jitter_s"] / q, 4)
+    assert "dos poblaciones" in r["dos_poblaciones"]
+
+
+def test_la_sensibilidad_del_arbol_es_la_que_publica_el_archivo():
+    s = SEXTO["sensibilidad"]
+    assert s["dispersion"] == round(max(l["reloj_s"] for l in s["lecturas"])
+                                    / min(l["reloj_s"] for l in s["lecturas"]), 4)
+    assert s["dispersion"] > 1.5, "si el reloj fuera estable entre sesiones no habria nada que declarar"
+    # La lectura del lote 5, aplicada a la banda de hoy, queda fuera: es la prueba
+    # de que el reloj de un arbol no se puede trasladar de una sesion a otra.
+    assert s["residuo_con_reloj_lote5"] == round(
+        abs(s["reloj_lote5_s"] - SEXTO["cotizacion"]["tiempo"]["predicho_s"])
+        / SEXTO["cotizacion"]["tiempo"]["predicho_s"], 4)
+    assert s["dentro_con_reloj_lote5"] == (s["residuo_con_reloj_lote5"] <= SEXTO["banda"]["codigo"]["q"])
+
+
+def test_los_veredictos_del_lote_6_se_recomponen_desde_los_umbrales():
+    v = {p["id"]: p for p in SEXTO["veredictos"]}
+    codigo = SEXTO["modelos"]["codigo"]
+    assert set(v) == {"P1", "P2", "P3", "P4", "P5"}
+    assert v["P1"]["sobrevive"] == (codigo["loo_max"] < v["P1"]["umbral"])
+    assert v["P1"]["medido"] == codigo["loo_max"]
+    assert v["P2"]["sobrevive"] == (codigo["loo_p50"] < v["P2"]["umbral"])
+    docutils = next(f for f in SEXTO["banda"]["codigo"]["filas"] if f["package"] == "docutils")
+    assert v["P3"]["medido"] == docutils["residuo"]
+    assert v["P3"]["sobrevive"] == (docutils["residuo"] <= SEXTO["banda"]["codigo"]["q"])
+    assert v["P3"]["sobrevive"] is False
+    assert v["P4"]["medido"] == SEXTO["attrs"]["codigo"]["razon"]
+    assert v["P4"]["sobrevive"] == (SEXTO["attrs"]["codigo"]["razon"] > v["P4"]["umbral"])
+    t = SEXTO["cotizacion"]["tiempo"]
+    medido = SEXTO["cotizacion"]["reloj"]["cpu_min"]
+    assert v["P5"]["umbral"] == t["intervalo_s"]
+    assert v["P5"]["medido"] == medido
+    assert v["P5"]["sobrevive"] == (t["intervalo_s"][0] <= medido <= t["intervalo_s"][1])
+    resumen = SEXTO["predictions_summary"]
+    assert resumen["sobreviven"] == sorted(k for k, p in v.items() if p["sobrevive"])
+    assert resumen["caen"] == sorted(k for k, p in v.items() if not p["sobrevive"])
+    # Una prediccion que enumera ramas y no incluye la observada no es una
+    # particion: P3 cae sola y la taxonomia no la nombraba.
+    assert resumen["rama"] == "P3_cae_FUERA_DE_TAXONOMIA"
+    assert "P3" in resumen["hueco_de_la_taxonomia"]
+
+
+def test_la_seccion_del_lote_6_publica_el_archivo():
+    trozo = README[README.index(SECCION_6):]
+    fijos = ("fuera-de-dominio-6.json", "bench/sujeto.py", "0,301809",
+             "NO_COTIZADO", "0,1471", "jitter per block")
+    for fijo in fijos:
+        assert fijo in trozo, fijo
+    filas = {f[0]: f for f in _tabla_6("| regressor |")}
+    assert set(filas) == {"artifact bytes", "scanned .py bytes"}
+    for nombre, doc in (("artifact bytes", "artefacto"), ("scanned .py bytes", "codigo")):
+        celda, m = filas[nombre], SEXTO["modelos"][doc]
+        assert celda[1] == _coma(m["a"], 5), nombre
+        assert celda[2] == f"{m['b']:.6e}", nombre
+        assert celda[3] == _coma(m["r2"]), nombre
+        assert celda[4] == _coma(m["loo_p50"]), nombre
+        assert celda[5] == _coma(m["loo_max"]), nombre
+        assert celda[6] == _coma(SEXTO["banda"][doc]["q"]), nombre
+        assert celda[7] == f"{SEXTO['banda'][doc]['dentro']}/{SEXTO['banda'][doc]['total']}", nombre
+
+
+def test_la_tabla_de_cobertura_del_lote_6_es_el_archivo():
+    filas = {f[0]: f for f in _tabla_6("| package | scanned bytes |")}
+    publicadas = SEXTO["banda"]["codigo"]["filas"]
+    assert set(filas) == {f["package"] for f in publicadas}
+    for f in publicadas:
+        celda = filas[f["package"]]
+        r = next(x for x in SEXTO["rows"] if x["package"] == f["package"])
+        assert _num(celda[1]) == r["bytes_py"], f["package"]
+        assert celda[2] == _coma(r["cpu_min"]), f["package"]
+        assert celda[3] == _coma(f["predicho_s"]), f["package"]
+        assert celda[4] == _coma(f["residuo"], 6 if f["frontera"] else 4), f["package"]
+        dentro = "yes" if f["dentro"] else ("no (boundary)" if f["frontera"] else "no")
+        assert celda[5] == dentro, f["package"]
+
+
+# --- Lote 7: lo que ya esta predicho -----------------------------------------
+#
+# El lote 6 comparo banda y jitter sobre un solo arbol. Una afirmacion de
+# publicabilidad es por sujeto, asi que el lote 7 la lleva a cinco. Estas pruebas
+# no miden nada: sostienen que el orden exista antes de la medida y que los cinco
+# sujetos se eligieran por la regresora y no por el reloj.
+SEPTIMO = json.loads((RAIZ / "prediccion-batch-7.json").read_text(encoding="utf-8"))
+
+
+def test_la_prediccion_del_lote_7_tiene_falsador_y_es_anterior():
+    assert SEPTIMO["declared_before_computation"] is True
+    assert SEPTIMO["batch"] == 7
+    assert len(SEPTIMO["predictions"]) == 3
+    for p in SEPTIMO["predictions"]:
+        assert p["falsifier"].strip(), p["id"]
+        assert p["cota_error"].strip(), p["id"]
+        if p["kind"] == "cuantitativa":
+            assert p.get("umbral") is not None, p["id"]
+        else:
+            assert "ratio_orientation" in p, p["id"]
+    assert SEPTIMO["cost"]["escrituras_en_platino_labs"] == 0
+    assert SEPTIMO["cost"]["clones_externos"] == 0
+    assert SEPTIMO["cost"]["relojes_por_sujeto"] == len([]) + 90
+
+
+def test_los_cinco_sujetos_del_lote_7_se_eligen_por_la_regresora():
+    m = SEXTO["modelos"]["codigo"]
+    predichos = sorted((round(m["a"] + m["b"] * r["bytes_py"], 4), r["package"], r["scope"])
+                       for r in SEXTO["rows"])
+    nombres = [(s["package"], s["scope"]) for s in SEPTIMO["subjects"]]
+    esperados = [predichos[0][1:], predichos[1][1:], predichos[9][1:],
+                 predichos[-2][1:], predichos[-1][1:]]
+    assert nombres == esperados
+    por_sujeto = {(r["package"], r["scope"]): r for r in SEXTO["rows"]}
+    for s in SEPTIMO["subjects"]:
+        r = por_sujeto[(s["package"], s["scope"])]
+        # El pin es lo que impide que el lote 7 mida otros cinco sujetos.
+        assert s["sha256"] == r["sha256"], s["package"]
+        assert s["bytes_py"] == r["bytes_py"], s["package"]
+        assert s["predicho_s"] == round(m["a"] + m["b"] * r["bytes_py"], 4), s["package"]

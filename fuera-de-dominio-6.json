@@ -1,0 +1,811 @@
+{
+ "schema": "fiber-ast-lint/fuera-de-dominio/1",
+ "lote": 6,
+ "title": "el sujeto del modelo",
+ "prediction": {
+  "archivo": "prediccion-batch-6.json",
+  "commit": "4c5d1c8e",
+  "sha256": "8d2e9152875608999d24d219bbd366cc9db32da47fc70a41fc8fbba227f9a918",
+  "git_blob": "ac7b494952bab03d58f3012aa149b54927bda254",
+  "declared_before_computation": true
+ },
+ "metodo": "veinte relojes del lote 4 reutilizados sin volver a cronometrar; solo cambia la regresora. Dos ajustes sobre los mismos veinte y, por tanto, comparacion pareada en y.",
+ "rows": [
+  {
+   "package": "attrs",
+   "version": "26.1.0",
+   "artifact": "attrs-26.1.0-py3-none-any.whl",
+   "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+   "scope": "attr",
+   "bytes": 67548,
+   "bytes_py": 191766,
+   "ficheros_py": 13,
+   "files": 13,
+   "cpu_min": 0.6538,
+   "wall_min": 0.7473
+  },
+  {
+   "package": "attrs",
+   "version": "26.1.0",
+   "artifact": "attrs-26.1.0-py3-none-any.whl",
+   "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+   "scope": "attrs",
+   "bytes": 67548,
+   "bytes_py": 1557,
+   "ficheros_py": 6,
+   "files": 6,
+   "cpu_min": 0.1259,
+   "wall_min": 0.1978
+  },
+  {
+   "package": "click",
+   "version": "8.5.1",
+   "artifact": "click-8.5.1-py3-none-any.whl",
+   "sha256": "8bb5376d2006950386f8c6427613334a2acadc5f559cb80e638d00b4df957e37",
+   "scope": "click",
+   "bytes": 126163,
+   "bytes_py": 444075,
+   "ficheros_py": 17,
+   "files": 17,
+   "cpu_min": 0.9963,
+   "wall_min": 2.0337
+  },
+  {
+   "package": "requests",
+   "version": "2.34.2",
+   "artifact": "requests-2.34.2-py3-none-any.whl",
+   "sha256": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0",
+   "scope": "requests",
+   "bytes": 73075,
+   "bytes_py": 217284,
+   "ficheros_py": 19,
+   "files": 19,
+   "cpu_min": 0.7087,
+   "wall_min": 0.7671
+  },
+  {
+   "package": "tabulate",
+   "version": "0.10.0",
+   "artifact": "tabulate-0.10.0-py3-none-any.whl",
+   "sha256": "f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3",
+   "scope": "tabulate",
+   "bytes": 39814,
+   "bytes_py": 108269,
+   "ficheros_py": 1,
+   "files": 1,
+   "cpu_min": 0.2943,
+   "wall_min": 0.3018
+  },
+  {
+   "package": "jinja2",
+   "version": "3.1.6",
+   "artifact": "jinja2-3.1.6-py3-none-any.whl",
+   "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+   "scope": "jinja2",
+   "bytes": 134899,
+   "bytes_py": 490066,
+   "ficheros_py": 25,
+   "files": 25,
+   "cpu_min": 1.6963,
+   "wall_min": 1.9639
+  },
+  {
+   "package": "urllib3",
+   "version": "2.8.0",
+   "artifact": "urllib3-2.8.0-py3-none-any.whl",
+   "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3",
+   "scope": "urllib3",
+   "bytes": 135717,
+   "bytes_py": 434671,
+   "ficheros_py": 36,
+   "files": 36,
+   "cpu_min": 0.8255,
+   "wall_min": 0.9392
+  },
+  {
+   "package": "packaging",
+   "version": "26.4",
+   "artifact": "packaging-26.4-py3-none-any.whl",
+   "sha256": "81383611a09c1bc0b08b76e0fd5829d7c6824c65b27a6aee339da133f4233ea2",
+   "scope": "packaging",
+   "bytes": 140049,
+   "bytes_py": 515991,
+   "ficheros_py": 22,
+   "files": 22,
+   "cpu_min": 1.5453,
+   "wall_min": 3.3531
+  },
+  {
+   "package": "idna",
+   "version": "3.20",
+   "artifact": "idna-3.20-py3-none-any.whl",
+   "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+   "scope": "idna",
+   "bytes": 69583,
+   "bytes_py": 332039,
+   "ficheros_py": 10,
+   "files": 10,
+   "cpu_min": 0.5676,
+   "wall_min": 1.0208
+  },
+  {
+   "package": "six",
+   "version": "1.17.0",
+   "artifact": "six-1.17.0-py2.py3-none-any.whl",
+   "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+   "scope": "six.py",
+   "bytes": 11050,
+   "bytes_py": 34703,
+   "ficheros_py": 1,
+   "files": 1,
+   "cpu_min": 0.2151,
+   "wall_min": 0.3211
+  },
+  {
+   "package": "charset-normalizer",
+   "version": "3.5.3",
+   "artifact": "charset_normalizer-3.5.3-py3-none-any.whl",
+   "sha256": "96e268b0cbda016ac519513294fcd17032264085b600abaac58b93049477e132",
+   "scope": "charset_normalizer",
+   "bytes": 68878,
+   "bytes_py": 195871,
+   "ficheros_py": 12,
+   "files": 12,
+   "cpu_min": 0.5975,
+   "wall_min": 1.0328
+  },
+  {
+   "package": "pyparsing",
+   "version": "3.3.3",
+   "artifact": "pyparsing-3.3.3-py3-none-any.whl",
+   "sha256": "ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4",
+   "scope": "pyparsing",
+   "bytes": 126420,
+   "bytes_py": 471654,
+   "ficheros_py": 17,
+   "files": 17,
+   "cpu_min": 1.5603,
+   "wall_min": 2.1784
+  },
+  {
+   "package": "pygments",
+   "version": "2.21.0",
+   "artifact": "pygments-2.21.0-py3-none-any.whl",
+   "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9",
+   "scope": "pygments",
+   "bytes": 1250147,
+   "bytes_py": 4577209,
+   "ficheros_py": 343,
+   "files": 343,
+   "cpu_min": 10.3697,
+   "wall_min": 16.2038
+  },
+  {
+   "package": "tomli",
+   "version": "2.5.0",
+   "artifact": "tomli-2.5.0-py3-none-any.whl",
+   "sha256": "32a7b79ac57a2e83670ce329ccf675798bc5a2094783a63676866b70503f2e2b",
+   "scope": "tomli",
+   "bytes": 14765,
+   "bytes_py": 30691,
+   "ficheros_py": 4,
+   "files": 4,
+   "cpu_min": 0.2101,
+   "wall_min": 0.2503
+  },
+  {
+   "package": "colorama",
+   "version": "0.4.6",
+   "artifact": "colorama-0.4.6-py2.py3-none-any.whl",
+   "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+   "scope": "colorama",
+   "bytes": 25335,
+   "bytes_py": 57543,
+   "ficheros_py": 13,
+   "files": 13,
+   "cpu_min": 0.2766,
+   "wall_min": 0.2988
+  },
+  {
+   "package": "wcwidth",
+   "version": "0.9.5",
+   "artifact": "wcwidth-0.9.5-py3-none-any.whl",
+   "sha256": "ef205150ff317032d633de2d8ca26d03dc8d5ba6a00294f6acfd1d0cfe1365d6",
+   "scope": "wcwidth",
+   "bytes": 329353,
+   "bytes_py": 1739138,
+   "ficheros_py": 52,
+   "files": 52,
+   "cpu_min": 2.8333,
+   "wall_min": 4.5577
+  },
+  {
+   "package": "sqlparse",
+   "version": "0.6.1",
+   "artifact": "sqlparse-0.6.1-py3-none-any.whl",
+   "sha256": "3be5a72d04c873d690d7c6dedd33d6fae2ef82759881ceec02fc2efd0cba564f",
+   "scope": "sqlparse",
+   "bytes": 51200,
+   "bytes_py": 146489,
+   "ficheros_py": 21,
+   "files": 21,
+   "cpu_min": 0.4919,
+   "wall_min": 0.5122
+  },
+  {
+   "package": "pyflakes",
+   "version": "4.1.0",
+   "artifact": "pyflakes-4.1.0-py2.py3-none-any.whl",
+   "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+   "scope": "pyflakes",
+   "bytes": 66258,
+   "bytes_py": 296870,
+   "ficheros_py": 23,
+   "files": 23,
+   "cpu_min": 0.6791,
+   "wall_min": 0.6992
+  },
+  {
+   "package": "docutils",
+   "version": "0.23",
+   "artifact": "docutils-0.23-py3-none-any.whl",
+   "sha256": "25d013af9bf23bc1c7b2b093dff4208166c53a94786c9e447808335ef1185fea",
+   "scope": "docutils",
+   "bytes": 634701,
+   "bytes_py": 1809028,
+   "ficheros_py": 129,
+   "files": 129,
+   "cpu_min": 8.8588,
+   "wall_min": 22.3487
+  },
+  {
+   "package": "setuptools",
+   "version": "84.2.1",
+   "artifact": "setuptools-84.2.1-py3-none-any.whl",
+   "sha256": "ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2",
+   "scope": "setuptools",
+   "bytes": 876263,
+   "bytes_py": 2611450,
+   "ficheros_py": 227,
+   "files": 227,
+   "cpu_min": 8.2786,
+   "wall_min": 10.4249
+  }
+ ],
+ "coherencia": {
+  "files_igual_ficheros_py": 20,
+  "filas": 20,
+  "nota": "los ficheros que el escaner declara y los .py que el glob cuenta coinciden fila a fila: son dos instrumentos distintos midiendo el mismo universo, no dos columnas del mismo calculo"
+ },
+ "modelos": {
+  "artefacto": {
+   "clave": "bytes",
+   "a": 0.08108,
+   "b": 8.263263e-06,
+   "r2": 0.9891,
+   "loo_p50": 0.1666,
+   "loo_max": 0.8147,
+   "residuos": [
+    0.0246,
+    0.0375,
+    0.0378,
+    0.0515,
+    0.0869,
+    0.1205,
+    0.1439,
+    0.1666,
+    0.2705,
+    0.2764,
+    0.2989,
+    0.3287,
+    0.4258,
+    0.4626,
+    0.8147
+   ]
+  },
+  "codigo": {
+   "clave": "bytes_py",
+   "a": 0.16778,
+   "b": 2.236874e-06,
+   "r2": 0.9931,
+   "loo_p50": 0.1506,
+   "loo_max": 0.3936,
+   "residuos": [
+    0.015,
+    0.0725,
+    0.0911,
+    0.104,
+    0.12,
+    0.1249,
+    0.1329,
+    0.1506,
+    0.1832,
+    0.2821,
+    0.2901,
+    0.2987,
+    0.3018,
+    0.3757,
+    0.3936
+   ]
+  }
+ },
+ "covarianza": {
+  "py_sobre_wheel_min": 0.0231,
+  "py_sobre_wheel_max": 5.2805
+ },
+ "reproduccion_lote5": "el ajuste sobre bytes de artefacto, rehecho sobre estas veinte filas, devuelve q y max del lote 5 sin tocar sus relojes",
+ "banda": {
+  "artefacto": {
+   "clave": "bytes",
+   "q": 0.4258,
+   "frontera": [],
+   "filas": [
+    {
+     "package": "wcwidth",
+     "predicho_s": 2.8026,
+     "residuo": 0.010946,
+     "dentro": true,
+     "frontera": false
+    },
+    {
+     "package": "sqlparse",
+     "predicho_s": 0.5042,
+     "residuo": 0.02432,
+     "dentro": true,
+     "frontera": false
+    },
+    {
+     "package": "pyflakes",
+     "predicho_s": 0.6286,
+     "residuo": 0.080355,
+     "dentro": true,
+     "frontera": false
+    },
+    {
+     "package": "docutils",
+     "predicho_s": 5.3258,
+     "residuo": 0.663373,
+     "dentro": false,
+     "frontera": false
+    },
+    {
+     "package": "setuptools",
+     "predicho_s": 7.3219,
+     "residuo": 0.130662,
+     "dentro": true,
+     "frontera": false
+    }
+   ],
+   "dentro": 4,
+   "total": 5
+  },
+  "codigo": {
+   "clave": "bytes_py",
+   "q": 0.3018,
+   "frontera": [
+    "wcwidth"
+   ],
+   "filas": [
+    {
+     "package": "wcwidth",
+     "predicho_s": 4.0581,
+     "residuo": 0.301809,
+     "dentro": false,
+     "frontera": true
+    },
+    {
+     "package": "sqlparse",
+     "predicho_s": 0.4955,
+     "residuo": 0.007188,
+     "dentro": true,
+     "frontera": false
+    },
+    {
+     "package": "pyflakes",
+     "predicho_s": 0.8318,
+     "residuo": 0.183625,
+     "dentro": true,
+     "frontera": false
+    },
+    {
+     "package": "docutils",
+     "predicho_s": 4.2144,
+     "residuo": 1.102034,
+     "dentro": false,
+     "frontera": false
+    },
+    {
+     "package": "setuptools",
+     "predicho_s": 6.0093,
+     "residuo": 0.377624,
+     "dentro": false,
+     "frontera": false
+    }
+   ],
+   "dentro": 2,
+   "total": 5
+  }
+ },
+ "attrs": {
+  "medido_s": [
+   0.6538,
+   0.1259
+  ],
+  "bytes": [
+   67548,
+   67548
+  ],
+  "bytes_py": [
+   191766,
+   1557
+  ],
+  "artefacto": {
+   "clave": "bytes",
+   "predicho": [
+    0.6392,
+    0.6392
+   ],
+   "razon": 1.0,
+   "ordena": false
+  },
+  "codigo": {
+   "clave": "bytes_py",
+   "predicho": [
+    0.5967,
+    0.1713
+   ],
+   "razon": 3.484,
+   "ordena": true
+  }
+ },
+ "limitaciones": [
+  "las cinco filas de retencion ya se usaron en el lote 5: la cobertura de aqui no es una prueba fuera de muestra nueva",
+  "el reloj del arbol local no es el mismo entre sesiones: ver `sensibilidad`"
+ ],
+ "cotizacion": {
+  "arbol": {
+   "arbol": "/Users/marlene/fiber-ast-lint/src/fiber_ast_lint",
+   "manifiesto_sha256": "8093a1f2558cf42f5fc52f111c485a677c4ad3271e0dc89daf82c42a383ba702",
+   "bytes_py": 55596,
+   "ficheros": 7
+  },
+  "modelo": {
+   "clave": "bytes_py",
+   "sujeto": "scanned python bytes"
+  },
+  "reloj": {
+   "wall_min": 0.2161,
+   "cpu_min": 0.2103,
+   "repeticiones": 3,
+   "wall_muestras": [
+    0.2172,
+    0.2161,
+    0.2177
+   ],
+   "cpu_muestras": [
+    0.2111,
+    0.2103,
+    0.2109
+   ],
+   "determinista": true
+  },
+  "tiempo": {
+   "metodo": "conforme partido sobre residuos leave-one-out",
+   "calibracion": {
+    "filas": 15,
+    "alfa": 0.2,
+    "cuantil_indice": 12,
+    "q": 0.3018,
+    "max_residuo": 0.3936
+   },
+   "modelo": {
+    "a": 0.16778,
+    "b": 2.2369e-06,
+    "reloj": "cpu_min",
+    "clave": "bytes_py",
+    "sujeto": "scanned python bytes"
+   },
+   "estado": "MEDIDO",
+   "bytes_py": 55596,
+   "predicho_s": 0.2921,
+   "intervalo_s": [
+    0.204,
+    0.3803
+   ],
+   "semicerco_relativo": 0.3018
+  },
+  "precio": {
+   "estado": "NO_COTIZADO",
+   "motivo": "la tarifa no esta firmada (firmada != true): un ejemplo no cotiza",
+   "unidades_facturables": {
+    "sitios": 2,
+    "claves": 2,
+    "ficheros": 7
+   }
+  },
+  "unidades_facturables": {
+   "sitios": 2,
+   "claves": 2,
+   "ficheros": 7
+  },
+  "medido_en": "2026-11-25T22:38:21-0600"
+ },
+ "reloj_del_instrumento": {
+  "bloques": [
+   {
+    "lecturas": [
+     0.2059,
+     0.2337,
+     0.2423,
+     0.2434,
+     0.2443,
+     0.2449,
+     0.2465,
+     0.2477,
+     0.2491,
+     0.2503
+    ],
+    "n": 10,
+    "min_s": 0.2059,
+    "p50_s": 0.2446,
+    "max_s": 0.2503,
+    "jitter_s": 0.0444
+   },
+   {
+    "lecturas": [
+     0.2042,
+     0.2078,
+     0.2078,
+     0.2084,
+     0.2088,
+     0.2099,
+     0.21,
+     0.2335,
+     0.2468,
+     0.2474
+    ],
+    "n": 10,
+    "min_s": 0.2042,
+    "p50_s": 0.2094,
+    "max_s": 0.2474,
+    "jitter_s": 0.0432
+   },
+   {
+    "lecturas": [
+     0.2045,
+     0.207,
+     0.207,
+     0.2076,
+     0.2083,
+     0.2084,
+     0.2085,
+     0.2089,
+     0.2091,
+     0.2101
+    ],
+    "n": 10,
+    "min_s": 0.2045,
+    "p50_s": 0.2084,
+    "max_s": 0.2101,
+    "jitter_s": 0.0056
+   },
+   {
+    "lecturas": [
+     0.2059,
+     0.2061,
+     0.2064,
+     0.2065,
+     0.2067,
+     0.2077,
+     0.2078,
+     0.2083,
+     0.2088,
+     0.2098
+    ],
+    "n": 10,
+    "min_s": 0.2059,
+    "p50_s": 0.2072,
+    "max_s": 0.2098,
+    "jitter_s": 0.0039
+   },
+   {
+    "lecturas": [
+     0.2073,
+     0.2076,
+     0.2081,
+     0.2082,
+     0.2089,
+     0.2091,
+     0.2103,
+     0.2104,
+     0.2104,
+     0.2112
+    ],
+    "n": 10,
+    "min_s": 0.2073,
+    "p50_s": 0.209,
+    "max_s": 0.2112,
+    "jitter_s": 0.0039
+   },
+   {
+    "lecturas": [
+     0.2067,
+     0.2075,
+     0.2086,
+     0.2092,
+     0.2092,
+     0.2099,
+     0.2101,
+     0.2105,
+     0.211,
+     0.2182
+    ],
+    "n": 10,
+    "min_s": 0.2067,
+    "p50_s": 0.2096,
+    "max_s": 0.2182,
+    "jitter_s": 0.0115
+   },
+   {
+    "lecturas": [
+     0.2061,
+     0.2066,
+     0.2066,
+     0.2073,
+     0.2075,
+     0.2078,
+     0.2081,
+     0.2092,
+     0.2098,
+     0.2109
+    ],
+    "n": 10,
+    "min_s": 0.2061,
+    "p50_s": 0.2077,
+    "max_s": 0.2109,
+    "jitter_s": 0.0048
+   },
+   {
+    "lecturas": [
+     0.2047,
+     0.2061,
+     0.2065,
+     0.2072,
+     0.2079,
+     0.2082,
+     0.2082,
+     0.2087,
+     0.2087,
+     0.2103
+    ],
+    "n": 10,
+    "min_s": 0.2047,
+    "p50_s": 0.2081,
+    "max_s": 0.2103,
+    "jitter_s": 0.0056
+   },
+   {
+    "lecturas": [
+     0.2075,
+     0.2076,
+     0.2077,
+     0.2079,
+     0.208,
+     0.2085,
+     0.2096,
+     0.2101,
+     0.2101,
+     0.2111
+    ],
+    "n": 10,
+    "min_s": 0.2075,
+    "p50_s": 0.2082,
+    "max_s": 0.2111,
+    "jitter_s": 0.0036
+   }
+  ],
+  "n_bloques": 9,
+  "jitter_s": 0.0444,
+  "jitter_p50_s": 0.0056,
+  "jitter_min_s": 0.0036,
+  "p50_min_s": 0.2072,
+  "p50_max_s": 0.2446,
+  "dispersion": 1.2258,
+  "semianchura_s": 0.0882,
+  "publicable": true,
+  "minimo_publicable_s": 0.1471,
+  "jitter_por_bloque_s": [
+   0.0444,
+   0.0432,
+   0.0056,
+   0.0039,
+   0.0039,
+   0.0115,
+   0.0048,
+   0.0056,
+   0.0036
+  ],
+  "predicho_s": 0.2921,
+  "dos_poblaciones": "la banda mide el error del modelo y el jitter mide la maquina; son dos poblaciones y el intervalo que se publica es su comparacion. Un intervalo mas estrecho que el jitter no tiene grados de libertad: es ruido con formato de intervalo",
+  "juicio": "semianchura 0.0882 s contra jitter 0.0444 s: la banda manda"
+ },
+ "sensibilidad": {
+  "lecturas": [
+   {
+    "reloj_s": 0.4303,
+    "fuente": "fuera-de-dominio-5.json"
+   },
+   {
+    "reloj_s": 0.2072,
+    "fuente": "mediana del bloque mas rapido"
+   },
+   {
+    "reloj_s": 0.2446,
+    "fuente": "mediana del bloque mas lento"
+   },
+   {
+    "reloj_s": 0.2103,
+    "fuente": "la lectura de la cotizacion de este lote"
+   }
+  ],
+  "dispersion": 2.0767,
+  "reloj_lote5_s": 0.4303,
+  "residuo_con_reloj_lote5": 0.4731,
+  "dentro_con_reloj_lote5": false,
+  "lectura": "el mismo arbol medido en dos sesiones da dos relojes; la banda cubre el de hoy y no el del lote 5, asi que un intervalo de tiempo se cotiza con su reloj, no con el de la sesion en que se ajusto el modelo"
+ },
+ "veredictos": [
+  {
+   "id": "P1",
+   "umbral": 0.8147,
+   "medido": 0.3936,
+   "sobrevive": true,
+   "evalua": "el error maximo baja del del lote 4"
+  },
+  {
+   "id": "P2",
+   "umbral": 0.167,
+   "medido": 0.1506,
+   "sobrevive": true,
+   "evalua": "la mediana baja del 16,7 %"
+  },
+  {
+   "id": "P3",
+   "umbral": 0.3018,
+   "medido": 1.102034,
+   "sobrevive": false,
+   "evalua": "docutils vuelve a la banda"
+  },
+  {
+   "id": "P4",
+   "umbral": 2.0,
+   "medido": 3.484,
+   "sobrevive": true,
+   "evalua": "las dos filas de attrs se ordenan"
+  },
+  {
+   "id": "P5",
+   "umbral": [
+    0.204,
+    0.3803
+   ],
+   "medido": 0.2103,
+   "sobrevive": true,
+   "evalua": "el arbol local cae en su intervalo"
+  }
+ ],
+ "predictions_summary": {
+  "sobreviven": [
+   "P1",
+   "P2",
+   "P4",
+   "P5"
+  ],
+  "caen": [
+   "P3"
+  ],
+  "rama": "P3_cae_FUERA_DE_TAXONOMIA",
+  "hueco_de_la_taxonomia": "la prediccion enumeraba tres ramas -- todas sobreviven, caen P1/P2, cae P5 -- y ninguna nombra la caida de P3 sola, que es lo observado: un conjunto de ramas que no contiene el resultado no es una particion",
+  "leido": "la regresora era parte del muro: sobre bytes caminados el peor sujeto deja de serlo y dos artefactos identicos dejan de dar la misma prediccion; lo que no se arregla es la cobertura, que baja porque el cociente py/wheel va de 0,02x a 5,28x"
+ }
+}

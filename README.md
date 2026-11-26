@@ -744,6 +744,110 @@ they are what a quote is denominated in. Time is a band with a stated coverage a
 not cross. The invoice is denominated in work, and the clock is an input to scheduling — that is the
 whole of what this batch certifies.
 
+### The model's subject
+
+Batch 5 named its own wall in one sentence: the CPU model was fitted on **artifact bytes** and the
+subject a client brings is a **disk tree**, so the quote refused. A refusal is only correct if the
+wall is where it said it was. This batch moves the regressor and nothing else.
+
+**Nothing is timed again.** The twenty clocks of batch 4 are reused exactly as they stand — same
+subjects, same instrument, same session of origin — and the only change is the `x`: the bytes of
+Python the scanner actually walks, summed over the subtree each row declares. Two fits over the same
+twenty `y` values make the comparison paired, so any difference in error belongs to the change of
+regressor.
+
+| regressor | `a` | `b` | R² | LOO p50 | LOO max | `q` | coverage |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| artifact bytes | 0,08108 | 8.263263e-06 | 0,9891 | 0,1666 | 0,8147 | 0,4258 | **4/5** |
+| scanned `.py` bytes | 0,16778 | 2.236874e-06 | 0,9931 | 0,1506 | **0,3936** | 0,3018 | **2/5** |
+
+The first row is a reproduction, not a new claim: refitting on artifact bytes returns batch 5's
+`q = 0,4258` and `max = 0,8147` to the digit. The second row is the batch. The worst
+subject stops being the worst — 0,3936 against 0,8147 is **P1 surviving** —
+and the median moves from 0,1666 to 0,1506, **P2 surviving** with
+0,0164 of margin against the 0,167 threshold.
+
+**The regressor that could not see.** `attrs` ships two subtrees inside one wheel, `attr/` and
+`attrs/`, both 67 548 artifact bytes, clocks 0,6538 s and
+0,1259 s. On artifact bytes the model is blind by construction: the same `x` gives
+the same prediction, ratio **1,00×**, and the measured order is lost. On
+scanned bytes the two subtrees are 191 766 B and 1 557 B, and
+the model returns 0,5967 s against 0,1713 s:
+ratio **3,484×**, in the measured order. That is **P4 surviving**, and it is
+the sharpest thing this batch says — a regressor that maps two different objects to one number cannot
+be repaired by a better band, only by a different `x`.
+
+**docutils refuted the one prediction that named it.** P3 said the subject with the most code
+relative to its artifact would come back inside the band. It goes the other way: 0,6634 →
+**1,1020** against a `q` of 0,3018. Its
+1 809 028 scanned bytes predict
+4,2144 s and it costs 8,8588 s
+— docutils is slow *per scanned byte*, and changing the regressor removed the one thing artifact size
+was doing to hide it. Coverage falls to 2 of 5 with it:
+
+| package | scanned bytes | `cpu_min` | predicted | rel. error | inside |
+|---|---:|---:|---:|---:|:--:|
+| sqlparse | 146 489 | 0,4919 | 0,4955 | 0,0072 | yes |
+| pyflakes | 296 870 | 0,6791 | 0,8318 | 0,1836 | yes |
+| wcwidth | 1 739 138 | 2,8333 | 4,0581 | 0,301809 | **no** (boundary) |
+| setuptools | 2 611 450 | 8,2786 | 6,0093 | 0,3776 | **no** |
+| docutils | 1 809 028 | 8,8588 | 4,2144 | 1,1020 | **no** |
+
+One of those is not a clean "no": `wcwidth` lands at 0,301809 against
+`q = 0,3018`, outside by nine parts in a million — a boundary case, declared as one rather than
+counted as a success or a failure. A model can be better on every calibration row and worse out of
+sample, and here the reason is computable: scanned-over-artifact bytes runs from
+**0,0231×** (`tomli`) to
+**5,2805×** (`six`). Artifact bytes are not a proxy for scanned
+bytes at any multiplier; they are a different quantity that happens to correlate well inside the
+fifteen rows that fitted it.
+
+**The finding that arrived sideways: the band is barely twice the instrument.** Quoting the
+local tree with the new model gives `predicho 0,2921 s` and an interval
+`[0,2040, 0,3803]`; today's reading (0,2103) lands inside it
+— **P5 surviving** on its own terms, by 3 % above the lower bound. But the same tree, timed ten
+times in each of 9 consecutive blocks, does this:
+
+```
+jitter per block   0,0444 · 0,0432 · 0,0056 · 0,0039 · 0,0039 · 0,0115 · 0,0048 · 0,0056 · 0,0036   s
+median             0,0056 s      worst 0,0444 s      best  0,0036 s
+band half-width    0,0882 s      -> the worst block clears it by 1,99×
+```
+
+A twelvefold range inside one session, on one subject, from one instrument. The band of record still
+clears it, and that is not the same as saying the band is larger than the machine: a block measured
+earlier in this same session reached **0,0963 s**, over the half-width, and that reading is a
+transcription here rather than a file — which is precisely why the two populations have to be
+measured in the same act, not in two acts that are minutes apart. Two populations again, the same law
+as a partition of a single one: the band measures model error, the jitter measures the machine, and
+an interval that only reports the first has collapsed the difference that decides whether it means
+anything.
+
+**So what may be invoiced.** Counts. The invoice stays denominated in sites, keys and files —
+replayed 20 of 20, with the scanner's own `files` count and an independent `.py` glob agreeing on
+**20 of 20** rows: two instruments,
+one universe, not two columns of one calculation. The clock becomes a capacity input for a disk tree
+instead of a refusal — `bench/cotizar.py --modelo codigo` returns a banded time — and it ships with
+the size below which the jitter, not the model, is what the interval would be made of:
+**0,1471 s** of predicted time, where the half-width would equal the worst
+block measured here. `precio` stays `NO_COTIZADO`: no tariff ships with coefficients, and that
+refusal is the honest reading of a `firmada: false` file.
+
+The whole batch is one command, and it re-derives every figure above from the wheels rather than
+transcribing them:
+
+```bash
+PYTHONPATH=src:bench python bench/sujeto.py --dir /tmp/censo6 --artefacto
+```
+
+It writes `fuera-de-dominio-6.json`, the artifact of record: the twenty rows with their pins, both
+fits, both bands, the jitter and the quote. Every number on this page is read from it by the test
+suite, so a figure that stops matching the file fails CI instead of ageing quietly.
+
+The next order is already declared and nothing in it is measured yet: `prediccion-batch-7.json`
+carries three claims about the instrument's jitter on five of these twenty subjects — that the band
+has no degrees of freedom on the smallest and plenty on the largest — each with its own falsifier.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

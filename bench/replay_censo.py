@@ -103,7 +103,15 @@ def _medir(raiz: Path) -> dict:
     # `claves` is not compared by the replay; it is what the invoice is counted
     # in -- one adjudication closes every site that shares a key -- and a second
     # definition of a row would be a second thing to keep in sync.
+    # The bytes the scanner walked, not the bytes of the wheel it came from: the
+    # model in `cotizar.py` was fitted on artifact bytes and a tree is not that
+    # subject (batch 5). This is the same tree the counts are over.
+    if raiz.is_file():
+        bytes_py = raiz.stat().st_size
+    else:
+        bytes_py = sum(f.stat().st_size for f in sorted(raiz.rglob("*.py")) if f.is_file())
     return {"claves": [c["clave"] for c in cand],
+            "bytes_py": bytes_py,
             "species": {f: sum(1 for c in cand if c["forma"] == f)
                         for f in sorted({c["forma"] for c in cand})},
             "files": d["archivos"], "stores": d["almacenes"], "pierde": d["pierde"],

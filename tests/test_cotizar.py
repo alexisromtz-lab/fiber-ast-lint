@@ -110,7 +110,8 @@ def test_la_banda_no_puntua_un_sujeto_que_el_modelo_no_vio():
     assert sin["calibracion"]["filas"] == 15
     con = cotizar._banda(cal, 100_000)
     assert con["estado"] == "MEDIDO"
-    assert con["bytes_artefacto"] == 100_000
+    assert con["bytes"] == 100_000
+    assert con["modelo"]["clave"] == "bytes"
     assert con["calibracion"] == sin["calibracion"]
     assert con["modelo"] == sin["modelo"]
 
