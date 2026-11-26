@@ -1,0 +1,65 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 6,
+ "title": "el sujeto del modelo",
+ "declared_before_computation": true,
+ "declared_at": "2026-11-20",
+ "why": "El lote 5 cerro con una negativa: cotizar.py no cotiza el tiempo de un arbol en disco porque el modelo se ajusto sobre bytes de artefacto y un arbol no es ese sujeto. Ese es el muro que el propio lote 5 nombro. Si el muro es de sujeto -- la regresora no describe lo que se escanea -- entonces cambiar la regresora por los bytes de codigo que el escaner realmente recorre debe mover el error, y la forma funcional se queda quieta. Si el error no se mueve, la regresora no era el problema y el siguiente sujeto es la forma (logaritmica o por fichero), no otra variable.",
+ "what_is_new": "Nada se vuelve a cronometrar. Los veinte relojes del lote 4 se reutilizan tal cual (mismo sujeto, mismo instrumento, misma sesion de origen) y solo cambia la x: bytes de codigo Python escaneado, sumados sobre el arbol que el escaner recorre, medidos en la misma pasada que los conteos. La comparacion es pareada a proposito: dos modelos sobre los mismos veinte valores de y, para que la diferencia de error sea atribuible a la regresora y a nada mas.",
+ "method": {
+  "calibracion": "las 15 filas de los lotes 1-3 dentro de fuera-de-dominio-4.json",
+  "retencion": "las 5 filas del lote 4 dentro del mismo archivo",
+  "modelo": "cpu_min = a + b*bytes_py por minimos cuadrados, ajustado sin la fila puntuada",
+  "score": "residuo relativo leave-one-out",
+  "banda": "conforme partido, cuantil en el indice ceil((n+1)*(1-alfa))-1 con n=15 y alfa=0,2",
+  "advertencia": "las 5 filas de retencion ya se usaron en el lote 5 para medir cobertura; reusarlas aqui NO es una prueba fuera de muestra nueva. La unica prediccion genuinamente fuera de muestra de este lote es P5, sobre un arbol que no participo en ningun ajuste."
+ },
+ "predictions": [
+  {
+   "id": "P1",
+   "kind": "cuantitativa",
+   "claim": "El error relativo maximo leave-one-out baja del maximo del lote 4: max < 0,8147. Si el muro era el sujeto de la regresora, el peor sujeto deja de serlo.",
+   "ratio_orientation": "|medido - predicho| / predicho",
+   "cota_error": "el maximo es un solo sujeto y por tanto tiene la varianza de un punto; se predice la direccion con una banda de +-0,10 sobre el valor medido. Umbral falsable: 0,8147.",
+   "falsifier": "max >= 0,8147 con bytes_py como regresora."
+  },
+  {
+   "id": "P2",
+   "kind": "cuantitativa",
+   "claim": "La mediana del error relativo baja del 16,7 % del lote 4: p50 < 0,167. La mediana no la mueve un sujeto raro, asi que es la prediccion que un cambio de sujeto deberia tocar.",
+   "ratio_orientation": "|medido - predicho| / predicho",
+   "cota_error": "+-0,03 sobre la mediana medida. Umbral falsable: 0,167.",
+   "falsifier": "p50 >= 0,167 con bytes_py como regresora."
+  },
+  {
+   "id": "P3",
+   "kind": "estructural",
+   "claim": "docutils vuelve a caer dentro de la banda: su error relativo queda por debajo del q del reajuste, cuando con bytes de artefacto era 0,6634 contra q 0,4258. Es el sujeto con mas codigo respecto de su artefacto, y por eso el candidato natural a que el cambio de sujeto lo explique.",
+   "ratio_orientation": "error_docutils / q (denominador: la banda del reajuste)",
+   "cota_error": "docutils es un sujeto; se predice el signo de la comparacion, no su valor.",
+   "falsifier": "el error de docutils queda en q o por encima."
+  },
+  {
+   "id": "P4",
+   "kind": "estructural",
+   "claim": "Las dos filas de attrs -- mismo artefacto, 67548 bytes las dos, relojes 0,6538 y 0,1259 s -- reciben predicciones distintas en razon mayor que 2, y en el orden medido (attr > attrs). Con bytes de artefacto la razon predicha es exactamente 1,00 por construccion: una regresora que no distingue dos sujetos no puede ordenarlos.",
+   "ratio_orientation": "predicho(attrs/attr) / predicho(attrs/attrs)",
+   "cota_error": "la razon medida es 5,19; se predice superar 2, no acertar el valor.",
+   "falsifier": "razon predicha <= 2 o invertida respecto del orden medido."
+  },
+  {
+   "id": "P5",
+   "kind": "fuera_de_muestra",
+   "claim": "El arbol local src/fiber_ast_lint, que no participo en ningun ajuste, pasa de NO_MEDIDO a MEDIDO y su cpu_min medido (0,4303 s en el lote 5) cae dentro del intervalo del reajuste.",
+   "ratio_orientation": "medido / predicho",
+   "cota_error": "un solo sujeto fuera de muestra; el intervalo se declara antes de medirlo.",
+   "falsifier": "el arbol sigue en NO_MEDIDO, o el cpu_min medido queda fuera del intervalo."
+  }
+ ],
+ "falsification": "Cae P1 y P2 si el reajuste sobre bytes de codigo escaneado no mueve el error: entonces la regresora no era el muro y el lote 7 ataca la forma funcional. Cae P3 si docutils sigue fuera de la banda. Cae P4 si el modelo sigue dando la misma prediccion a dos sujetos que miden 5,19x distinto. Cae P5 si el arbol local queda fuera de su propio intervalo: una banda que no cubre al primer sujeto nuevo no es una banda.",
+ "what_it_would_mean": {
+  "todas_sobreviven": "el muro del lote 5 era de sujeto: el modelo se puede reconstruir sobre lo que el escaner recorre y entonces un arbol en disco se cotiza con banda. Es la pieza que falta para que la cotizacion sea un producto y no una negativa.",
+  "P1_P2_caen": "el error no venia de la regresora. El lote 7 compara formas (log, por fichero, por almacen) sobre los mismos veinte relojes, que ya estan pagados.",
+  "P5_cae": "la banda no cubre al primer sujeto nuevo. Eso invalida la publicacion de cualquier intervalo hasta que la cobertura se mida sobre sujetos frescos, no reusados."
+ }
+}
