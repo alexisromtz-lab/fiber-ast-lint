@@ -1,0 +1,65 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 8,
+ "title": "la cotizacion mide su propio piso",
+ "declared_before_computation": true,
+ "declared_at": "2026-11-26",
+ "why": "El lote 7 midio el ruido sobre cinco sujetos y los cinco salieron no publicables, con jitter_relativo entre 0,3418 y 0,8163 contra un q de 0,3018. Ese cociente no ordena por tamano (el mayor da 0,3418 y el segundo mayor 0,8163), asi que no es una propiedad del sujeto. Si el piso es una lectura de la maquina en el acto, dos actos sobre el mismo sujeto tienen que discrepar; si es una propiedad del sujeto, tienen que coincidir. Este lote es esa disyuntiva, con un solo sujeto y dos actos.",
+ "what_is_new": "Nada se vuelve a ajustar: q, coeficientes y pin del sujeto son los del lote 6 y el lote 7. El acto A son los noventa relojes que el lote 7 ya midio sobre pyflakes/pyflakes y se reutilizan sin volver a cronometrar, para que la comparacion sea pareada. Lo unico nuevo es el acto B: el mismo sujeto, el mismo protocolo, otra ventana.",
+ "method": {
+  "sujeto": "pyflakes/pyflakes, la mediana de los veinte por tiempo predicho y el sujeto cuyo jitter_relativo del lote 7 (0,6054) esta mas cerca de la media de los cinco",
+  "acto_a": "reutilizado del lote 7: 9 bloques de 10 lecturas de cpu_min, jitter del sujeto 0,5036 s, predicho 0,8318 s",
+  "acto_b": "mismo protocolo, mismo pin, ventana distinta; 9 bloques de 10 lecturas de cpu_min con cotizar._tiempo(arbol, 3)",
+  "estadistico": "jitter por bloque = max - min de sus diez lecturas; jitter del sujeto = max de los nueve; k = jitter del sujeto / predicho",
+  "particion_de_k": "k_primera_mitad y k_ultima_mitad se calculan sobre los bloques 1-4 y 6-9, descartando el 5 para que la particion no comparta un bloque",
+  "banda": "q = 0,3018 y semianchura q/2 = 0,1509, del lote 6 sin reajustar",
+  "advertencia": "el acto B no se puede elegir por su resultado: se corre una vez y se publica lo que salga"
+ },
+ "predictions": [
+  {
+   "id": "K1",
+   "kind": "cuantitativa",
+   "claim": "En el acto B el sujeto es publicable: k_B = jitter_B / predicho es menor que q/2 = 0,1509, contra k_A = 0,6054 en el acto A. El piso es una lectura del acto y no una propiedad del sujeto.",
+   "umbral": 0.1509,
+   "ratio_orientation": "jitter_B / predicho_s contra q/2",
+   "cota_error": "un acto B con la maquina cargada da k_B alto y favorece la caida; la caida es informativa, la subida no prueba lo contrario",
+   "falsifier": "k_B >= 0,1509"
+  },
+  {
+   "id": "K2",
+   "kind": "cuantitativa",
+   "claim": "Dentro del acto B el piso es estacionario: |k_primera_mitad - k_ultima_mitad| < 0,1509, de modo que el piso medido al principio del acto sigue valiendo al final y una sola ventana basta para decidir.",
+   "umbral": 0.1509,
+   "cota_error": "cuatro bloques por mitad: el maximo de cuatro es mas inestable que el de nueve y favorece la caida",
+   "falsifier": "|k_primera_mitad - k_ultima_mitad| >= 0,1509"
+  },
+  {
+   "id": "K3",
+   "kind": "cuantitativa",
+   "claim": "El minimo es la unica cantidad que viaja entre actos: min_B / min_A cae en [0,90, 1,10] aunque el jitter no se parezca. Es lo que hace que una cotizacion pueda denominarse en el minimo y no en la banda.",
+   "umbral": [
+    0.9,
+    1.1
+   ],
+   "cota_error": "el minimo de 90 lecturas es estable pero no exacto; la ventana es ancha a proposito",
+   "falsifier": "min_B / min_A fuera de [0,90, 1,10]"
+  }
+ ],
+ "falsification": "Cada prediccion nombra su falsador arriba. El lote se publica igual si las tres caen: lo que cambia es la conclusion, no la entrega. Lo que no se admite es cambiar el estadistico ni descartar el acto B despues de ver los numeros.",
+ "what_it_would_mean": {
+  "K1_K2_sobreviven": "publicable se decide en el acto que cotiza, con el piso medido ahi mismo: la compuerta cuesta la misma ventana que la cotizacion y deja de heredarse de un banco de pruebas",
+  "K1_cae": "el piso no es una lectura del acto: hay algo del sujeto que lo fija y el lote 7 midio ese algo, no la maquina",
+  "K2_cae": "una ventana no basta: el piso deriva dentro del acto y la compuerta tiene que medirlo intercalado con la cotizacion, no antes",
+  "K3_cae": "ni el minimo viaja entre actos, y entonces no hay magnitud temporal que se pueda publicar: la cotizacion se queda en conteos y el reloj sale del recibo"
+ },
+ "cost": {
+  "sujetos": 1,
+  "actos": 2,
+  "bloques_por_acto": 9,
+  "lecturas_por_bloque": 10,
+  "relojes_nuevos": 90,
+  "relojes_reutilizados": 90,
+  "clones_externos": 0,
+  "escrituras_en_platino_labs": 0
+ }
+}

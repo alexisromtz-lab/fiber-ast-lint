@@ -1,0 +1,1113 @@
+{
+ "schema": "fiber-ast-lint/fuera-de-dominio/1",
+ "lote": 7,
+ "title": "el ruido del instrumento por sujeto",
+ "prediction": {
+  "archivo": "prediccion-batch-7.json",
+  "sha256": "8a6500b1b0996f4eeb41cf75e109935d0da4642da9b21868df9f3f566e369c9e",
+  "git_blob": "0017aabe466f1545717301e7f06a68754ba63174",
+  "declared_before_computation": true
+ },
+ "metodo": "cinco sujetos fijados por tiempo predicho; nueve bloques de diez lecturas por sujeto con cotizar._tiempo(arbol, 3); coeficientes y q del lote 6 sin reajustar; ningun reloj de estos sujetos intervino en su eleccion",
+ "sujetos": [
+  {
+   "package": "attrs",
+   "scope": "attrs",
+   "version": "26.1.0",
+   "artifact": "attrs-26.1.0-py3-none-any.whl",
+   "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+   "bytes_py_pin": 1557,
+   "bytes_py": 1557,
+   "ficheros_py": 6,
+   "pin_ok": true,
+   "predicho_s": 0.1713,
+   "cpu_min_lote6": 0.1259,
+   "q": 0.3018,
+   "bloques": [
+    {
+     "lecturas": [
+      0.0878,
+      0.0924,
+      0.0979,
+      0.1051,
+      0.1201,
+      0.1208,
+      0.1283,
+      0.1347,
+      0.1355,
+      0.1415
+     ],
+     "n": 10,
+     "min_s": 0.0878,
+     "p50_s": 0.1205,
+     "max_s": 0.1415,
+     "jitter_s": 0.0537
+    },
+    {
+     "lecturas": [
+      0.113,
+      0.1135,
+      0.1144,
+      0.1156,
+      0.1275,
+      0.1295,
+      0.1344,
+      0.1348,
+      0.1352,
+      0.136
+     ],
+     "n": 10,
+     "min_s": 0.113,
+     "p50_s": 0.1285,
+     "max_s": 0.136,
+     "jitter_s": 0.023
+    },
+    {
+     "lecturas": [
+      0.1273,
+      0.1286,
+      0.1306,
+      0.1353,
+      0.1358,
+      0.1381,
+      0.1387,
+      0.1431,
+      0.1436,
+      0.1462
+     ],
+     "n": 10,
+     "min_s": 0.1273,
+     "p50_s": 0.137,
+     "max_s": 0.1462,
+     "jitter_s": 0.0189
+    },
+    {
+     "lecturas": [
+      0.1222,
+      0.126,
+      0.126,
+      0.1268,
+      0.1328,
+      0.1335,
+      0.1336,
+      0.1344,
+      0.1349,
+      0.1443
+     ],
+     "n": 10,
+     "min_s": 0.1222,
+     "p50_s": 0.1331,
+     "max_s": 0.1443,
+     "jitter_s": 0.0221
+    },
+    {
+     "lecturas": [
+      0.1226,
+      0.1245,
+      0.1254,
+      0.1305,
+      0.1305,
+      0.1334,
+      0.1351,
+      0.1352,
+      0.1376,
+      0.139
+     ],
+     "n": 10,
+     "min_s": 0.1226,
+     "p50_s": 0.132,
+     "max_s": 0.139,
+     "jitter_s": 0.0164
+    },
+    {
+     "lecturas": [
+      0.1239,
+      0.1305,
+      0.1305,
+      0.1326,
+      0.1351,
+      0.1378,
+      0.1389,
+      0.139,
+      0.1429,
+      0.1433
+     ],
+     "n": 10,
+     "min_s": 0.1239,
+     "p50_s": 0.1365,
+     "max_s": 0.1433,
+     "jitter_s": 0.0194
+    },
+    {
+     "lecturas": [
+      0.0834,
+      0.096,
+      0.1231,
+      0.1303,
+      0.1317,
+      0.132,
+      0.1396,
+      0.1404,
+      0.1445,
+      0.1485
+     ],
+     "n": 10,
+     "min_s": 0.0834,
+     "p50_s": 0.1319,
+     "max_s": 0.1485,
+     "jitter_s": 0.0651
+    },
+    {
+     "lecturas": [
+      0.0996,
+      0.1071,
+      0.1307,
+      0.1313,
+      0.1313,
+      0.1328,
+      0.1333,
+      0.1333,
+      0.1346,
+      0.1351
+     ],
+     "n": 10,
+     "min_s": 0.0996,
+     "p50_s": 0.1321,
+     "max_s": 0.1351,
+     "jitter_s": 0.0355
+    },
+    {
+     "lecturas": [
+      0.1222,
+      0.1256,
+      0.1267,
+      0.1287,
+      0.1299,
+      0.1306,
+      0.1312,
+      0.1343,
+      0.1348,
+      0.1408
+     ],
+     "n": 10,
+     "min_s": 0.1222,
+     "p50_s": 0.1302,
+     "max_s": 0.1408,
+     "jitter_s": 0.0186
+    }
+   ],
+   "n_bloques": 9,
+   "relojes": 90,
+   "jitter_s": 0.0651,
+   "jitter_p50_s": 0.0221,
+   "jitter_min_s": 0.0164,
+   "p50_min_s": 0.1205,
+   "p50_max_s": 0.137,
+   "dispersion": 1.7806,
+   "semianchura_s": 0.0517,
+   "jitter_relativo": 0.38,
+   "publicable": false,
+   "minimo_publicable_s": 0.2157,
+   "en_banda": true,
+   "segundos_de_pared": 59.0
+  },
+  {
+   "package": "tomli",
+   "scope": "tomli",
+   "version": "2.5.0",
+   "artifact": "tomli-2.5.0-py3-none-any.whl",
+   "sha256": "32a7b79ac57a2e83670ce329ccf675798bc5a2094783a63676866b70503f2e2b",
+   "bytes_py_pin": 30691,
+   "bytes_py": 30691,
+   "ficheros_py": 4,
+   "pin_ok": true,
+   "predicho_s": 0.2364,
+   "cpu_min_lote6": 0.2101,
+   "q": 0.3018,
+   "bloques": [
+    {
+     "lecturas": [
+      0.2276,
+      0.2292,
+      0.2406,
+      0.2441,
+      0.2468,
+      0.2497,
+      0.251,
+      0.2575,
+      0.2667,
+      0.2676
+     ],
+     "n": 10,
+     "min_s": 0.2276,
+     "p50_s": 0.2482,
+     "max_s": 0.2676,
+     "jitter_s": 0.04
+    },
+    {
+     "lecturas": [
+      0.1635,
+      0.2285,
+      0.2343,
+      0.2352,
+      0.2461,
+      0.2463,
+      0.2538,
+      0.2679,
+      0.2691,
+      0.2827
+     ],
+     "n": 10,
+     "min_s": 0.1635,
+     "p50_s": 0.2462,
+     "max_s": 0.2827,
+     "jitter_s": 0.1192
+    },
+    {
+     "lecturas": [
+      0.1536,
+      0.1547,
+      0.1818,
+      0.2001,
+      0.2143,
+      0.2318,
+      0.2359,
+      0.2413,
+      0.2566,
+      0.2668
+     ],
+     "n": 10,
+     "min_s": 0.1536,
+     "p50_s": 0.223,
+     "max_s": 0.2668,
+     "jitter_s": 0.1132
+    },
+    {
+     "lecturas": [
+      0.1613,
+      0.1658,
+      0.1714,
+      0.1714,
+      0.1821,
+      0.183,
+      0.1931,
+      0.2297,
+      0.25,
+      0.2732
+     ],
+     "n": 10,
+     "min_s": 0.1613,
+     "p50_s": 0.1825,
+     "max_s": 0.2732,
+     "jitter_s": 0.1119
+    },
+    {
+     "lecturas": [
+      0.1286,
+      0.1295,
+      0.1316,
+      0.132,
+      0.1553,
+      0.1934,
+      0.2366,
+      0.2482,
+      0.2644,
+      0.2771
+     ],
+     "n": 10,
+     "min_s": 0.1286,
+     "p50_s": 0.1744,
+     "max_s": 0.2771,
+     "jitter_s": 0.1485
+    },
+    {
+     "lecturas": [
+      0.1308,
+      0.1312,
+      0.1372,
+      0.1394,
+      0.1626,
+      0.2025,
+      0.2396,
+      0.2548,
+      0.2808,
+      0.2836
+     ],
+     "n": 10,
+     "min_s": 0.1308,
+     "p50_s": 0.1825,
+     "max_s": 0.2836,
+     "jitter_s": 0.1528
+    },
+    {
+     "lecturas": [
+      0.1331,
+      0.1506,
+      0.1601,
+      0.1764,
+      0.177,
+      0.2019,
+      0.2354,
+      0.2611,
+      0.2611,
+      0.2617
+     ],
+     "n": 10,
+     "min_s": 0.1331,
+     "p50_s": 0.1895,
+     "max_s": 0.2617,
+     "jitter_s": 0.1286
+    },
+    {
+     "lecturas": [
+      0.1351,
+      0.1449,
+      0.1583,
+      0.1925,
+      0.2319,
+      0.2606,
+      0.2703,
+      0.2757,
+      0.2856,
+      0.3064
+     ],
+     "n": 10,
+     "min_s": 0.1351,
+     "p50_s": 0.2462,
+     "max_s": 0.3064,
+     "jitter_s": 0.1713
+    },
+    {
+     "lecturas": [
+      0.1381,
+      0.1414,
+      0.1421,
+      0.143,
+      0.1695,
+      0.1985,
+      0.2078,
+      0.2173,
+      0.2331,
+      0.2695
+     ],
+     "n": 10,
+     "min_s": 0.1381,
+     "p50_s": 0.184,
+     "max_s": 0.2695,
+     "jitter_s": 0.1314
+    }
+   ],
+   "n_bloques": 9,
+   "relojes": 90,
+   "jitter_s": 0.1713,
+   "jitter_p50_s": 0.1286,
+   "jitter_min_s": 0.04,
+   "p50_min_s": 0.1744,
+   "p50_max_s": 0.2482,
+   "dispersion": 2.3826,
+   "semianchura_s": 0.0713,
+   "jitter_relativo": 0.7246,
+   "publicable": false,
+   "minimo_publicable_s": 0.5676,
+   "en_banda": true,
+   "segundos_de_pared": 87.8
+  },
+  {
+   "package": "pyflakes",
+   "scope": "pyflakes",
+   "version": "4.1.0",
+   "artifact": "pyflakes-4.1.0-py2.py3-none-any.whl",
+   "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+   "bytes_py_pin": 296870,
+   "bytes_py": 296870,
+   "ficheros_py": 23,
+   "pin_ok": true,
+   "predicho_s": 0.8318,
+   "cpu_min_lote6": 0.6791,
+   "q": 0.3018,
+   "bloques": [
+    {
+     "lecturas": [
+      0.5089,
+      0.5112,
+      0.5481,
+      0.5793,
+      0.7717,
+      0.8405,
+      0.8973,
+      0.9048,
+      0.9534,
+      1.0125
+     ],
+     "n": 10,
+     "min_s": 0.5089,
+     "p50_s": 0.8061,
+     "max_s": 1.0125,
+     "jitter_s": 0.5036
+    },
+    {
+     "lecturas": [
+      0.5088,
+      0.5151,
+      0.5317,
+      0.5414,
+      0.6636,
+      0.6839,
+      0.7283,
+      0.7772,
+      0.8434,
+      0.9143
+     ],
+     "n": 10,
+     "min_s": 0.5088,
+     "p50_s": 0.6737,
+     "max_s": 0.9143,
+     "jitter_s": 0.4055
+    },
+    {
+     "lecturas": [
+      0.5047,
+      0.7047,
+      0.7321,
+      0.7798,
+      0.789,
+      0.8427,
+      0.8603,
+      0.8608,
+      0.8705,
+      0.9433
+     ],
+     "n": 10,
+     "min_s": 0.5047,
+     "p50_s": 0.8158,
+     "max_s": 0.9433,
+     "jitter_s": 0.4386
+    },
+    {
+     "lecturas": [
+      0.6944,
+      0.6964,
+      0.6982,
+      0.7109,
+      0.7127,
+      0.7167,
+      0.7418,
+      0.761,
+      0.7891,
+      0.8019
+     ],
+     "n": 10,
+     "min_s": 0.6944,
+     "p50_s": 0.7147,
+     "max_s": 0.8019,
+     "jitter_s": 0.1075
+    },
+    {
+     "lecturas": [
+      0.5252,
+      0.6285,
+      0.6477,
+      0.6662,
+      0.689,
+      0.787,
+      0.8042,
+      0.815,
+      0.83,
+      0.8552
+     ],
+     "n": 10,
+     "min_s": 0.5252,
+     "p50_s": 0.738,
+     "max_s": 0.8552,
+     "jitter_s": 0.33
+    },
+    {
+     "lecturas": [
+      0.5274,
+      0.5295,
+      0.5555,
+      0.6097,
+      0.6322,
+      0.6362,
+      0.6377,
+      0.6463,
+      0.6594,
+      0.692
+     ],
+     "n": 10,
+     "min_s": 0.5274,
+     "p50_s": 0.6342,
+     "max_s": 0.692,
+     "jitter_s": 0.1646
+    },
+    {
+     "lecturas": [
+      0.5759,
+      0.5836,
+      0.653,
+      0.6665,
+      0.6735,
+      0.6802,
+      0.6874,
+      0.7376,
+      0.747,
+      0.7871
+     ],
+     "n": 10,
+     "min_s": 0.5759,
+     "p50_s": 0.6768,
+     "max_s": 0.7871,
+     "jitter_s": 0.2112
+    },
+    {
+     "lecturas": [
+      0.5011,
+      0.6463,
+      0.6578,
+      0.6858,
+      0.6953,
+      0.702,
+      0.7154,
+      0.7219,
+      0.8365,
+      0.8646
+     ],
+     "n": 10,
+     "min_s": 0.5011,
+     "p50_s": 0.6986,
+     "max_s": 0.8646,
+     "jitter_s": 0.3635
+    },
+    {
+     "lecturas": [
+      0.5755,
+      0.6337,
+      0.6757,
+      0.6825,
+      0.689,
+      0.7811,
+      0.8381,
+      0.8505,
+      0.9232,
+      0.9325
+     ],
+     "n": 10,
+     "min_s": 0.5755,
+     "p50_s": 0.735,
+     "max_s": 0.9325,
+     "jitter_s": 0.357
+    }
+   ],
+   "n_bloques": 9,
+   "relojes": 90,
+   "jitter_s": 0.5036,
+   "jitter_p50_s": 0.357,
+   "jitter_min_s": 0.1075,
+   "p50_min_s": 0.6342,
+   "p50_max_s": 0.8158,
+   "dispersion": 2.0206,
+   "semianchura_s": 0.251,
+   "jitter_relativo": 0.6054,
+   "publicable": false,
+   "minimo_publicable_s": 1.6687,
+   "en_banda": true,
+   "segundos_de_pared": 252.7
+  },
+  {
+   "package": "setuptools",
+   "scope": "setuptools",
+   "version": "84.2.1",
+   "artifact": "setuptools-84.2.1-py3-none-any.whl",
+   "sha256": "ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2",
+   "bytes_py_pin": 2611450,
+   "bytes_py": 2611450,
+   "ficheros_py": 227,
+   "pin_ok": true,
+   "predicho_s": 6.0093,
+   "cpu_min_lote6": 8.2786,
+   "q": 0.3018,
+   "bloques": [
+    {
+     "lecturas": [
+      8.8168,
+      9.2635,
+      9.5074,
+      10.3468,
+      10.6007,
+      10.6083,
+      10.7865,
+      11.1387,
+      11.6072,
+      11.914
+     ],
+     "n": 10,
+     "min_s": 8.8168,
+     "p50_s": 10.6045,
+     "max_s": 11.914,
+     "jitter_s": 3.0972
+    },
+    {
+     "lecturas": [
+      6.999,
+      8.8913,
+      9.4901,
+      10.3618,
+      11.0432,
+      11.0773,
+      11.0987,
+      11.5308,
+      11.6402,
+      11.9042
+     ],
+     "n": 10,
+     "min_s": 6.999,
+     "p50_s": 11.0602,
+     "max_s": 11.9042,
+     "jitter_s": 4.9052
+    },
+    {
+     "lecturas": [
+      5.9325,
+      6.9448,
+      7.1733,
+      7.1756,
+      7.384,
+      7.5226,
+      9.2098,
+      9.334,
+      9.7964,
+      10.2948
+     ],
+     "n": 10,
+     "min_s": 5.9325,
+     "p50_s": 7.4533,
+     "max_s": 10.2948,
+     "jitter_s": 4.3623
+    },
+    {
+     "lecturas": [
+      5.832,
+      5.8828,
+      6.0765,
+      6.5801,
+      6.69,
+      6.8951,
+      7.082,
+      7.783,
+      7.8597,
+      7.8764
+     ],
+     "n": 10,
+     "min_s": 5.832,
+     "p50_s": 6.7926,
+     "max_s": 7.8764,
+     "jitter_s": 2.0444
+    },
+    {
+     "lecturas": [
+      5.6854,
+      5.8376,
+      5.8821,
+      5.9833,
+      6.0396,
+      6.087,
+      6.1113,
+      6.3048,
+      6.3281,
+      6.7721
+     ],
+     "n": 10,
+     "min_s": 5.6854,
+     "p50_s": 6.0633,
+     "max_s": 6.7721,
+     "jitter_s": 1.0867
+    },
+    {
+     "lecturas": [
+      5.6392,
+      5.6571,
+      5.6574,
+      5.6697,
+      5.6938,
+      5.7088,
+      5.7167,
+      5.8214,
+      5.9789,
+      6.235
+     ],
+     "n": 10,
+     "min_s": 5.6392,
+     "p50_s": 5.7013,
+     "max_s": 6.235,
+     "jitter_s": 0.5958
+    },
+    {
+     "lecturas": [
+      5.6061,
+      5.6406,
+      5.6447,
+      5.6467,
+      5.6528,
+      5.6599,
+      5.664,
+      5.6796,
+      5.7301,
+      5.8427
+     ],
+     "n": 10,
+     "min_s": 5.6061,
+     "p50_s": 5.6563,
+     "max_s": 5.8427,
+     "jitter_s": 0.2366
+    },
+    {
+     "lecturas": [
+      5.581,
+      5.5811,
+      5.5848,
+      5.5889,
+      5.5892,
+      5.5905,
+      5.5959,
+      5.6035,
+      5.606,
+      5.614
+     ],
+     "n": 10,
+     "min_s": 5.581,
+     "p50_s": 5.5899,
+     "max_s": 5.614,
+     "jitter_s": 0.033
+    },
+    {
+     "lecturas": [
+      5.5739,
+      5.5839,
+      5.5896,
+      5.5901,
+      5.5923,
+      5.596,
+      5.5961,
+      5.5968,
+      5.6074,
+      5.6138
+     ],
+     "n": 10,
+     "min_s": 5.5739,
+     "p50_s": 5.5941,
+     "max_s": 5.6138,
+     "jitter_s": 0.0399
+    }
+   ],
+   "n_bloques": 9,
+   "relojes": 90,
+   "jitter_s": 4.9052,
+   "jitter_p50_s": 1.0867,
+   "jitter_min_s": 0.033,
+   "p50_min_s": 5.5899,
+   "p50_max_s": 11.0602,
+   "dispersion": 2.1375,
+   "semianchura_s": 1.8136,
+   "jitter_relativo": 0.8163,
+   "publicable": false,
+   "minimo_publicable_s": 16.2531,
+   "en_banda": false,
+   "segundos_de_pared": 2474.9
+  },
+  {
+   "package": "pygments",
+   "scope": "pygments",
+   "version": "2.21.0",
+   "artifact": "pygments-2.21.0-py3-none-any.whl",
+   "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9",
+   "bytes_py_pin": 4577209,
+   "bytes_py": 4577209,
+   "ficheros_py": 343,
+   "pin_ok": true,
+   "predicho_s": 10.4064,
+   "cpu_min_lote6": 10.3697,
+   "q": 0.3018,
+   "bloques": [
+    {
+     "lecturas": [
+      7.2603,
+      7.2641,
+      7.2649,
+      7.2842,
+      7.3018,
+      7.3022,
+      7.3028,
+      7.3045,
+      7.3067,
+      7.3072
+     ],
+     "n": 10,
+     "min_s": 7.2603,
+     "p50_s": 7.302,
+     "max_s": 7.3072,
+     "jitter_s": 0.0469
+    },
+    {
+     "lecturas": [
+      7.2885,
+      7.2934,
+      7.2961,
+      7.2991,
+      7.3099,
+      7.3113,
+      7.3115,
+      7.318,
+      7.3236,
+      7.3588
+     ],
+     "n": 10,
+     "min_s": 7.2885,
+     "p50_s": 7.3106,
+     "max_s": 7.3588,
+     "jitter_s": 0.0703
+    },
+    {
+     "lecturas": [
+      7.3497,
+      7.361,
+      7.3697,
+      7.3826,
+      7.3865,
+      7.3885,
+      7.4009,
+      7.4427,
+      7.539,
+      8.085
+     ],
+     "n": 10,
+     "min_s": 7.3497,
+     "p50_s": 7.3875,
+     "max_s": 8.085,
+     "jitter_s": 0.7353
+    },
+    {
+     "lecturas": [
+      7.6156,
+      7.813,
+      7.9304,
+      8.7422,
+      8.9744,
+      9.0777,
+      9.307,
+      9.7628,
+      10.4278,
+      11.1724
+     ],
+     "n": 10,
+     "min_s": 7.6156,
+     "p50_s": 9.026,
+     "max_s": 11.1724,
+     "jitter_s": 3.5568
+    },
+    {
+     "lecturas": [
+      7.7577,
+      8.059,
+      8.0603,
+      8.402,
+      8.8174,
+      9.1806,
+      9.6942,
+      9.7591,
+      9.8776,
+      10.7905
+     ],
+     "n": 10,
+     "min_s": 7.7577,
+     "p50_s": 8.999,
+     "max_s": 10.7905,
+     "jitter_s": 3.0328
+    },
+    {
+     "lecturas": [
+      7.1643,
+      7.1649,
+      7.1727,
+      7.1736,
+      7.1746,
+      7.1774,
+      7.1808,
+      7.194,
+      7.2003,
+      7.2153
+     ],
+     "n": 10,
+     "min_s": 7.1643,
+     "p50_s": 7.176,
+     "max_s": 7.2153,
+     "jitter_s": 0.051
+    },
+    {
+     "lecturas": [
+      7.159,
+      7.1653,
+      7.1657,
+      7.1672,
+      7.1709,
+      7.1753,
+      7.176,
+      7.1873,
+      7.2013,
+      7.2197
+     ],
+     "n": 10,
+     "min_s": 7.159,
+     "p50_s": 7.1731,
+     "max_s": 7.2197,
+     "jitter_s": 0.0607
+    },
+    {
+     "lecturas": [
+      7.1131,
+      7.1306,
+      7.1476,
+      7.1486,
+      7.1501,
+      7.1609,
+      7.1627,
+      7.1779,
+      7.1865,
+      7.2023
+     ],
+     "n": 10,
+     "min_s": 7.1131,
+     "p50_s": 7.1555,
+     "max_s": 7.2023,
+     "jitter_s": 0.0892
+    },
+    {
+     "lecturas": [
+      7.1344,
+      7.1414,
+      7.1419,
+      7.1422,
+      7.1469,
+      7.1482,
+      7.1561,
+      7.1633,
+      7.167,
+      7.1803
+     ],
+     "n": 10,
+     "min_s": 7.1344,
+     "p50_s": 7.1475,
+     "max_s": 7.1803,
+     "jitter_s": 0.0459
+    }
+   ],
+   "n_bloques": 9,
+   "relojes": 90,
+   "jitter_s": 3.5568,
+   "jitter_p50_s": 0.0703,
+   "jitter_min_s": 0.0459,
+   "p50_min_s": 7.1475,
+   "p50_max_s": 9.026,
+   "dispersion": 1.5707,
+   "semianchura_s": 3.1407,
+   "jitter_relativo": 0.3418,
+   "publicable": false,
+   "minimo_publicable_s": 11.7853,
+   "en_banda": true,
+   "segundos_de_pared": 2188.3
+  }
+ ],
+ "escala": {
+  "bytes_py": {
+   "attrs": 1557,
+   "tomli": 30691,
+   "pyflakes": 296870,
+   "setuptools": 2611450,
+   "pygments": 4577209
+  },
+  "jitter_s": {
+   "attrs": 0.0651,
+   "tomli": 0.1713,
+   "pyflakes": 0.5036,
+   "setuptools": 4.9052,
+   "pygments": 3.5568
+  },
+  "jitter_por_megabyte_s": {
+   "attrs": 41.8112,
+   "tomli": 5.5814,
+   "pyflakes": 1.6964,
+   "setuptools": 1.8783,
+   "pygments": 0.7771
+  },
+  "jitter_relativo": {
+   "attrs": 0.38,
+   "tomli": 0.7246,
+   "pyflakes": 0.6054,
+   "setuptools": 0.8163,
+   "pygments": 0.3418
+  },
+  "dispersion_jitter": 75.3487,
+  "dispersion_bytes": 2939.8,
+  "nota": "si el jitter fuera una constante de la maquina, `dispersion_jitter` seria cercano a 1 mientras `dispersion_bytes` es de tres ordenes: ese es el contraste que separa piso fijo de ruido proporcional, y se lee aqui sin ajustar nada"
+ },
+ "veredictos": [
+  {
+   "id": "J1",
+   "sujeto": "attrs/attrs",
+   "umbral": 0.3018,
+   "medido": 0.38,
+   "sobrevive": true,
+   "evalua": "En el sujeto mas pequeno por tiempo predicho (attrs/attrs), el jitter relativo —jitter del sujeto dividido por su tiempo predicho— supera q: alli el intervalo es ruido con formato de intervalo y no se publica."
+  },
+  {
+   "id": "J2",
+   "sujetos": [
+    "setuptools/setuptools",
+    "pygments/pygments"
+   ],
+   "umbral": 0.05,
+   "medido": {
+    "setuptools/setuptools": 0.8163,
+    "pygments/pygments": 0.3418
+   },
+   "sobrevive": false,
+   "evalua": "En los dos sujetos mas grandes (setuptools y pygments) el jitter relativo es menor que 0,05: la banda tiene grados de libertad de sobra."
+  },
+  {
+   "id": "J3",
+   "umbral": [
+    0.003,
+    0.05
+   ],
+   "medido": {
+    "attrs/attrs": 0.0221,
+    "tomli/tomli": 0.1286,
+    "pyflakes/pyflakes": 0.357,
+    "setuptools/setuptools": 1.0867,
+    "pygments/pygments": 0.0703
+   },
+   "sobrevive": false,
+   "evalua": "La mediana del jitter por bloque no escala con el sujeto: en los cinco sujetos cae entre 0,003 s y 0,05 s."
+  }
+ ],
+ "cost": {
+  "sujetos": 5,
+  "relojes_por_sujeto": 90,
+  "relojes_totales": 450,
+  "segundos_de_pared": 5062.7,
+  "clones_externos": 0,
+  "escrituras_en_platino_labs": 0,
+  "medido_en": "2026-11-26T13:49:06-0600"
+ },
+ "predictions_summary": {
+  "sobreviven": [
+   "J1"
+  ],
+  "caen": [
+   "J2",
+   "J3"
+  ],
+  "rama": "parcial",
+  "publicables": [],
+  "lo_que_cambio": "`publicable` deja de ser una cifra del lote y pasa a ser una funcion del sujeto: el recibo puede decir, por arbol, si su intervalo tiene grados de libertad"
+ }
+}

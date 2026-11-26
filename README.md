@@ -841,12 +841,102 @@ PYTHONPATH=src:bench python bench/sujeto.py --dir /tmp/censo6 --artefacto
 ```
 
 It writes `fuera-de-dominio-6.json`, the artifact of record: the twenty rows with their pins, both
-fits, both bands, the jitter and the quote. Every number on this page is read from it by the test
-suite, so a figure that stops matching the file fails CI instead of ageing quietly.
+fits, both bands, the jitter and the quote. Every number in this section is read from that file by
+the test suite, so a figure that stops matching it fails CI instead of ageing quietly.
 
-The next order is already declared and nothing in it is measured yet: `prediccion-batch-7.json`
-carries three claims about the instrument's jitter on five of these twenty subjects — that the band
-has no degrees of freedom on the smallest and plenty on the largest — each with its own falsifier.
+### The instrument's noise floor, per subject
+
+Batch 6 ended on an admission it could not pay for: the half-width had been calibrated on **one**
+tree, and a block of that same session had already beaten it. Publishability is a claim about a
+subject, so this batch takes it to five. The five were fixed by *predicted* time — the batch-6 fit
+`a + b·bytes`, never a clock — and each was given the same protocol: nine blocks of ten readings,
+a reading being the minimum of three full scans, with `q` and both coefficients frozen at the
+values batch 6 published. Four hundred and fifty clocks over five thousand seconds of declared
+wall, no external clone, nothing written outside this repository.
+
+**Zero of five are publishable.** The rule the artifact applies is the one batch 6 wrote down,
+neither looser nor tighter: a subject is publishable when `q × predicted` exceeds its worst block
+jitter, that is when `jitter / predicted` stays under 0,3018.
+
+| package | scanned bytes | predicted | worst block jitter | half-width | jitter / predicted | publishable |
+|---|---:|---:|---:|---:|---:|:--:|
+| attrs | 1 557 | 0,1713 | 0,0651 | 0,0517 | 0,3800 | **no** |
+| tomli | 30 691 | 0,2364 | 0,1713 | 0,0713 | 0,7246 | **no** |
+| pyflakes | 296 870 | 0,8318 | 0,5036 | 0,2510 | 0,6054 | **no** |
+| setuptools | 2 611 450 | 6,0093 | 4,9052 | 1,8136 | 0,8163 | **no** |
+| pygments | 4 577 209 | 10,4064 | 3,5568 | 3,1407 | 0,3418 | **no** |
+
+The narrowest refusal is the largest subject, at 0,3418 — over `q` by an eighth — and the widest
+is `setuptools`, at 0,8163, over it by 2,70×. Neither end of the size range buys publishability,
+which is the finding: size is what the model is denominated in and not what the gate is. Two of
+the three pre-registered claims were written to be falsified, and both were:
+
+- **J1 survives.** The smallest subject by predicted time, `attrs/attrs`, was predicted to come
+  back over `q` — the interval there is noise wearing the format of an interval. Measured 0,3800
+  against 0,3018.
+- **J2 falls.** The two largest subjects were predicted to come back under 0,05, on the argument
+  that a big subject has band to spare. They came back at 0,8163 and 0,3418 — 16,3 and 6,8 times
+  the threshold, not a few per cent over it.
+- **J3 falls.** The median block jitter was predicted to land between 0,003 s and 0,05 s in all
+  five subjects, on the argument that the floor is a property of the machine and the machine did
+  not change. It landed at 0,0221 · 0,1286 · 0,3570 · 1,0867 · 0,0703 s: the smallest subject sits
+  inside that window and the other four clear its upper edge by 1,4, 2,6, 7,1 and 21,7 times.
+
+Both failures say the same thing, and it is not that the machine is noisy. It is that the noise is
+not a constant of the machine:
+
+- scanned bytes span **2 939,8×** from the smallest subject to the largest, and the absolute
+  jitter spans **75,3×** — 39,0 times less than the span it would cover if it were a property of
+  the code.
+- the jitter per megabyte falls from 41,8112 s/MB on `attrs` to 0,7771 s/MB on `pygments`, a
+  factor of 53,8: the larger the tree, the smaller the noise relative to it.
+- the quantity that stays put is the one nobody had written down, `jitter / predicted`: between
+  0,3418 and 0,8163, mean 0,5736, a spread of 2,39× across a population that varies by three
+  orders of magnitude in size.
+
+**The noise enters only upward, which is why the statistic chosen for it has no ceiling.** The 450
+readings behind that table, per subject:
+
+| package | best of 90 | median | worst | worst / best | block minima, best to worst | readings above 2× best |
+|---|---:|---:|---:|---:|---:|---:|
+| attrs | 0,0834 | 0,1319 | 0,1485 | 1,7806 | 1,5264 | 0/90 |
+| tomli | 0,1286 | 0,2288 | 0,3064 | 2,3826 | 1,7698 | 21/90 |
+| pyflakes | 0,5011 | 0,6973 | 1,0125 | 2,0206 | 1,3858 | 1/90 |
+| setuptools | 5,5739 | 5,9811 | 11,9140 | 2,1375 | 1,5818 | 5/90 |
+| pygments | 7,1131 | 7,2910 | 11,1724 | 1,5707 | 1,0906 | 0/90 |
+
+An interruption can add time and can never take it away, so the minimum is the only estimate of
+the code's cost that survives contention; `max − min`, the batch-7 statistic, is an estimate of
+the scheduler. Taking the worst of nine blocks takes the maximum of a one-sided quantity, and a
+one-sided quantity has no ceiling by construction: more blocks can only widen it. That is the
+whole difference between a noise floor and a band, and it is why the answer is *no* five times
+instead of four.
+
+**The figure that closes the argument.** Batch 6's own subject — the local tree, worst block
+jitter 0,0444 s, predicted 0,2921 s — sat at `jitter / predicted = 0,1520`, while `q / 2 =
+0,1509`. The tree the half-width was calibrated on lay within eight parts in a thousand of the
+point where band and jitter are the same size, and that is where the published minimum of 0,1471 s
+comes from: it is that act's jitter divided by `q`, not a property of the scanner. Today's mean is
+0,5736, which is 3,77× the condition `q` was read in — same scanner, same machine, a different
+act.
+
+So `publicable` stops being a figure a benchmark hands to a quote and becomes a reading the quote
+has to take itself. That is the next order, already written: `prediccion-batch-8.json` asks
+whether the floor can be sampled **inside** the act that quotes — one subject, its own nine
+blocks, its own `jitter / predicted` — refusing to publish when that ratio does not stay under
+`q`. The point is the cost: the gate would then be paid in the act instead of in a second act
+apart from it, which is the only way a quote can carry its own resolution.
+
+The batch is one command, and it re-derives every figure above rather than transcribing it:
+
+```bash
+PYTHONPATH=src:bench python bench/ruido.py --dir /tmp/censo7 --artefacto
+```
+
+It writes `fuera-de-dominio-7.json`: the five subjects with their pins, their ninety readings
+each, the noise of every block, the verdicts against the frozen prediction and the comparison of
+scales. Every cell of both tables above is read from that file by the test suite, so a figure that
+stops matching the artifact fails CI instead of ageing quietly.
 
 ## Fixtures census, recomputed by the test suite
 

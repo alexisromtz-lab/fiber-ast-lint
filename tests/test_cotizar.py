@@ -15,7 +15,9 @@ missing instead.
 """
 import json
 import math
+import subprocess
 import sys
+import tarfile
 from pathlib import Path
 
 import pytest
@@ -156,3 +158,30 @@ def test_la_cli_devuelve_el_rc_del_precio(tmp_path):
     assert doc["tiempo"]["estado"] == "NO_MEDIDO"
     assert doc["sujeto"]["ficheros"] == doc["conteos"]["files"]
     assert doc["sujeto"]["manifiesto_sha256"] == cotizar._manifiesto(RAIZ / "src" / "fiber_ast_lint")[0]
+
+
+def test_el_manifiesto_citado_se_recompone_desde_git_y_no_desde_el_disco(tmp_path):
+    """The quoted tree is the tree the repository ships, read from the commit.
+
+    ``cotizacion.sujeto.manifiesto_sha256`` was verified until now by recomputing
+    the digest over the worktree -- the same object only while nobody edits
+    ``src/``. Reading it from ``git archive HEAD`` makes the commit the subject: a
+    quote whose tree moved under it fails here instead of quietly describing a
+    different tree. A future edit to ``src/fiber_ast_lint`` must therefore re-measure
+    the quote in the same act, which is the rule this test exists to enforce.
+    """
+    tar = tmp_path / "arbol.tar"
+    p = subprocess.run(["git", "-C", str(RAIZ), "archive", "--format=tar",
+                        "-o", str(tar), "HEAD", "src/fiber_ast_lint"],
+                       capture_output=True, text=True)
+    if p.returncode != 0:
+        pytest.skip(f"git no disponible para leer el commit: {p.stderr.strip()[:200]}")
+    (tmp_path / "x").mkdir()
+    with tarfile.open(tar) as tf:
+        tf.extractall(tmp_path / "x")
+    digest, bytes_py, ficheros = cotizar._manifiesto(tmp_path / "x" / "src" / "fiber_ast_lint")
+    arbol = json.loads((RAIZ / "fuera-de-dominio-6.json")
+                       .read_text(encoding="utf-8"))["cotizacion"]["arbol"]
+    assert digest == arbol["manifiesto_sha256"]
+    assert bytes_py == arbol["bytes_py"]
+    assert ficheros == arbol["ficheros"]

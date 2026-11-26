@@ -1182,3 +1182,233 @@ def test_los_cinco_sujetos_del_lote_7_se_eligen_por_la_regresora():
         assert s["sha256"] == r["sha256"], s["package"]
         assert s["bytes_py"] == r["bytes_py"], s["package"]
         assert s["predicho_s"] == round(m["a"] + m["b"] * r["bytes_py"], 4), s["package"]
+
+
+# --- Lote 7: el piso de ruido no es una constante, es una proporcion ---------
+#
+# El lote 6 dejo la publicabilidad calibrada sobre un arbol, y un bloque de esa
+# misma sesion ya la habia vencido. El lote 7 la midio en cinco sujetos con el
+# mismo protocolo. Estas pruebas no cronometran nada: recomponen de las 450
+# lecturas el jitter de cada bloque y de cada sujeto, la semianchura, la
+# condicion `publicable` y el minimo publicable, y sostienen por separado que el
+# ruido crece 75 veces mientras los bytes crecen 2 940.
+SEPTIMO_ARTE = json.loads((RAIZ / "fuera-de-dominio-7.json").read_text(encoding="utf-8"))
+OCTAVO = RAIZ / "prediccion-batch-8.json"
+SECCION_7 = "### The instrument's noise floor, per subject"
+Q7 = SEXTO["banda"]["codigo"]["q"]
+
+
+def _tabla_7(encabezado):
+    lineas = README[README.index(SECCION_7):].splitlines()
+    inicio = next(i for i, l in enumerate(lineas) if l.startswith(encabezado))
+    filas = []
+    for linea in lineas[inicio + 1:]:
+        if not linea.startswith("|"):
+            break
+        celdas = [c.strip().replace("**", "").replace("`", "")
+                  for c in linea.strip().strip("|").split("|")]
+        if all(set(c) <= set("-: ") for c in celdas):
+            continue
+        filas.append(celdas)
+    return filas
+
+
+def _bloques_7(sujeto):
+    """El jitter de un bloque es su peor lectura menos la mejor: no se promedia."""
+    fuera = []
+    for i, b in enumerate(sujeto["bloques"], start=1):
+        lecturas = b["lecturas"]
+        assert len(lecturas) == 10, (sujeto["package"], i)
+        fuera.append({
+            "bloque": i,
+            "min_s": min(lecturas),
+            "p50_s": round(statistics.median(lecturas), 4),
+            "max_s": max(lecturas),
+            "jitter_s": round(max(lecturas) - min(lecturas), 4),
+        })
+    return fuera
+
+
+def _todas_7(sujeto):
+    return [x for b in sujeto["bloques"] for x in b["lecturas"]]
+
+
+def test_el_pin_del_lote_7_es_la_orden_que_viaja():
+    assert SEPTIMO_ARTE["lote"] == 7
+    assert SEPTIMO_ARTE["prediction"]["archivo"] == "prediccion-batch-7.json"
+    assert SEPTIMO_ARTE["prediction"]["sha256"] == _sha(RAIZ / "prediccion-batch-7.json")
+    assert re.fullmatch(r"[0-9a-f]{40}", SEPTIMO_ARTE["prediction"]["git_blob"])
+    assert SEPTIMO_ARTE["schema"] == "fiber-ast-lint/fuera-de-dominio/1"
+    assert SEPTIMO_ARTE["prediction"]["declared_before_computation"] is True
+
+
+def test_las_lecturas_del_lote_7_recomponen_su_jitter_y_su_banda():
+    assert len(SEPTIMO_ARTE["sujetos"]) == 5
+    for s in SEPTIMO_ARTE["sujetos"]:
+        bloques = _bloques_7(s)
+        assert [b["jitter_s"] for b in bloques] == [b["jitter_s"] for b in s["bloques"]], s["package"]
+        assert [b["min_s"] for b in bloques] == [b["min_s"] for b in s["bloques"]], s["package"]
+        assert [b["p50_s"] for b in bloques] == [b["p50_s"] for b in s["bloques"]], s["package"]
+        assert [b["max_s"] for b in bloques] == [b["max_s"] for b in s["bloques"]], s["package"]
+
+        jitters = [b["jitter_s"] for b in bloques]
+        assert s["jitter_s"] == max(jitters), s["package"]
+        assert s["jitter_min_s"] == min(jitters), s["package"]
+        assert s["jitter_p50_s"] == round(statistics.median(jitters), 4), s["package"]
+        assert s["p50_min_s"] == min(b["p50_s"] for b in bloques), s["package"]
+        assert s["p50_max_s"] == max(b["p50_s"] for b in bloques), s["package"]
+        assert s["dispersion"] == round(max(b["max_s"] for b in bloques)
+                                        / min(b["min_s"] for b in bloques), 4), s["package"]
+
+        # La regla del lote 7, recompuesta: la semianchura relativa se compara
+        # contra el peor jitter del sujeto, y eso decide `publicable`.
+        assert s["q"] == Q7, s["package"]
+        assert s["semianchura_s"] == round(s["predicho_s"] * Q7, 4), s["package"]
+        assert s["jitter_relativo"] == round(s["jitter_s"] / s["predicho_s"], 4), s["package"]
+        assert s["publicable"] is (s["semianchura_s"] > s["jitter_s"]), s["package"]
+        assert s["minimo_publicable_s"] == round(s["jitter_s"] / Q7, 4), s["package"]
+        assert s["n_bloques"] * 10 == s["relojes"] == len(_todas_7(s)), s["package"]
+
+
+def test_ningun_sujeto_del_lote_7_es_publicable():
+    """El titular del lote: cero de cinco, y por que cero y no casi."""
+    assert SEPTIMO_ARTE["predictions_summary"]["publicables"] == []
+    assert SEPTIMO_ARTE["predictions_summary"]["sobreviven"] == ["J1"]
+    assert sorted(SEPTIMO_ARTE["predictions_summary"]["caen"]) == ["J2", "J3"]
+    for s in SEPTIMO_ARTE["sujetos"]:
+        assert s["publicable"] is False, s["package"]
+        assert s["jitter_relativo"] > Q7, s["package"]
+        assert s["semianchura_s"] < s["jitter_s"], s["package"]
+    # La negativa mas estrecha es el sujeto mayor, no el menor: el ruido no
+    # escala con los bytes.
+    estrecho = min(SEPTIMO_ARTE["sujetos"], key=lambda s: s["jitter_relativo"])
+    ancho = max(SEPTIMO_ARTE["sujetos"], key=lambda s: s["jitter_relativo"])
+    assert estrecho["package"] != ancho["package"]
+    assert estrecho["bytes_py"] > ancho["bytes_py"]
+
+
+def test_los_veredictos_del_lote_7_se_recomponen_de_las_lecturas():
+    sujetos = SEPTIMO_ARTE["sujetos"]
+    menor = min(sujetos, key=lambda s: s["bytes_py"])
+    veredictos = {v["id"]: v for v in SEPTIMO_ARTE["veredictos"]}
+    assert veredictos["J1"]["sujeto"] == f"{menor['package']}/{menor['scope']}"
+    assert veredictos["J1"]["medido"] == menor["jitter_relativo"]
+    assert veredictos["J1"]["sobrevive"] is (menor["jitter_relativo"] > Q7)
+    j2 = [s for s in sujetos if f"{s['package']}/{s['scope']}" in veredictos["J2"]["sujetos"]]
+    assert len(j2) == 2
+    assert veredictos["J2"]["medido"] == {f"{s['package']}/{s['scope']}": s["jitter_relativo"] for s in j2}
+    assert veredictos["J2"]["sobrevive"] is all(s["jitter_relativo"] < 0.05 for s in j2)
+    j3 = veredictos["J3"]["medido"]
+    assert j3 == {f"{s['package']}/{s['scope']}": s["jitter_p50_s"] for s in sujetos}
+    dentro = [0.003 <= s["jitter_p50_s"] <= 0.05 for s in sujetos]
+    assert veredictos["J3"]["sobrevive"] is all(dentro)
+    assert [v["id"] for v in SEPTIMO_ARTE["veredictos"]] == [p["id"] for p in SEPTIMO["predictions"]]
+
+
+def test_la_escala_del_lote_7_separa_el_piso_de_la_proporcion():
+    sujetos = SEPTIMO_ARTE["sujetos"]
+    escala = SEPTIMO_ARTE["escala"]
+    jitters = [s["jitter_s"] for s in sujetos]
+    bytes_ = [s["bytes_py"] for s in sujetos]
+    assert escala["dispersion_jitter"] == round(max(jitters) / min(jitters), 4)
+    assert escala["dispersion_bytes"] == round(max(bytes_) / min(bytes_), 1)
+    # El argumento entero vive en este cociente: si el ruido fuera proporcion al
+    # tamano, valdria 1.
+    assert round(escala["dispersion_bytes"] / escala["dispersion_jitter"], 1) == 39.0
+    por_mb = {}
+    for s in sujetos:
+        assert escala["jitter_por_megabyte_s"][s["package"]] == round(s["jitter_s"] / (s["bytes_py"] / 1e6), 4)
+        assert escala["jitter_relativo"][s["package"]] == s["jitter_relativo"]
+        por_mb[s["package"]] = escala["jitter_por_megabyte_s"][s["package"]]
+    assert round(max(por_mb.values()) / min(por_mb.values()), 1) == 53.8
+
+
+def test_el_costo_del_lote_7_se_suma_de_sus_partes():
+    sujetos = SEPTIMO_ARTE["sujetos"]
+    cost = SEPTIMO_ARTE["cost"]
+    assert cost["clones_externos"] == 0
+    assert cost["escrituras_en_platino_labs"] == 0
+    assert cost["sujetos"] == len(sujetos) == 5
+    assert cost["relojes_por_sujeto"] == 90
+    assert cost["relojes_totales"] == sum(len(_todas_7(s)) for s in sujetos) == 450
+    assert cost["segundos_de_pared"] == round(sum(s["segundos_de_pared"] for s in sujetos), 1)
+
+
+def test_la_tabla_del_lote_7_es_el_artefacto_celda_a_celda():
+    filas = _tabla_7("| package | scanned bytes |")
+    assert len(filas) == 5
+    por_nombre = {s["package"]: s for s in SEPTIMO_ARTE["sujetos"]}
+    for fila in filas:
+        s = por_nombre[fila[0]]
+        assert _num(fila[1]) == s["bytes_py"], fila[0]
+        assert _coma(s["predicho_s"]) == fila[2], fila[0]
+        assert _coma(s["jitter_s"]) == fila[3], fila[0]
+        assert _coma(s["semianchura_s"]) == fila[4], fila[0]
+        assert _coma(s["jitter_relativo"]) == fila[5], fila[0]
+        assert fila[6] == ("yes" if s["publicable"] else "no"), fila[0]
+
+
+def test_la_tabla_de_las_lecturas_del_lote_7_es_el_artefacto():
+    filas = _tabla_7("| package | best of 90 |")
+    assert len(filas) == 5
+    por_nombre = {s["package"]: s for s in SEPTIMO_ARTE["sujetos"]}
+    for fila in filas:
+        s = por_nombre[fila[0]]
+        todas = _todas_7(s)
+        mejor = min(todas)
+        assert _coma(mejor) == fila[1], fila[0]
+        assert _coma(statistics.median(todas)) == fila[2], fila[0]
+        assert _coma(max(todas)) == fila[3], fila[0]
+        assert _coma(max(todas) / mejor) == fila[4], fila[0]
+        minimos = [min(b["lecturas"]) for b in s["bloques"]]
+        assert _coma(max(minimos) / min(minimos)) == fila[5], fila[0]
+        assert _num(fila[6].split("/")[0]) == sum(1 for x in todas if x > 2 * mejor), fila[0]
+
+
+def test_el_lote_7_publica_el_cociente_y_no_un_promedio_de_ventaja():
+    """La cifra que cierra el argumento: el minimo publicable del lote 6 era su
+    propio jitter dividido por q, no una propiedad del escaner."""
+    jitter6 = SEXTO["reloj_del_instrumento"]["jitter_s"]
+    predicho6 = SEXTO["cotizacion"]["tiempo"]["predicho_s"]
+    condicion6 = round(jitter6 / predicho6, 4)
+    assert condicion6 == 0.1520
+    assert abs(condicion6 - Q7 / 2) < 0.002
+    assert SEXTO["reloj_del_instrumento"]["minimo_publicable_s"] == round(jitter6 / Q7, 4)
+    media = round(sum(s["jitter_relativo"] for s in SEPTIMO_ARTE["sujetos"]) / 5, 4)
+    assert media == 0.5736
+    assert round(media / condicion6, 2) == 3.77
+
+
+def test_la_orden_del_lote_8_esta_escrita_antes_de_su_acto():
+    octavo = json.loads(OCTAVO.read_text(encoding="utf-8"))
+    assert octavo["declared_before_computation"] is True
+    assert octavo["batch"] == 8
+    assert len(octavo["predictions"]) == 3
+    for p in octavo["predictions"]:
+        assert p["falsifier"].strip(), p["id"]
+        assert p["cota_error"].strip(), p["id"]
+    assert octavo["cost"]["escrituras_en_platino_labs"] == 0
+    assert octavo["cost"]["clones_externos"] == 0
+    assert octavo["cost"]["sujetos"] == 1 and octavo["cost"]["actos"] == 2
+    assert octavo["cost"]["relojes_nuevos"] == 90
+    # El acto A es el que el lote 7 ya midio sobre pyflakes: mismo sujeto, mismo
+    # jitter, sin volver a cronometrar. Si el pin cambia, cambia el sujeto.
+    pyflakes = next(s for s in SEPTIMO_ARTE["sujetos"] if s["package"] == "pyflakes")
+    assert f"{pyflakes['jitter_s']:.4f}".replace(".", ",") in octavo["method"]["acto_a"]
+    assert f"{pyflakes['predicho_s']:.4f}".replace(".", ",") in octavo["method"]["acto_a"]
+    assert f"{pyflakes['jitter_relativo']:.4f}".replace(".", ",") in octavo["method"]["sujeto"]
+
+
+def test_los_multiplos_que_publica_el_texto_se_recomponen():
+    """Cada 'veces' de la prosa del lote 7 es un cociente del artefacto."""
+    sujetos = {s["package"]: s for s in SEPTIMO_ARTE["sujetos"]}
+    rel = {k: v["jitter_relativo"] for k, v in sujetos.items()}
+    assert round(max(rel.values()) / min(rel.values()), 2) == 2.39          # dispersion de jitter/predicho
+    assert round(rel["setuptools"] / Q7, 2) == 2.70                        # la mas ancha, sobre q
+    assert round(rel["pygments"] / Q7, 2) == 1.13                          # la mas estrecha, sobre q
+    assert round(rel["setuptools"] / 0.05, 1) == 16.3                      # J2 contra su umbral
+    assert round(rel["pygments"] / 0.05, 1) == 6.8
+    sobre_techo = sorted(round(s["jitter_p50_s"] / 0.05, 1)
+                         for s in SEPTIMO_ARTE["sujetos"] if s["jitter_p50_s"] > 0.05)
+    assert sobre_techo == [1.4, 2.6, 7.1, 21.7]                                 # J3 contra su techo
+    assert round(max(rel.values()) / (Q7 / 2), 2) == 5.41                  # media sobre q/2, sin promedio
