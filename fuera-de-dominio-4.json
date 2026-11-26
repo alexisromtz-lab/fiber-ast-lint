@@ -1104,6 +1104,7 @@
    "version": "0.9.5",
    "scope": "wcwidth",
    "sha256_medido": "ef205150ff317032d633de2d8ca26d03dc8d5ba6a00294f6acfd1d0cfe1365d6",
+   "sha256": "ef205150ff317032d633de2d8ca26d03dc8d5ba6a00294f6acfd1d0cfe1365d6",
    "files": 52,
    "stores": 6,
    "pierde": 0,
@@ -1139,7 +1140,8 @@
    ],
    "sites": 0,
    "groups": 0,
-   "species": {}
+   "species": {},
+   "lote": 4
   },
   {
    "package": "sqlparse",
@@ -1148,6 +1150,7 @@
    "version": "0.6.1",
    "scope": "sqlparse",
    "sha256_medido": "3be5a72d04c873d690d7c6dedd33d6fae2ef82759881ceec02fc2efd0cba564f",
+   "sha256": "3be5a72d04c873d690d7c6dedd33d6fae2ef82759881ceec02fc2efd0cba564f",
    "files": 21,
    "stores": 3,
    "pierde": 0,
@@ -1183,7 +1186,8 @@
    ],
    "sites": 0,
    "groups": 0,
-   "species": {}
+   "species": {},
+   "lote": 4
   },
   {
    "package": "pyflakes",
@@ -1192,6 +1196,7 @@
    "version": "4.1.0",
    "scope": "pyflakes",
    "sha256_medido": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+   "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
    "files": 23,
    "stores": 0,
    "pierde": 0,
@@ -1227,7 +1232,8 @@
    ],
    "sites": 0,
    "groups": 0,
-   "species": {}
+   "species": {},
+   "lote": 4
   },
   {
    "package": "docutils",
@@ -1236,6 +1242,7 @@
    "version": "0.23",
    "scope": "docutils",
    "sha256_medido": "25d013af9bf23bc1c7b2b093dff4208166c53a94786c9e447808335ef1185fea",
+   "sha256": "25d013af9bf23bc1c7b2b093dff4208166c53a94786c9e447808335ef1185fea",
    "files": 129,
    "stores": 32,
    "pierde": 3,
@@ -1273,7 +1280,8 @@
    "groups": 3,
    "species": {
     "PROYECCION_VISIBLE": 3
-   }
+   },
+   "lote": 4
   },
   {
    "package": "setuptools",
@@ -1282,6 +1290,7 @@
    "version": "84.2.1",
    "scope": "setuptools",
    "sha256_medido": "ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2",
+   "sha256": "ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2",
    "files": 227,
    "stores": 61,
    "pierde": 1,
@@ -1320,7 +1329,8 @@
    "species": {
     "PROYECCION_ARRIBA_CON_PERDIDA": 5,
     "PROYECCION_VISIBLE": 2
-   }
+   },
+   "lote": 4
   }
  ],
  "arranque_vacio": {
@@ -1342,5 +1352,13 @@
    0.1311,
    0.1227
   ]
+ },
+ "defect_found": {
+  "where": "fuera-de-dominio-4.json rows 16-20 (wcwidth, sqlparse, pyflakes, docutils, setuptools)",
+  "what": "las cinco filas nuevas se publicaron con sha256_medido y sin sha256. replay_censo compara el pin, no la medicion, asi que esas cinco filas no se podian re-leer: KeyError en la primera.",
+  "why_it_matters": "una fila que un tercero no puede re-leer no es una fila: es una transcripcion. El lote 4 declaro 20 filas y solo 15 eran verificables por el lector que el propio paquete publica.",
+  "found_by": "correr el lector del paquete sobre el artefacto del lote 4 (lote 5, control P1), no por revisar el archivo.",
+  "fix": "cada fila nueva publica sha256 igual a su sha256_medido y su lote; el replay da 20 de 20 identicos.",
+  "resolved_in": "lote 5"
  }
 }

@@ -11,6 +11,7 @@ files. What they cannot check is the measurement itself -- that needs the wheels
 and `bench/replay_censo.py --censo fuera-de-dominio.json` is the reader for it.
 """
 import json
+import math
 import re
 import statistics
 from pathlib import Path
@@ -692,3 +693,176 @@ def test_el_lote_4_no_abre_un_esquema_paralelo():
         assert sum(r["species"].values()) == r["sites"], r["package"]
         assert r["sites"] == r["candidates"], r["package"]
         assert len(r["wall_muestras"]) == len(r["cpu_muestras"]) == 5, r["package"]
+
+
+# --- Lote 5: la cotizacion que no da un numero -------------------------------
+#
+# El lote 4 dejo la factura en conteos y el reloj al lado. El paso obvio es
+# convertir ese reloj en precio; lo que el lote 5 entrega son conteos, una banda
+# con cobertura declarada y una negativa. Estas pruebas separan las tres cosas y
+# recomputan cada cifra que la seccion publica.
+QUINTO = json.loads((RAIZ / "fuera-de-dominio-5.json").read_text(encoding="utf-8"))
+PREDICCION_5 = RAIZ / "prediccion-batch-5.json"
+SECCION_5 = "### The quote that refuses to give a number"
+
+
+def test_el_pin_del_lote_5_es_el_archivo_que_viaja():
+    assert QUINTO["prediction"]["sha256"] == _sha(PREDICCION_5)
+    declarado = json.loads(PREDICCION_5.read_text(encoding="utf-8"))
+    assert declarado["declared_before_computation"] is True
+    assert len(declarado["predictions"]) == len(QUINTO["predictions"]) == 5
+
+
+def test_el_lote_5_repara_lo_que_su_control_encontro():
+    # El defecto no lo encontro una lectura: lo encontro correr el control. Cinco
+    # filas del lote 4 publicaban la medicion donde el contrato pide el pin.
+    defecto = QUINTO["defect_found"]
+    nombrados = {"wcwidth", "sqlparse", "pyflakes", "docutils", "setuptools"}
+    for paquete in nombrados:
+        assert paquete in defecto["where"], paquete
+    assert "sha256_medido" in defecto["what"] and defecto["resolved_in"] == "lote 5"
+    for r in CUARTO["rows"]:
+        # Un lector de terceros compara `sha256`; sin el, la fila es una trascripcion.
+        assert HEX64.match(r["sha256"]), r["package"]
+        if r["package"] in nombrados:
+            assert r["sha256"] == r["sha256_medido"], r["package"]
+            assert r["lote"] == 4, r["package"]
+    assert QUINTO["control"]["filas_identicas"] == QUINTO["control"]["filas"] == len(CUARTO["rows"])
+    assert QUINTO["control"]["rc"] == 0
+
+
+def test_la_banda_conforme_es_el_cuantil_que_declara():
+    residuos = _loo(_conocidos(), "cpu_min")
+    indice = math.ceil((len(residuos) + 1) * (1 - QUINTO["banda"]["calibracion"]["alfa"])) - 1
+    cal = QUINTO["banda"]["calibracion"]
+    assert cal["filas"] == len(residuos) == 15
+    assert cal["cuantil_indice"] == indice == 12
+    assert cal["q"] == round(residuos[indice], 4)
+    assert cal["max_residuo"] == round(residuos[-1], 4)
+    assert cal["residuos"] == [round(x, 4) for x in residuos]
+    # Lo que hace que la banda sea una banda y no el peor caso: el cuantil no es
+    # el maximo, y el maximo es un solo sujeto.
+    assert cal["q"] < cal["max_residuo"]
+    assert cal["q"] < 0.50
+
+
+def test_la_cobertura_medida_es_la_que_el_alfa_promete():
+    conocidos = _conocidos()
+    a, b, _ = _modelo(conocidos, "bytes", "cpu_min")
+    q = QUINTO["banda"]["calibracion"]["q"]
+    cobertura = QUINTO["banda"]["cobertura_retencion"]
+    fuera = []
+    for fila in cobertura["filas"]:
+        r = next(x for x in CUARTO["rows"] if x["package"] == fila["package"])
+        predicho = a + b * r["bytes"]
+        error = abs(r["cpu_min"] - predicho) / predicho
+        assert fila["bytes"] == r["bytes"], fila["package"]
+        assert fila["predicho"] == round(predicho, 4), fila["package"]
+        assert fila["error_relativo"] == round(error, 4), fila["package"]
+        assert fila["dentro"] is (error <= q), fila["package"]
+        if not fila["dentro"]:
+            fuera.append(fila["package"])
+    assert cobertura["previstos"] == len(cobertura["filas"]) == 5
+    assert cobertura["dentro"] == sum(1 for f in cobertura["filas"] if f["dentro"]) == 4
+    assert cobertura["dentro"] >= 3
+    # La que cae fuera es el sujeto que el lote 4 ya habia nombrado como falla del
+    # regresor: la banda vale para sujetos como los de calibracion, y lo dice.
+    assert fuera == ["docutils"]
+
+
+def test_el_lote_5_no_cotiza_tiempo_de_un_arbol_en_disco():
+    cot = QUINTO["cotizacion"]
+    assert cot["tiempo"]["estado"] == "NO_MEDIDO"
+    assert cot["tiempo"]["que_falta"]
+    assert cot["precio"]["estado"] == "NO_COTIZADO"
+    assert HEX64.match(cot["sujeto"]["manifiesto_sha256"])
+    # Los conteos si son del sujeto: cierran entre si, que es lo unico que una
+    # cotizacion puede afirmar sin un modelo.
+    c = cot["conteos"]
+    assert sum(c[k] for k in CUBETAS) == c["stores"]
+    assert c["candidates"] == cot["unidades_facturables"]["sitios"]
+    assert cot["unidades_facturables"]["claves"] == c["column_loci"]
+    assert cot["unidades_facturables"]["ficheros"] == c["files"]
+    assert cot["reloj"]["determinista"] is True
+    assert cot["reloj"]["cpu_min"] > 0 and cot["reloj"]["wall_min"] > 0
+
+
+def test_la_aritmetica_de_la_tarifa_de_ejemplo_es_una_suma():
+    ejemplo = json.loads((RAIZ / "tarifa.ejemplo.json").read_text(encoding="utf-8"))
+    assert ejemplo["firmada"] is False
+    aritmetica = QUINTO["tarifa_de_ejemplo"]["aritmetica_comprobada"]
+    assert QUINTO["tarifa_de_ejemplo"]["firmada"] is False
+    assert aritmetica["estado"] == "COTIZADO"
+    assert aritmetica["total"] == sum(x["subtotal"] for x in aritmetica["detalle"])
+    for x in aritmetica["detalle"]:
+        assert x["subtotal"] == x["conteo"] * x["coeficiente"], x["unidad"]
+        assert x["coeficiente"] == ejemplo["coeficientes"][x["unidad"]], x["unidad"]
+    # El total del archivo no se teclea: sale de la misma funcion que lo emitiria
+    # con una tarifa firmada.
+    assert aritmetica["total"] == 4600
+
+
+def test_las_cinco_predicciones_del_lote_5_se_verifican_contra_la_medicion():
+    v = _veredictos(QUINTO)
+    q = QUINTO["banda"]["calibracion"]["q"]
+    dentro = QUINTO["banda"]["cobertura_retencion"]["dentro"]
+    assert v["P1"]["verdict"] == "SOBREVIVE" and v["P1"]["medido"]["filas_identicas"] == "20 de 20"
+    # P2 pedia una banda de medio punto; se midio mas estrecha. La prediccion era
+    # pesimista, no el instrumento.
+    assert v["P2"]["verdict"] == "REFUTADA" and q < v["P2"]["banda"]["q_min"]
+    assert v["P3"]["verdict"] == "SOBREVIVE" and dentro >= 3
+    assert v["P4"]["verdict"] == "SOBREVIVE"
+    assert v["P4"]["medido"]["con_tarifa_firmada"] == "COTIZADO"
+    assert v["P4"]["medido"]["total"] == 4600
+    assert v["P4"]["medido"]["sin_tarifa"] == "NO_COTIZADO"
+    # P5 tenia dos mitades y solo una se puede puntuar.
+    assert v["P5"]["verdict"] == "NO_MEDIDO"
+    assert QUINTO["predictions_summary"]["sobrevive"] == 3
+    assert QUINTO["predictions_summary"]["refutada"] == 1
+    assert QUINTO["predictions_summary"]["no_medido"] == 1
+
+
+def _tabla_5(encabezado):
+    lineas = README[README.index(SECCION_5):].splitlines()
+    inicio = next(i for i, l in enumerate(lineas) if l.startswith(encabezado))
+    filas = []
+    for linea in lineas[inicio + 1:]:
+        if not linea.startswith("|"):
+            break
+        celdas = [c.strip().replace("**", "").replace("`", "")
+                  for c in linea.strip().strip("|").split("|")]
+        if all(set(c) <= set("-: ") for c in celdas):
+            continue
+        filas.append(celdas)
+    return filas
+
+
+def test_la_seccion_del_lote_5_publica_el_archivo():
+    trozo = README[README.index(SECCION_5):]
+    fijos = ("8093a1f2558cf42f", "cpu_min 0,4303 s", "wall_min 0,5071 s",
+             "NO_MEDIDO", "NO_COTIZADO", "4600", "firmada: false",
+             "20 `identico:` lines", "4 of 5")
+    for fijo in fijos:
+        assert fijo in trozo, fijo
+    # Cada celda de la banda sale del artefacto, no de la prosa que la rodea: un
+    # numero publicado dos veces con dos valores es el defecto que este lote mide.
+    cal = QUINTO["banda"]["calibracion"]
+    banda = {f[0]: f[1] for f in _tabla_5("| | value |")}
+    assert banda["q (half-width, relative)"] == f"{cal['q']:.4f}".replace(".", ",")
+    assert banda["max LOO residual"] == f"{cal['max_residuo']:.4f}".replace(".", ",")
+    assert quilates(banda["residuals, sorted"]) == [f"{x:.2f}".replace(".", ",") for x in cal["residuos"]]
+
+
+def quilates(celda):
+    return [x.strip() for x in celda.split("·")]
+
+
+def test_la_tabla_de_cobertura_del_lote_5_es_el_archivo():
+    filas = {f[0]: f for f in _tabla_5("| package | bytes |")}
+    for fila in QUINTO["banda"]["cobertura_retencion"]["filas"]:
+        publicada = filas[fila["package"]]
+        assert _num(publicada[1]) == fila["bytes"], fila["package"]
+        assert publicada[2] == f"{fila['cpu_min']:.4f}".replace(".", ","), fila["package"]
+        assert publicada[3] == f"{fila['predicho']:.4f}".replace(".", ","), fila["package"]
+        assert publicada[4] == f"{fila['error_relativo']:.4f}".replace(".", ","), fila["package"]
+        assert publicada[5] == ("yes" if fila["dentro"] else "no"), fila["package"]

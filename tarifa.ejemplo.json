@@ -1,0 +1,10 @@
+{
+ "firmada": false,
+ "moneda": "MXN",
+ "nota": "coeficientes de EJEMPLO, sin firmar: sirven para probar la aritmetica y para que el dueno los edite. Mientras firmada no sea true, el cotizador publica NO_COTIZADO y no multiplica nada.",
+ "coeficientes": {
+  "sitios": 1500,
+  "claves": 800,
+  "ficheros": 0
+ }
+}

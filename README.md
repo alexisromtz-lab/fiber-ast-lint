@@ -672,6 +672,78 @@ defects.
 wild. That is what the seven-row census and the out-of-sample rows measure — and neither of them is
 recall. `tests/test_kill_matrix.py` recomputes the matrix offline on the five shapes.
 
+### The quote that refuses to give a number
+
+Batch 4 ended with the invoice denominated in counts and a clock published beside it. The obvious
+next step is to turn that clock into a price, and the obvious way to do it is to hand a client a
+number. This batch hands over three things instead, and the third one is a refusal.
+
+**The control found the defect, not the reading of the artifact.** Re-running
+`bench/replay_censo.py` over the batch-4 file died with `KeyError: 'sha256'` on the fifth row added
+last batch. Five rows — `wcwidth`, `sqlparse`, `pyflakes`, `docutils`, `setuptools` — published
+`sha256_medido`, a *measurement*, where the file's contract asks for `sha256`, a *pin*: the thing a
+reader compares against. They were transcriptions, not rows, and a third party could not re-read
+them. Repaired by pointing each pin at its own measurement and recording the repair in the
+artifact's `defect_found` block. The replay then returned **20 `identico:` lines, rc 0**, up from
+15 rows that were actually legible. A control that only ever runs against foreign artifacts finds
+only foreign defects.
+
+**The band is conformal, and it is narrower than the prediction said.** Fifteen calibration rows,
+leave-one-out residuals, quantile at index `ceil((n+1)(1-α))-1 = 12` of 15 with `α = 0,2`:
+
+| | value |
+|---|---:|
+| `q` (half-width, relative) | **0,4258** |
+| max LOO residual | 0,8147 |
+| residuals, sorted | 0,02 · 0,04 · 0,04 · 0,05 · 0,09 · 0,12 · 0,14 · 0,17 · 0,27 · 0,28 · 0,30 · 0,33 · **0,43** · 0,46 · 0,81 |
+
+The prediction asked for `q ≥ 0,50` and this is 0,4258, so **P2 is refuted**. The reason is
+structural, not lucky: the quantile lands three positions before the maximum, because the maximum
+is one subject (`pygments`, 0,8147) and the quantile does not need it. A band sized to the worst
+subject in the calibration set would have been 0,81 wide — the pessimistic prediction was what you
+get by confusing a maximum with a quantile.
+
+Coverage on the five held-out rows is **4 of 5**, exactly the `1 - α` the method promises:
+
+| package | bytes | `cpu_min` | predicted | rel. error | inside |
+|---|---:|---:|---:|---:|:--:|
+| wcwidth | 329 353 | 2,8333 | 2,8026 | 0,0110 | yes |
+| sqlparse | 51 200 | 0,4919 | 0,5042 | 0,0243 | yes |
+| pyflakes | 66 258 | 0,6791 | 0,6286 | 0,0804 | yes |
+| docutils | 634 701 | 8,8588 | 5,3258 | 0,6634 | **no** |
+| setuptools | 876 263 | 8,2786 | 7,3219 | 0,1307 | yes |
+
+The one that falls outside is `docutils` again — the subject batch 4 already named as a regressor
+failure, 634 701 B and 129 files costing more than a larger artifact. The band holds for subjects
+that look like the calibration set, and this table says out loud when one does not.
+
+**What the instrument will quote, and what it will not.** `bench/cotizar.py` returns counts, a
+manifest digest, its own two clocks and a price:
+
+```
+sujeto          src/fiber_ast_lint   7 files · 55 596 py bytes
+manifiesto      8093a1f2558cf42f…
+conteos         sitios 2 · claves 2 · ficheros 7
+reloj           cpu_min 0,4303 s · wall_min 0,5071 s (3 repetitions, identical counts)
+tiempo          NO_MEDIDO
+precio          NO_COTIZADO        rc 2
+```
+
+`tiempo` is `NO_MEDIDO` because the CPU model was fitted on **artifact bytes** and the subject here
+is a **disk tree**: two different objects under one word, which is the `attrs` defect named in the
+batch-4 section. The instrument says which subject it lacks rather than returning a number from a
+model that never saw one. `precio` is `NO_COTIZADO` because no tariff is shipped with coefficients:
+arithmetic over a coefficient the repository invented would be a price, and a price is not a
+measurement. `tarifa.ejemplo.json` carries `firmada: false` for exactly that reason — the same file
+with `firmada: true` yields `total = 2·1500 + 2·800 + 7·0 = 4600`, computed by the function that
+emits it and never typed by hand. The example exists so the arithmetic is exercised; it is not a
+quotation.
+
+**The line worth keeping:** counts reproduced 15 of 15 across sessions and now replay 20 of 20, so
+they are what a quote is denominated in. Time is a band with a stated coverage and a subject it does
+not cross. The invoice is denominated in work, and the clock is an input to scheduling — that is the
+whole of what this batch certifies.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

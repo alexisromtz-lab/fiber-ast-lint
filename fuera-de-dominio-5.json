@@ -1,0 +1,307 @@
+{
+ "schema": "fiber-ast-lint/fuera-de-dominio/1",
+ "instrument": "fiber-ast-lint",
+ "instrument_version": "0.4.6",
+ "measured_at": "2026-11-25T22:19:50-0600",
+ "measured_by": "bench/cotizar.py + bench/replay_censo.py",
+ "prediction": {
+  "file": "prediccion-batch-5.json",
+  "declared_before_fetch": true,
+  "sha256": "f63e98e9fb89bc5e22c82c3dba531cae01407f0014548a2e8f5f5cf22faeab29",
+  "git_blob": "617cd42c7e19a0230e17858579169ca9c7925ce4",
+  "commit": "8332a26"
+ },
+ "method": {
+  "control": "replay_censo sobre las 20 filas del lote 4: descarga, verifica sha256, extrae, escanea y compara CAMPOS + FIRMA",
+  "banda": "conforme partido sobre los residuos leave-one-out del modelo cpu = a + b*bytes, cuantil en ceil((n+1)(1-alfa))",
+  "cotizacion": "cotizar.py sobre src/fiber_ast_lint: manifiesto, conteos, reloj propio y precio"
+ },
+ "control": {
+  "comando": "python bench/replay_censo.py --censo fuera-de-dominio-4.json",
+  "filas_identicas": 20,
+  "filas": 20,
+  "rc": 0,
+  "reading": "la reparacion del pin que este control encontro dejo las 20 filas legibles; antes eran 15."
+ },
+ "defect_found": {
+  "where": "fuera-de-dominio-4.json rows 16-20 (wcwidth, sqlparse, pyflakes, docutils, setuptools)",
+  "what": "las cinco filas nuevas se publicaron con sha256_medido y sin sha256. replay_censo compara el pin, no la medicion, asi que esas cinco filas no se podian re-leer: KeyError en la primera.",
+  "why_it_matters": "una fila que un tercero no puede re-leer no es una fila: es una transcripcion. El lote 4 declaro 20 filas y solo 15 eran verificables por el lector que el propio paquete publica.",
+  "found_by": "correr el lector del paquete sobre el artefacto del lote 4 (lote 5, control P1), no por revisar el archivo.",
+  "fix": "cada fila nueva publica sha256 igual a su sha256_medido y su lote; el replay da 20 de 20 identicos.",
+  "resolved_in": "lote 5"
+ },
+ "banda": {
+  "modelo": {
+   "a": 0.08108,
+   "b": 8.2633e-06,
+   "reloj": "cpu_min",
+   "sujeto": "artifact bytes (wheel)"
+  },
+  "calibracion": {
+   "filas": 15,
+   "alfa": 0.2,
+   "cuantil_indice": 12,
+   "q": 0.4258,
+   "max_residuo": 0.8147,
+   "residuos": [
+    0.0246,
+    0.0375,
+    0.0378,
+    0.0515,
+    0.0869,
+    0.1205,
+    0.1439,
+    0.1666,
+    0.2705,
+    0.2764,
+    0.2989,
+    0.3287,
+    0.4258,
+    0.4626,
+    0.8147
+   ]
+  },
+  "semicerco_relativo": 0.4258,
+  "intervalo": "predicho * (1 - q) .. predicho * (1 + q)",
+  "cobertura_retencion": {
+   "dentro": 4,
+   "previstos": 5,
+   "alfa_prometido": 0.2,
+   "filas": [
+    {
+     "package": "wcwidth",
+     "bytes": 329353,
+     "cpu_min": 2.8333,
+     "predicho": 2.8026,
+     "error_relativo": 0.011,
+     "dentro": true
+    },
+    {
+     "package": "sqlparse",
+     "bytes": 51200,
+     "cpu_min": 0.4919,
+     "predicho": 0.5042,
+     "error_relativo": 0.0243,
+     "dentro": true
+    },
+    {
+     "package": "pyflakes",
+     "bytes": 66258,
+     "cpu_min": 0.6791,
+     "predicho": 0.6286,
+     "error_relativo": 0.0804,
+     "dentro": true
+    },
+    {
+     "package": "docutils",
+     "bytes": 634701,
+     "cpu_min": 8.8588,
+     "predicho": 5.3258,
+     "error_relativo": 0.6634,
+     "dentro": false
+    },
+    {
+     "package": "setuptools",
+     "bytes": 876263,
+     "cpu_min": 8.2786,
+     "predicho": 7.3219,
+     "error_relativo": 0.1307,
+     "dentro": true
+    }
+   ]
+  },
+  "reading": "el cuantil cae en el indice 12 de 15, no en el maximo: la banda que el metodo sostiene es +/-42.6 %, mas estrecha que el maximo residual 81.5 % y bastante mas ancha que cualquier margen comercial. Con alfa=0,2 promete 4 de 5 y midio 4 de 5."
+ },
+ "cotizacion": {
+  "sujeto": {
+   "arbol": "src/fiber_ast_lint",
+   "manifiesto_sha256": "8093a1f2558cf42f5fc52f111c485a677c4ad3271e0dc89daf82c42a383ba702",
+   "bytes_py": 55596,
+   "ficheros": 7
+  },
+  "conteos": {
+   "files": 7,
+   "stores": 8,
+   "pierde": 0,
+   "candidates": 2,
+   "admitted": 2,
+   "column_loci": 2,
+   "guardadas": 0,
+   "acumulacion": 0,
+   "posicional": 0,
+   "sin_len": 8,
+   "loops": 62,
+   "rc": 1,
+   "rc_certificado": 1,
+   "reconciles": true,
+   "certifica": true
+  },
+  "unidades_facturables": {
+   "sitios": 2,
+   "claves": 2,
+   "ficheros": 7
+  },
+  "reloj": {
+   "wall_min": 0.5071,
+   "cpu_min": 0.4303,
+   "repeticiones": 3,
+   "wall_muestras": [
+    0.5259,
+    0.5071,
+    0.5807
+   ],
+   "cpu_muestras": [
+    0.4434,
+    0.4396,
+    0.4303
+   ],
+   "determinista": true
+  },
+  "tiempo": {
+   "metodo": "conforme partido sobre residuos leave-one-out",
+   "calibracion": {
+    "filas": 15,
+    "alfa": 0.2,
+    "cuantil_indice": 12,
+    "q": 0.4258,
+    "max_residuo": 0.8147
+   },
+   "modelo": {
+    "a": 0.08108,
+    "b": 8.2633e-06,
+    "reloj": "cpu_min",
+    "sujeto": "artifact bytes (wheel)"
+   },
+   "estado": "NO_MEDIDO",
+   "motivo": "el modelo se ajusto sobre bytes de artefacto (wheel); un arbol en disco no es ese sujeto. Aplicarlo aqui seria un segundo sujeto bajo la misma llave (lote 4: attrs, dos subarboles, un bytes).",
+   "que_falta": "ajustar el mismo modelo sobre bytes de codigo escaneado y pre-registrar su error antes de cotizar arboles en disco"
+  },
+  "precio": {
+   "estado": "NO_COTIZADO",
+   "motivo": "la tarifa no esta firmada (firmada != true): un ejemplo no cotiza",
+   "unidades_facturables": {
+    "sitios": 2,
+    "claves": 2,
+    "ficheros": 7
+   }
+  },
+  "con_tarifa_de_ejemplo": {
+   "estado": "NO_COTIZADO",
+   "motivo": "no hay tarifa firmada: el instrumento no inventa coeficientes",
+   "unidades_facturables": {
+    "sitios": 2,
+    "claves": 2,
+    "ficheros": 7
+   }
+  },
+  "repeticiones_identicas": true
+ },
+ "tarifa_de_ejemplo": {
+  "archivo": "tarifa.ejemplo.json",
+  "firmada": false,
+  "coeficientes": {
+   "sitios": 1500,
+   "claves": 800,
+   "ficheros": 0
+  },
+  "aritmetica_comprobada": {
+   "estado": "COTIZADO",
+   "moneda": "MXN",
+   "tarifa_digest": "0d9bda13725fefb9256c96d9858f0a4bc4124c5ad261f79b84cb9057eb210db6",
+   "detalle": [
+    {
+     "unidad": "sitios",
+     "conteo": 2,
+     "coeficiente": 1500,
+     "subtotal": 3000
+    },
+    {
+     "unidad": "claves",
+     "conteo": 2,
+     "coeficiente": 800,
+     "subtotal": 1600
+    },
+    {
+     "unidad": "ficheros",
+     "conteo": 7,
+     "coeficiente": 0,
+     "subtotal": 0
+    }
+   ],
+   "total": 4600
+  },
+  "nota": "los coeficientes del archivo son de ejemplo; la aritmetica se comprobo con la misma funcion y no viaja como precio"
+ },
+ "predictions": [
+  {
+   "id": "P1",
+   "verdict": "SOBREVIVE",
+   "medido": {
+    "filas_identicas": "20 de 20",
+    "rc": 0
+   },
+   "why": "el control no solo paso: encontro un defecto. Cinco filas del lote 4 se publicaron sin pin y el lector moria con KeyError en la primera; reparadas, las 20 se re-leen identicas."
+  },
+  {
+   "id": "P2",
+   "verdict": "REFUTADA",
+   "banda": {
+    "q_min": 0.5
+   },
+   "medido": {
+    "q": 0.4258,
+    "max_residuo": 0.8147
+   },
+   "why": "se predijo una banda de mas del doble y salio +/-42.6 %. La prediccion era pesimista: el cuantil no cae en el maximo, cae tres puestos antes, porque el maximo residual es un solo sujeto y el cuantil no lo necesita."
+  },
+  {
+   "id": "P3",
+   "verdict": "SOBREVIVE",
+   "banda": {
+    "cobertura_min": "3 de 5"
+   },
+   "medido": {
+    "dentro": 4,
+    "previstos": 5
+   },
+   "why": "4 de 5, exactamente lo que alfa=0,2 promete. La unica que cae es docutils, el sujeto que el lote 4 ya habia nombrado como falla del regresor: la banda vale para sujetos como los de calibracion y docutils no lo es."
+  },
+  {
+   "id": "P4",
+   "verdict": "SOBREVIVE",
+   "medido": {
+    "sin_tarifa": "NO_COTIZADO",
+    "ejemplo_sin_firmar": "NO_COTIZADO",
+    "con_tarifa_firmada": "COTIZADO",
+    "total": 4600
+   },
+   "why": "sin tarifa y con un ejemplo sin firmar el estado es NO_COTIZADO; con la tarifa firmada el total es la suma exacta de coeficiente por conteo, sin redondeo intermedio."
+  },
+  {
+   "id": "P5",
+   "verdict": "NO_MEDIDO",
+   "banda": {
+    "semicerco_min": 0.5,
+    "conteos_identicos": "2 de 2"
+   },
+   "medido": {
+    "conteos_identicos": "2 de 2",
+    "banda": "NO_MEDIDO",
+    "manifiesto": "8093a1f2558cf42f"
+   },
+   "why": "la mitad medible se cumple: dos corridas devuelven los mismos conteos y el mismo manifiesto. La otra mitad no se puede puntuar porque el modelo no tiene sujeto para un arbol en disco -- se ajusto sobre bytes de artefacto. Devolver ahi una banda seria aplicar un modelo fuera de su sujeto, el defecto de attrs del lote 4."
+  }
+ ],
+ "predictions_summary": {
+  "sobrevive": 3,
+  "refutada": 1,
+  "no_medido": 1,
+  "reading": "el control paso y encontro el defecto que valia la pena; la banda salio mas estrecha que la prediccion y su cobertura coincide con la prometida; y el instrumento se niega a cotizar tiempo donde el modelo no tiene sujeto. Lo que no se puede hacer manana: cotizar el tiempo de un arbol en disco con este modelo."
+ },
+ "unidad_de_factura": {
+  "hallazgo": "la cotizacion se emite en sitios, claves y ficheros -- los conteos del lote 4, 15 de 15 identicos entre sesiones -- y el reloj se publica al lado como medicion del sujeto, no como prediccion.",
+  "precio": "el instrumento no tiene coeficientes por defecto: sin tarifa firmada el estado es NO_COTIZADO y el rc es 2. La aritmetica es suma(coeficiente * conteo), comprobada con la funcion que la emite.",
+  "que_falta": "un modelo de tiempo con sujeto para arboles en disco (bytes de codigo escaneado, no bytes de artefacto) y su error pre-registrado; y una tarifa firmada, que no es una decision tecnica."
+ }
+}
