@@ -1671,3 +1671,326 @@ def test_la_orden_del_lote_9_esta_escrita_antes_de_su_acto():
     assert c["ratio_min_A_B"] >= l1["umbral"]["dispersion_min_min"]      # 2,10 >= 1,80
     assert round(c["min_B_s"] / b"" if False else (c["min_B_s"] / OCTAVO_ARTE["acto_b"]["jitter_s"]) /
                (c["min_A_s"] / OCTAVO_ARTE["acto_a"]["jitter_s"]), 2) <= 1.30
+
+
+# ---------------------------------------------------------------------------
+# Lote 9. Las tres predicciones congeladas en `prediccion-batch-9.json` cayeron:
+# el cociente que el lote 8 habia nominado como lo que viaja es lo que peor viaja
+# (3,01x contra 2,10x del propio minimo), la ventana tranquila rompe el techo de
+# L2 por tres veces, y L3 no se puede decidir con la formula que su `claim`
+# declara. Estos tests recomponen los cinco actos desde sus 450 lecturas, sostienen
+# los tres veredictos contra la orden, prueban el defecto de L3 por aritmetica con
+# los actos del lote 8, y pinean cada celda de las cuatro tablas y cada cifra de
+# la prosa. El lote 10 queda pre-registrado en el mismo acto.
+NOVENO_ARTE = json.loads((RAIZ / "fuera-de-dominio-9.json").read_text(encoding="utf-8"))
+SECCION_9 = "### Nothing travels but the counts"
+DECIMO = RAIZ / "prediccion-batch-10.json"
+
+
+def _seccion_9():
+    return README[README.index(SECCION_9):README.index("## Fixtures census, recomputed")]
+
+
+def _prosa_9():
+    return " ".join(_seccion_9().split())
+
+
+def _tabla_9(encabezado):
+    lineas = _seccion_9().splitlines()
+    inicio = next(i for i, l in enumerate(lineas) if l.startswith(encabezado))
+    filas = []
+    for linea in lineas[inicio + 1:]:
+        if not linea.startswith("|"):
+            break
+        celdas = [c.strip().replace("**", "").replace("`", "")
+                  for c in linea.strip().strip("|").split("|")]
+        if all(set(c) <= set("-: ") for c in celdas):
+            continue
+        filas.append(celdas)
+    return filas
+
+
+def _acto_9(nombre):
+    return next(a for a in NOVENO_ARTE["actos"] if a["nombre"] == nombre)
+
+
+def test_el_lote_9_es_un_sujeto_y_cinco_actos_sobre_el_mismo_pin():
+    assert NOVENO_ARTE["lote"] == 9
+    assert NOVENO_ARTE["prediction"]["sha256"] == _sha(NOVENO)
+    assert NOVENO_ARTE["prediction"]["declared_before_computation"] is True
+    assert re.fullmatch(r"[0-9a-f]{40}", NOVENO_ARTE["prediction"]["git_blob"])
+    assert NOVENO_ARTE["cost"]["relojes_nuevos"] == 270
+    assert NOVENO_ARTE["cost"]["relojes_reutilizados"] == 180
+    assert NOVENO_ARTE["cost"]["relojes_totales"] == 450
+    assert NOVENO_ARTE["cost"]["escrituras_en_platino_labs"] == 0
+    assert NOVENO_ARTE["cost"]["clones_externos"] == 0
+    actos = NOVENO_ARTE["actos"]
+    assert [a["nombre"] for a in actos] == ["A", "B", "C", "D", "E"]
+    # El mismo pin en los cinco: el sujeto no se movio mientras se median ventanas.
+    assert len({a["sha256"] for a in actos}) == 1
+    assert len({a["bytes_py_pin"] for a in actos}) == 1
+    assert len({a["predicho_s"] for a in actos}) == 1
+    assert len({a["q"] for a in actos}) == 1
+    for acto in actos[2:]:
+        assert acto["reutilizado"] is False
+        assert acto["pin_ok"] is True
+        assert acto["bytes_py"] == acto["bytes_py_pin"]
+        assert acto["lecturas_n"] == 90
+    # A y B no se volvieron a cronometrar: son, lectura a lectura, los del lote 8.
+    for nombre, clave in (("A", "acto_a"), ("B", "acto_b")):
+        assert _acto_9(nombre)["reutilizado"] is True
+        assert [x for b in _acto_9(nombre)["bloques"] for x in b["lecturas"]] == \
+               [x for b in OCTAVO_ARTE[clave]["bloques"] for x in b["lecturas"]]
+    assert _acto_9("A")["sellado_lote_7"] == OCTAVO_ARTE["acto_a"]["sellado_lote_7"]
+
+
+def test_los_cinco_actos_del_lote_9_se_recomponen_de_sus_lecturas():
+    for acto in NOVENO_ARTE["actos"]:
+        assert len(acto["bloques"]) == 9, acto["nombre"]
+        assert all(len(b["lecturas"]) == 10 for b in acto["bloques"]), acto["nombre"]
+        recomputado = _resumen_8(acto)
+        for campo, valor in recomputado.items():
+            assert acto[campo] == valor, (acto["nombre"], campo, acto[campo], valor)
+        assert acto["relojes"] == acto["lecturas_n"] == 90
+
+
+def test_los_veredictos_del_lote_9_son_los_que_la_orden_congelo():
+    orden = json.loads(NOVENO.read_text(encoding="utf-8"))
+    assert [p["id"] for p in orden["predictions"]] == \
+           [v["id"] for v in NOVENO_ARTE["veredictos"]] == ["L1", "L2", "L3"]
+    c = NOVENO_ARTE["comparacion"]
+    # Las dispersiones se rehacen desde los resumenes de los actos, no se heredan.
+    minimos = [a["minimo_s"] for a in NOVENO_ARTE["actos"]]
+    jitters = [a["jitter_s"] for a in NOVENO_ARTE["actos"]]
+    cocientes = [round(a["minimo_s"] / a["jitter_s"], 4) for a in NOVENO_ARTE["actos"]]
+    assert c["min_s"] == minimos and c["jitter_s"] == jitters
+    assert c["min_sobre_jitter"] == cocientes
+    assert c["dispersion"]["min"] == round(max(minimos) / min(minimos), 4) == 2.1019
+    assert c["dispersion"]["jitter"] == round(max(jitters) / min(jitters), 4) == 5.2404
+    assert c["dispersion"]["min_sobre_jitter"] == round(max(cocientes) / min(cocientes), 4)
+    assert c["dispersion"]["k"] == round(max(c["k"]) / min(c["k"]), 4)
+    # L1 cae y ademas dispara su propio falsador: la dispersion del cociente pasa
+    # de 1,50 cuando la orden pedia 1,30, y el minimo se mueve mas que el umbral.
+    l1, l2, l3 = NOVENO_ARTE["veredictos"]
+    assert l1["umbral"] == orden["predictions"][0]["umbral"]
+    assert c["dispersion"]["min_sobre_jitter"] > 1.30
+    assert c["dispersion"]["min"] >= 1.80
+    assert l1["sobrevive"] is False and l1["falsador"] is True
+    # L2 cae por tres veces su techo: la ventana tranquila no tiene techo.
+    assert l2["umbral"] == orden["predictions"][1]["umbral"] == [0.9, 1.4]
+    assert all(x > 2.5 for x in cocientes[2:]), cocientes
+    assert not all(0.90 <= x <= 1.40 for x in cocientes)
+    assert l2["sobrevive"] is False and l2["falsador"] is True
+    # L3 se evalua con la formula que su `claim` declara, y cae.
+    assert l3["umbral"] == orden["predictions"][2]["umbral"] == [0.8, 1.25]
+    assert l3["medido"]["claim"] == c["l3_claim"] == 0.2766
+    assert not 0.80 <= c["l3_claim"] <= 1.25
+    assert l3["sobrevive"] is False and l3["falsador"] is True
+    assert NOVENO_ARTE["predictions_summary"]["caen"] == ["L1", "L2", "L3"]
+    assert NOVENO_ARTE["predictions_summary"]["sobreviven"] == []
+
+
+def test_el_defecto_de_l3_se_prueba_con_la_aritmetica_del_lote_8():
+    """`claim` y `cota_error` no evaluan la misma cantidad, y eso se prueba, no se afirma."""
+    defecto = NOVENO_ARTE["defectos_de_la_orden"][0]
+    assert defecto["id"] == "L3" and defecto["clase"] == "la orden se contradice a si misma"
+    # La dispersion interna de jitter del acto B del lote 8, recompuesta de sus bloques.
+    jit_b = [round(max(b["lecturas"]) - min(b["lecturas"]), 4)
+             for b in OCTAVO_ARTE["acto_b"]["bloques"]]
+    disp_jitter_b = round(max(jit_b) / min(jit_b), 4)
+    assert disp_jitter_b == defecto["probado_con_el_lote_8"]["dispersion_jitter_del_acto_B"]
+    disp_min_8 = round(max(OCTAVO_ARTE["acto_a"]["minimo_s"], OCTAVO_ARTE["acto_b"]["minimo_s"])
+                       / min(OCTAVO_ARTE["acto_a"]["minimo_s"],
+                             OCTAVO_ARTE["acto_b"]["minimo_s"]), 4)
+    assert disp_min_8 == round(defecto["probado_con_el_lote_8"]["dispersion_min"], 4)
+    # La `cota_error` es esta razon, y pasa por el rango congelado.
+    cota = round(disp_jitter_b / disp_min_8, 4)
+    assert cota == defecto["probado_con_el_lote_8"]["cota"] == 1.1797
+    assert 0.80 <= cota <= 1.25
+    # El `claim`, en cambio, promedia max(jitter de bloque) / min(minimo de bloque)
+    # por acto, y no pasa.
+    actos_8 = (OCTAVO_ARTE["acto_a"], OCTAVO_ARTE["acto_b"])
+    por_acto = [max(max(b["lecturas"]) - min(b["lecturas"]) for b in a["bloques"])
+                / min(min(b["lecturas"]) for b in a["bloques"]) for a in actos_8]
+    assert [round(x, 4) for x in por_acto] == [1.005, 0.8716]
+    claim_8 = round(statistics.mean(por_acto) / disp_min_8, 4)
+    assert claim_8 == defecto["probado_con_el_lote_8"]["claim"] == 0.4464
+    assert not 0.80 <= claim_8 <= 1.25
+    # Dos numeros distintos para la misma prediccion: la orden se contradice a si misma.
+    assert abs(cota - claim_8) > 0.70
+    # Y el lote 9 se evalua con el `claim`, que es lo que el rango congela; el otro
+    # numero se publica como cifra descriptiva y no como veredicto.
+    assert NOVENO_ARTE["comparacion"]["l3_claim"] == defecto["medido_ahora"]["claim"]
+    assert NOVENO_ARTE["comparacion"]["l3_cota_media"] == defecto["medido_ahora"]["cota_media"]
+    dentro = NOVENO_ARTE["comparacion"]["dentro"]
+    media_dentro = statistics.mean(d["dispersion_jitter_de_bloque"] for d in dentro)
+    assert round(media_dentro / NOVENO_ARTE["comparacion"]["dispersion"]["min"], 4) == 1.6992
+    assert NOVENO_ARTE["veredictos"][2]["medido"]["cota_media"] == 1.6992
+    assert "se declara" in defecto["que_se_hace"]
+
+
+def test_las_cuatro_tablas_del_lote_9_son_las_de_las_lecturas():
+    actos = NOVENO_ARTE["actos"]
+    c = NOVENO_ARTE["comparacion"]
+    filas = _tabla_9("| act | minimum |")
+    assert len(filas) == 5
+    for i, (fila, acto) in enumerate(zip(filas, actos)):
+        assert fila == [
+            acto["nombre"],
+            _coma(acto["minimo_s"]), _coma(acto["mediana_s"]), _coma(acto["jitter_s"]),
+            _coma(c["min_sobre_jitter"][i]), _coma(c["k"][i]),
+            "yes" if acto["publicable"] else "no",
+        ], (acto["nombre"], fila)
+
+    disp = c["dispersion"]
+    filas = _tabla_9("| quantity |")
+    assert filas == [
+        ["minimum", _coma(disp["min"], 2)],
+        ["worst block jitter", _coma(disp["jitter"], 2)],
+        ["min / jitter", _coma(disp["min_sobre_jitter"], 2)],
+        ["k", _coma(disp["k"], 2)],
+    ]
+
+    filas = _tabla_9("| id |")
+    assert filas == [
+        ["L1", "min / jitter dispersion \u2264 1,30 and min dispersion \u2265 1,80",
+         f"{_coma(disp['min_sobre_jitter'], 2)} and {_coma(disp['min'], 2)}", "falls"],
+        ["L2", "min / jitter in [0,90; 1,40] in all five acts",
+         f"{_coma(min(c['min_sobre_jitter']))} to {_coma(max(c['min_sobre_jitter']))}", "falls"],
+        ["L3", "within-act over between-act ratio in [0,80; 1,25]",
+         _coma(c["l3_claim"]), "falls"],
+    ]
+
+    costes = NOVENO_ARTE["cost"]["coste_compuerta_s"]
+    filas = _tabla_9("| act | gate wall |")
+    assert len(filas) == len(costes) == 3
+    for fila, acto, coste in zip(filas, actos[2:], costes):
+        assert fila == [
+            acto["nombre"],
+            f"{_coma(coste, 1)} s",
+            f"{_coma(coste / 90, 1)} s",
+            str(round(coste / acto["minimo_s"])),
+        ], (acto["nombre"], fila)
+
+
+def test_el_coste_de_la_compuerta_se_mide_y_se_publica():
+    """El punto ciego de A0.12: el corpus medía el ruido del entorno, no lo que cuesta medirlo."""
+    from datetime import datetime
+
+    cost = NOVENO_ARTE["cost"]
+    costes = cost["coste_compuerta_s"]
+    assert len(costes) == 3 and all(x > 0 for x in costes)
+    # El mismo numero viaja dos veces: el resumen y el acto que lo pago. Dos copias
+    # de una cifra divergen si nadie las compara, y aqui las compara un lector.
+    assert costes == [a["coste_compuerta_s"] for a in NOVENO_ARTE["actos"][2:]]
+    for acto, coste in zip(NOVENO_ARTE["actos"][2:], costes):
+        desde = datetime.fromisoformat(acto["ventana"]["inicio"])
+        hasta = datetime.fromisoformat(acto["ventana"]["fin"])
+        # La ventana declarada y el reloj de pared de la compuerta son la misma cosa.
+        assert abs((hasta - desde).total_seconds() - coste) < 1.0, (acto["nombre"], coste)
+    assert cost["coste_compuerta_total_s"] == round(sum(costes), 1) == 451.3
+    assert cost["coste_por_reloj_s"] == round(sum(costes) / 270, 4) == 1.6714
+    # La compuerta cuesta cientos de los escaneos mas baratos que calibra, y ese
+    # precio tambien es lectura del acto: cae 1,91x dentro de una sola sesion.
+    for acto, coste in zip(NOVENO_ARTE["actos"][2:], costes):
+        razon = coste / acto["minimo_s"]
+        assert 380 <= round(razon) <= 698, (acto["nombre"], razon)
+    assert round(max(costes) / min(costes), 4) == round(209.5298 / 109.6219, 4)
+    assert round((costes[0] / 90) / (costes[2] / 90), 2) == 1.91
+    assert cost["medido_en"] == _acto_9("E")["ventana"]["fin"]
+    # L3 moriria tambien con la otra formula: la dispersion dentro del acto no es
+    # del tamano de la de entre actos, la mide o no la mide.
+    assert NOVENO_ARTE["metodo"].count("coste_compuerta_s") == 1
+
+
+def test_cada_cifra_de_la_prosa_del_lote_9_tiene_lector():
+    prosa = _prosa_9()
+    actos = NOVENO_ARTE["actos"]
+    c = NOVENO_ARTE["comparacion"]
+    a, b = actos[0], actos[1]
+    cociente_8 = (b["minimo_s"] / b["jitter_s"]) / (a["minimo_s"] / a["jitter_s"])
+    costes = NOVENO_ARTE["cost"]["coste_compuerta_s"]
+    razones = [round(coste / acto["minimo_s"]) for coste, acto in zip(costes, actos[2:])]
+    dentro_k = [x for x in c["k"][2:]]
+    anclas = [
+        # El cociente del lote 8, que es lo que este lote falsa.
+        f"{_coma(cociente_8, 2)}\u00d7 against {_coma(c['dispersion']['min'], 2)}\u00d7 "
+        f"for the minimum",
+        # L1: cayo contra su propio falsador, por el doble.
+        f"It measured {_coma(c['dispersion']['min_sobre_jitter'], 2)} \u2014 twice the falsifier "
+        f"\u2014 while the minimum moved {_coma(c['dispersion']['min'], 2)}",
+        # El jitter solo se mueve 5,24x, y el cociente hereda ese movimiento.
+        f"`jitter` alone moves {_coma(c['dispersion']['jitter'], 2)}\u00d7",
+        f"{_coma(a['jitter_s'], 4)} to {_coma(min(x['jitter_s'] for x in actos), 4)} is "
+        f"{_coma(c['dispersion']['jitter'], 2)}\u00d7",
+        f"the minimum only falls {_coma(c['dispersion']['min'], 2)}\u00d7",
+        # L2: la ventana tranquila rompe el techo por tres veces.
+        f"{_coma(actos[2]['minimo_s'] / actos[2]['jitter_s'], 4)}, "
+        f"{_coma(actos[3]['minimo_s'] / actos[3]['jitter_s'], 4)} and "
+        f"{_coma(actos[4]['minimo_s'] / actos[4]['jitter_s'], 4)} against a ceiling of 1,40",
+        # La sesion: 1,15x dentro, 5,24x entre, y 4,54x de diferencia.
+        f"`k` at {_coma(dentro_k[0], 4)}, {_coma(dentro_k[1], 4)} and {_coma(dentro_k[2], 4)}",
+        f"a dispersion of {_coma(max(dentro_k) / min(dentro_k), 2)}\u00d7 between the three "
+        f"against {_coma(c['dispersion']['k'], 2)}\u00d7 across the five",
+        f"the quotient moves {_coma(c['dispersion']['k'] / (max(dentro_k) / min(dentro_k)), 1)}\u00d7 less",
+        # El booleano sobrevive y esconde 2,16x de diferencia en el piso.
+        f"{_coma(b['jitter_s'], 4)} s in act B against "
+        f"{_coma(actos[4]['jitter_s'], 4)} s in act E",
+        f"hides a {_coma(b['jitter_s'] / actos[4]['jitter_s'], 2)}\u00d7 change",
+        # Coste de la compuerta.
+        f"{_coma(NOVENO_ARTE['cost']['coste_compuerta_total_s'], 1)} s of wall bought the 270 new clocks",
+        f"between {min(razones)} and {max(razones)} of the cheapest scans",
+        f"from {_coma(costes[0] / 90, 1)} s to {_coma(costes[2] / 90, 1)} s across one session, "
+        f"{_coma(costes[0] / costes[2], 2)}\u00d7 on a constant workload",
+        f"{round(min(costes))} to {round(max(costes))} s for the certificate",
+        # El defecto de L3, con sus dos numeros.
+        f"gives {_coma(0.4464)} and the second {_coma(1.1797)}",
+        f"{_coma(2.4797)} / {_coma(2.1019)}",
+        f"freezes: {_coma(c['l3_claim'])}",
+        f"`l3_cota_media`, {_coma(c['l3_cota_media'])}",
+        # Y lo que si viaja: conteos.
+        "Counts travel",
+    ]
+    for ancla in anclas:
+        assert ancla in prosa, ancla
+    # El bloque de comando y el nombre del artefacto tienen que estar en la seccion.
+    assert "bench/ventana.py --dir /tmp/censo9 --artefacto" in prosa
+    assert "fuera-de-dominio-9.json" in prosa
+    assert "prediccion-batch-10.json" in prosa
+
+
+def test_la_seccion_del_lote_9_va_despues_de_la_del_lote_8_y_antes_del_censo():
+    assert README.index(SECCION_8) < README.index(SECCION_9)
+    assert README.index(SECCION_9) < README.index("## Fixtures census, recomputed")
+
+
+def test_la_orden_del_lote_10_esta_escrita_antes_de_su_acto():
+    orden = json.loads(DECIMO.read_text(encoding="utf-8"))
+    assert orden["batch"] == 10
+    assert orden["declared_before_computation"] is True
+    assert [p["id"] for p in orden["predictions"]] == ["M1", "M2", "M3"]
+    for p in orden["predictions"]:
+        assert p["falsifier"] and p["cota_error"] and p["claim"]
+    # M1 nombra las dos dispersiones que el lote 9 dejo medidas y no concluidas:
+    # dentro de la sesion C-D-E, y entre los cinco actos.
+    dentro = [a["jitter_s"] / a["predicho_s"] for a in NOVENO_ARTE["actos"][2:]]
+    m1 = orden["predictions"][0]
+    assert m1["umbral"]["dispersion_k_dentro_max"] == 1.30
+    assert max(dentro) / min(dentro) <= m1["umbral"]["dispersion_k_dentro_max"]
+    assert m1["umbral"]["dispersion_k_entre_sesiones_min"] == 3.00
+    assert NOVENO_ARTE["comparacion"]["dispersion"]["k"] >= 3.00
+    # M2 se mide con una sonda anidada: nueve relojes repartidos no cuestan relojes
+    # nuevos en el papel, pero si exigen que cada bloque guarde su primera lectura.
+    m2 = orden["predictions"][1]
+    assert m2["umbral"]["sobrestimacion_max"] == 1.15
+    assert "primera lectura en orden" in orden["method"]["actos_nuevos"]
+    # M3 cotiza la compuerta desde el acto; el lote 9 da el rango que la orden usa.
+    m3 = orden["predictions"][2]
+    p50 = [statistics.median(x for b in a["bloques"] for x in b["lecturas"]) for a in NOVENO_ARTE["actos"][2:]]
+    razones = [costes / 90 / mediana
+               for costes, mediana in zip(NOVENO_ARTE["cost"]["coste_compuerta_s"], p50)]
+    assert m3["umbral"] == [3.0, 6.5]
+    assert all(m3["umbral"][0] <= r <= m3["umbral"][1] for r in razones), razones
+    assert orden["cost"]["relojes_nuevos"] == 270
+    assert orden["cost"]["relojes_reutilizados"] == 450
+    assert orden["cost"]["escrituras_en_platino_labs"] == 0

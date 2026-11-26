@@ -1,0 +1,72 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 10,
+ "title": "la unidad de estacionariedad es la sesion, y la compuerta se puede cotizar",
+ "declared_before_computation": true,
+ "declared_at": "2026-11-26",
+ "why": "El lote 9 midio cinco actos sobre el mismo pin y las tres predicciones cayeron: ninguna magnitud temporal viaja entre actos, y el cociente min / jitter que el lote 8 habia nominado se movio 3,01x, mas que el propio minimo (2,10x). Pero los tres actos nuevos del lote 9 se corrieron seguidos y coincidieron entre si a 1,15x mientras los dos viejos quedaban a 5,24x: la dispersion no es del acto aislado, parece del regimen en que se mide. Eso es una observacion con una sola sesion nueva y no una ley, y este lote la pone a prueba con una segunda.",
+ "what_is_new": "Dos cosas. Primero, una segunda sesion de tres actos sobre el mismo pin, para comparar la dispersion dentro de una sesion contra la dispersion entre sesiones con dos sesiones y no con una. Segundo, la compuerta medida contra si misma: cada bloque guarda ademas su primera lectura en orden cronologico, de modo que las nueve primeras lecturas de un acto forman una sonda de nueve relojes repartida a lo largo del acto, y se puede medir cuanto sobrestima el minimo de nueve al minimo de noventa. Los cinco actos del lote 9 se reutilizan sin volver a cronometrar.",
+ "method": {
+  "sujeto": "pyflakes/pyflakes, el mismo pin de los lotes 7, 8 y 9, con dos controles independientes: bytes_py_escaneados y sha256 de la rueda",
+  "actos_reutilizados": "A, B, C, D y E del lote 9, con sus noventa lecturas cada uno, sin volver a cronometrar",
+  "actos_nuevos": "F, G y H: una sola sesion, mismo pin, mismo protocolo, 9 bloques de 10 lecturas de cpu_min con cotizar._tiempo(arbol, 3); cada bloque guarda ademas primera_s, su primera lectura en orden",
+  "sonda": "las nueve primeras lecturas de un acto, una por bloque, en orden: es lo que costaria una compuerta de nueve relojes en vez de noventa",
+  "estadistico": "jitter por bloque = max - min de sus diez lecturas; jitter del acto = max de los nueve; k = jitter del acto / predicho; min = minimo de las noventa lecturas; sonda_min = minimo de las nueve primeras lecturas; sonda_jitter = max - min de esas nueve",
+  "dispersion": "dispersion(x) = max(x) / min(x); dentro de una sesion = sobre los actos de esa sesion; entre sesiones = sobre los seis actos de las dos sesiones nuevas, tomando la mediana de k de cada sesion",
+  "advertencia": "cada acto se corre una vez y se publica lo que salga; ningun acto se repite por su resultado ni se descarta despues de verlo"
+ },
+ "predictions": [
+  {
+   "id": "M1",
+   "kind": "cuantitativa",
+   "claim": "La dispersion de k dentro de una sesion es menor que entre sesiones. Concreto: en la sesion nueva dispersion(k) <= 1,30 y dispersion(k) entre las medianas de las dos sesiones >= 3,00. Lo que viaja es el regimen, y el acto aislado no lo captura.",
+   "umbral": {
+    "dispersion_k_dentro_max": 1.3,
+    "dispersion_k_entre_sesiones_min": 3.0
+   },
+   "cota_error": "la sesion del lote 9 dio 1,15x dentro y 5,24x entre los cinco actos; una sola sesion nueva puede caer en una ventana de otro regimen y arrastrar la dispersion entre sesiones hacia abajo",
+   "falsifier": "dispersion(k) dentro de la sesion nueva > 1,50 o dispersion entre sesiones < 2,00"
+  },
+  {
+   "id": "M2",
+   "kind": "cuantitativa",
+   "claim": "Una compuerta de nueve relojes repartidos por el acto cuesta un decimo y sobrestima el minimo de noventa en un margen acotado: sonda_min / min <= 1,15 en los tres actos nuevos, y sonda_jitter >= 0,50 x el jitter del acto. Si sobrevive, la compuerta se puede pagar en produccion.",
+   "umbral": {
+    "sobrestimacion_max": 1.15,
+    "sonda_jitter_sobre_jitter_min": 0.5
+   },
+   "cota_error": "la sonda es un subconjunto de las noventa lecturas, asi que sonda_min >= min por construccion; lo que se mide es cuanto, y con nueve puntos el maximo de la sonda puede quedarse corto por azar en un acto con un pico temprano",
+   "falsifier": "cualquier acto con sonda_min / min > 1,30, o cualquier acto con sonda_jitter < 0,30 x el jitter del acto"
+  },
+  {
+   "id": "M3",
+   "kind": "cuantitativa",
+   "claim": "El coste de la compuerta se cotiza desde el acto y no solo se mide despues: coste_compuerta_s / (relojes x p50) cae en [3,0; 6,5] en los tres actos nuevos. Cada reloj son tres escaneos, asi que el cociente es el recargo de la compuerta sobre su propio trabajo.",
+   "umbral": [
+    3.0,
+    6.5
+   ],
+   "cota_error": "el lote 9 da 5,87 en el acto C, 3,85 en el D y 3,53 en el E: el rango es el observado mas margen, y un acto con el planificador cargado lo mueve hacia arriba",
+   "falsifier": "la razon fuera de [3,0; 6,5] en cualquier acto nuevo"
+  }
+ ],
+ "falsification": "Cada prediccion nombra su falsador arriba. El lote se publica igual si las tres caen: lo que cambia es la conclusion, no la entrega. No se admite cambiar el estadistico, ni repetir un acto por su resultado, ni descartar un acto despues de verlo.",
+ "what_it_would_mean": {
+  "M1_y_M2_sobreviven": "una cotizacion publica su banda midiendo el piso con nueve relojes en la misma sesion en que cotiza, a un decimo del coste del acto completo, y declara la sesion como sujeto del margen",
+  "M1_cae": "tampoco la sesion es la unidad: la dispersion es del acto y la compuerta se mide en cada cotizacion sin excepcion ni atajo",
+  "M2_cae": "la compuerta de nueve relojes no alcanza al minimo de noventa y la banda publicada tiene que pagar los noventa o declararse mas ancha",
+  "M3_cae": "el coste de la compuerta no se puede cotizar antes de correrla, y el precio del certificado se mide y no se estima"
+ },
+ "cost": {
+  "sujetos": 1,
+  "actos": 8,
+  "actos_reutilizados": 5,
+  "actos_nuevos": 3,
+  "bloques_por_acto": 9,
+  "lecturas_por_bloque": 10,
+  "relojes_nuevos": 270,
+  "relojes_reutilizados": 450,
+  "clones_externos": 0,
+  "escrituras_en_platino_labs": 0
+ }
+}

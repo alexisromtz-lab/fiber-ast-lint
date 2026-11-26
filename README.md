@@ -1045,6 +1045,101 @@ it fails CI instead of ageing quietly. `--desde` recomposes the document from re
 — act A rebuilt from the sealed batch-7 artifact, act B read back from its progress file and its
 summary recomputed from the raw blocks — so a recomposition can never quietly become a second act.
 
+### Nothing travels but the counts
+
+Batch 8 put one pinned tree in two acts and showed the floor moving; it could not show what stays.
+Two acts are not a population, and the one quantity that looked stable — `min / jitter`, 1,15×
+against 2,10× for the minimum — was chosen after seeing that pair. This batch pays for three more acts
+on the same pin, ninety clocks each, and it times the gate itself. All three claims frozen in
+`prediccion-batch-9.json` fell.
+
+| act | minimum | median | worst block jitter | `min / jitter` | `k` | publishable |
+|---|---:|---:|---:|---:|---:|---|
+| A | 0,5011 | 0,6973 | 0,5036 | 0,9950 | 0,6054 | no |
+| B | 0,2384 | 0,3286 | 0,2078 | 1,1473 | 0,2498 | yes |
+| C | 0,3002 | 0,3968 | 0,1065 | 2,8188 | 0,1280 | yes |
+| D | 0,3243 | 0,3810 | 0,1108 | 2,9269 | 0,1332 | yes |
+| E | 0,2882 | 0,3451 | 0,0961 | 2,9990 | 0,1155 | yes |
+
+| quantity | five acts, max / min |
+|---|---:|
+| minimum | 2,10 |
+| worst block jitter | 5,24 |
+| `min / jitter` | 3,01 |
+| `k` | 5,24 |
+
+| id | pre-registered threshold | measured | verdict |
+|---|---|---|---|
+| L1 | `min / jitter` dispersion ≤ 1,30 **and** `min` dispersion ≥ 1,80 | 3,01 and 2,10 | **falls** |
+| L2 | `min / jitter` in [0,90; 1,40] in all five acts | 0,9950 to 2,9990 | **falls** |
+| L3 | within-act over between-act ratio in [0,80; 1,25] | 0,2766 | **falls** |
+
+**The quotient is the loser, not the winner, and L1 fell against its own falsifier.** The falsifier
+was written before the act: dispersion of `min / jitter` above 1,50, or dispersion of `min` below
+1,50. It measured 3,01 — twice the falsifier — while the minimum moved 2,10. The quantity batch 8
+nominated as the one that travels is the one that travels worst, because `jitter` alone moves 5,24×
+and the quotient inherits that movement divided by 2,10. Two acts made it look stable: both
+magnitudes happened to move by nearly the same factor. Three more separate them. A ratio of two noisy
+quantities is not an invariant, it is a coincidence of covariance.
+
+**L2 fell by three times its ceiling, and the quiet window is the reason.** Acts C, D and E put
+`min / jitter` at 2,8188, 2,9269 and 2,9990 against a ceiling of 1,40. On a quiet machine the jitter
+collapses faster than the minimum does — 0,5036 to 0,0961 is 5,24×, while the minimum only falls
+2,10× — so a ratio with the jitter in the denominator has no ceiling, exactly as it had no floor.
+
+**What does stay is the session, and it is frozen, not concluded.** Acts C, D and E were three
+consecutive windows of one session: `k` at 0,1280, 0,1332 and 0,1155, a dispersion of 1,15× between
+the three against 5,24× across the five. Inside the session the quotient moves 4,5× less than
+between sessions. One session is one observation, so this is written into
+`prediccion-batch-10.json` before its own act rather than concluded here.
+
+**The boolean survives all five acts and hides a 2,16× change in the floor.** Four of the five acts
+are publishable under `q` = 0,3018, and their floors do not agree: 0,2078 s in act B against 0,0961 s
+in act E. The bit answers yes to both, so it answers the same to a quote whose uncertainty is twice
+the other's. What a receipt has to carry is the measured `k`, the threshold it was compared against,
+and how far `k` moved between the acts of the population it came from — none of which a boolean can
+hold.
+
+**The gate is not free, and this batch is the first to say what it costs.** `coste_compuerta_s` is
+the wall clock the ninety clocks of an act burn to certify the floor:
+
+| act | gate wall | per clock | gate / cheapest scan |
+|---|---:|---:|---:|
+| C | 209,5 s | 2,3 s | 698 |
+| D | 132,1 s | 1,5 s | 407 |
+| E | 109,6 s | 1,2 s | 380 |
+
+451,3 s of wall bought the 270 new clocks. The gate burns between 380 and 698 of the cheapest scans it
+calibrates, and even that price is a reading of the act: per clock it fell from 2,3 s to 1,2 s across
+one session, 1,91× on a constant workload. So the corpus no longer measures only the noise of the
+environment and not the cost of measuring it: a quote that certifies its own floor pays 110 to 210 s
+for the certificate, which on a tree this size is the whole budget of the quote.
+
+**L3 is not decidable as frozen, and the defect is arithmetic.** Its `claim` divides
+`max(jitter) / min(minimum)` per act and averages; its `cota_error` divides one act's block-jitter
+dispersion by the dispersion of `min`. On batch 8's own two acts the first gives 0,4464 and the second
+1,1797 — 2,4797 / 2,1019, where 2,4797 is act B's internal dispersion and not a mean over acts. The
+two are not the same quantity, and only the second passes the frozen range. L3 is scored with the
+formula its `claim` declares, which is the one the range freezes: 0,2766. The other number is
+published as `l3_cota_media`, 1,6992. Neither the order nor the score is retro-fitted; the breach is
+declared.
+
+**What this leaves a quote.** Counts travel: bytes scanned and nodes visited are the same in every
+act, and they are the only quantities this population puts inside a receipt without a timestamp. A
+temporal band exists only inside the act that quotes it, and certifying it costs 380 to 698 of the
+scans it calibrates. Anything else is a second inherited from another window, and this batch has five
+windows on one tree that disagree by 5,24×.
+
+```bash
+PYTHONPATH=src:bench python bench/ventana.py --dir /tmp/censo9 --artefacto
+```
+
+It writes `fuera-de-dominio-9.json`: the five acts with their pins, their ninety readings each, the
+noise of every block, the within-act dispersions, the verdicts against the frozen prediction, the
+declared defect of L3 and the wall cost of each gate. Acts A and B are read back from
+`fuera-de-dominio-8.json` and never re-timed, so the sample is paired; `--desde` recomposes the
+document from acts already paid, so a recomposition can never quietly become a fourth act.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the
