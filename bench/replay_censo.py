@@ -3,7 +3,9 @@
 The census is a claim about wheels, so the only honest way to check it is to go
 and get the wheels. This script fetches each row's artifact from PyPI, checks
 its SHA-256 against both the pin and PyPI's own digest, unpacks it, runs the
-analyzer on the declared subtree, and compares the six measured fields.
+analyzer on the declared subtree, and compares the measured cells -- the counts,
+the four buckets, and the pair of codes (`rc` for the scan, `rc_certificado` for
+the act) with the pair of booleans that name them.
 
     python bench/replay_censo.py            # temp dir, deleted at the end
     python bench/replay_censo.py --dir /tmp/censo --keep
@@ -53,6 +55,13 @@ SIETE = (("mypy", "mypy"), ("pylint", "."), ("astroid", "."), ("dill", "."),
          ("isort", "."), ("platformdirs", "."), ("tomlkit", "."))
 CAMPOS = ("files", "stores", "pierde", "candidates", "admitted", "column_loci") + CUBETAS
 
+# Two surfaces the payload already publishes with their own names. The census
+# used to carry only `rc` and `reconciles`, and on the two empty universes those
+# two held the *certificate* answer while the other eleven held the *scan*
+# answer: one key, two subjects. A consumer cannot tell `1` ("the scan found
+# candidates") from `1` ("the receipt declared a collision"), so both are pinned.
+FIRMA = ("rc", "rc_certificado", "reconciles", "certifica")
+
 # The verdicts are this package's own codes, not a private ladder: 1 is a proven
 # defect, 2 is blindness, 4 is a broken premise, and the operator is the one the
 # CLI already uses so a batch of rows cannot compose differently here than there.
@@ -95,7 +104,9 @@ def _medir(raiz: Path) -> dict:
             **{k: d[k] for k in CUBETAS},
             "candidates": len(cand),
             "admitted": sum(1 for c in cand if c["severidad"] == "CANDIDATO"),
-            "column_loci": sum(1 for c in cand if c["forma"] == "SELECCION_COLUMNA_BUCLE")}
+            "column_loci": sum(1 for c in cand if c["forma"] == "SELECCION_COLUMNA_BUCLE"),
+            "rc": d["rc"], "rc_certificado": d["rc_certificado"],
+            "reconciles": d["reconcilia"], "certifica": d["certifica"]}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -107,7 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--censo", help="read this census file instead of ./censo.json")
     ap.add_argument("--desde", help="measure from this cache dir; download nothing")
     ap.add_argument("--anotar", action="store_true",
-                    help="write the measured buckets back into the census, so the "
+                    help="write the measured cells back into the census, so the "
                          "row can be reconciled by someone else")
     a = ap.parse_args(argv)
 
@@ -133,14 +144,14 @@ def main(argv: list[str] | None = None) -> int:
                     continue
                 real = _medir(raiz)
                 medidas[(r["artifact"], r["scope"])] = real
-                difs = {k: (real[k], r[k]) for k in CAMPOS
+                difs = {k: (real[k], r[k]) for k in CAMPOS + FIRMA
                         if k in r and real[k] != r[k]}
                 if difs:
                     print("  DIVERGE: " + ", ".join(f"{k} medido={m} pin={p}"
                                                     for k, (m, p) in difs.items()))
                     peor = combinar_rc(peor, DIVERGE)
                 else:
-                    print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS))
+                    print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS + FIRMA))
                 continue
             rueda, dig_pypi, rc = _traer(r["package"], r["artifact"], base / r["artifact"])
             if rc:
@@ -170,14 +181,14 @@ def main(argv: list[str] | None = None) -> int:
             if sin_anotar:
                 print("  SIN ANOTAR: " + ", ".join(sin_anotar)
                       + " (reconciles no es comprobable por un tercero)")
-            difs = {k: (real[k], r[k]) for k in CAMPOS
+            difs = {k: (real[k], r[k]) for k in CAMPOS + FIRMA
                     if k in r and real[k] != r[k]}
             if difs:
                 print("  DIVERGE: " + ", ".join(f"{k} medido={m} pin={p}"
                                                 for k, (m, p) in difs.items()))
                 peor = combinar_rc(peor, DIVERGE)
             else:
-                print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS))
+                print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS + FIRMA))
 
         if a.anotar:
             tocadas = 0
@@ -185,7 +196,7 @@ def main(argv: list[str] | None = None) -> int:
                 real = medidas.get((r["artifact"], r["scope"]))
                 if real is None:
                     continue
-                for k in CUBETAS:
+                for k in CUBETAS + FIRMA:
                     r[k] = real[k]
                 residuo = r["stores"] - r["pierde"] - sum(real[k] for k in CUBETAS)
                 if residuo:

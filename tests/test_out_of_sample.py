@@ -118,4 +118,7 @@ def test_la_tabla_de_fuera_de_muestra_dice_lo_que_dice_el_censo():
         assert re.sub(r"\s", "", version) == r["version"], package
         assert (int(files), int(stores), int(cand), int(adm)) == (
             r["files"], r["stores"], r["candidates"], r["admitted"]), package
-        assert (reconciles == "yes") is r["reconciles"], package
+        dice = reconciles.split()[0]
+        assert (dice == "yes") is r["reconciles"], package
+        # La firma es la otra pregunta: sobre cero almacenes reconcilia y no firma.
+        assert (dice == "yes" and r["stores"] > 0) is r["certifica"], package

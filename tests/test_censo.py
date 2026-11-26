@@ -60,12 +60,35 @@ def test_every_row_is_pinned():
         assert suma == r["stores"], (
             f"{r['package']} {r['scope']}: {r['stores']} != {suma} (residuo {r['stores'] - suma})")
         if r["stores"] == 0:
-            # La identidad cierra por vacio: cero unidades no certifican nada, y
-            # la fila tiene que decirlo con el codigo que el instrumento publica.
-            assert r["reconciles"] is False, f"{r['package']}: firma sobre cero almacenes"
-            assert r["rc"] == 2, f"{r['package']}: un universo sin almacen es NO_MEDIDO"
+            # `0 = 0` cierra: la aritmetica se cumple sobre el vacio y la fila
+            # tiene que publicarlo. Lo que no puede firmar es el certificado.
+            assert r["reconciles"] is True, f"{r['package']}: 0 = 0 no cierra"
+            assert r["certifica"] is False, f"{r['package']}: firma sobre cero almacenes"
+            assert r["rc_certificado"] == 2, f"{r['package']}: un universo sin almacen es NO_MEDIDO"
         else:
             assert r["reconciles"] is True, f"{r['package']}: el censo de descartes no cuadra"
+            assert r["certifica"] is True, f"{r['package']}: no firma lo que si reconcilia"
+            assert r["rc_certificado"] == r["rc"], f"{r['package']}: dos codigos para un universo con poblacion"
+        # El codigo del escaneo nombra lo que el linter encontro, no lo que un
+        # acta puede firmar: se re-deriva de los candidatos, no se cree.
+        assert r["rc"] == (1 if r["candidates"] else 0), (
+            f"{r['package']}: rc={r['rc']} no es el codigo de sus {r['candidates']} candidatos")
+
+
+def test_las_dos_superficies_no_comparten_llave():
+    """Un entero sin nombre es texto: `rc` y `rc_certificado` son dos sujetos.
+
+    Hasta 0.4.5 el censo publicaba un solo `rc`, y en las dos filas sin almacen
+    puso ahi el codigo del acta (2) en la llave del escaneo (que vale 0). Un
+    lector aguas abajo leyo ese 2 como "el recibo declaro una colision" sobre
+    once filas que no declaraban nada.
+    """
+    vacias = [r for r in CENSO["rows"] if r["stores"] == 0]
+    assert vacias, "el censo necesita una fila vacia para falsar la regla"
+    for r in vacias:
+        assert (r["rc"], r["rc_certificado"], r["reconciles"], r["certifica"]) == (
+            0, 2, True, False), f"{r['package']}: {r['rc']}/{r['rc_certificado']}/" \
+                                f"{r['reconciles']}/{r['certifica']}"
 
 
 def test_one_artifact_one_digest():

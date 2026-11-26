@@ -1,7 +1,7 @@
 {
   "schema": "fiber-ast-lint/censo/1",
   "instrument": "fiber-ast-lint",
-  "instrument_version": "0.4.5",
+  "instrument_version": "0.4.6",
   "measured_at": "2026-11-25",
   "interpreter": "CPython 3.12.13",
   "method": "PyPI wheel downloaded, SHA-256 checked against PyPI's own digest, unzipped, and the subtree named in `scope` analysed. No install, no site-packages, no network during analysis.",
@@ -35,7 +35,9 @@
       "admitted": 5,
       "column_loci": 16,
       "reconciles": true,
-      "rc": 1
+      "rc": 1,
+      "rc_certificado": 1,
+      "certifica": true
     },
     {
       "package": "pylint",
@@ -56,7 +58,9 @@
       "admitted": 0,
       "column_loci": 2,
       "reconciles": true,
-      "rc": 1
+      "rc": 1,
+      "rc_certificado": 1,
+      "certifica": true
     },
     {
       "package": "astroid",
@@ -77,7 +81,9 @@
       "admitted": 0,
       "column_loci": 5,
       "reconciles": true,
-      "rc": 1
+      "rc": 1,
+      "rc_certificado": 1,
+      "certifica": true
     },
     {
       "package": "dill",
@@ -98,7 +104,9 @@
       "admitted": 0,
       "column_loci": 0,
       "reconciles": true,
-      "rc": 0
+      "rc": 0,
+      "rc_certificado": 0,
+      "certifica": true
     },
     {
       "package": "isort",
@@ -119,7 +127,9 @@
       "admitted": 0,
       "column_loci": 0,
       "reconciles": true,
-      "rc": 1
+      "rc": 1,
+      "rc_certificado": 1,
+      "certifica": true
     },
     {
       "package": "platformdirs",
@@ -139,8 +149,10 @@
       "candidates": 0,
       "admitted": 0,
       "column_loci": 0,
-      "reconciles": false,
-      "rc": 2
+      "reconciles": true,
+      "rc": 0,
+      "rc_certificado": 2,
+      "certifica": false
     },
     {
       "package": "tomlkit",
@@ -161,7 +173,9 @@
       "admitted": 0,
       "column_loci": 1,
       "reconciles": true,
-      "rc": 1
+      "rc": 1,
+      "rc_certificado": 1,
+      "certifica": true
     },
     {
       "package": "mypy",
@@ -182,7 +196,9 @@
       "admitted": 6,
       "column_loci": 24,
       "reconciles": true,
-      "rc": 1
+      "rc": 1,
+      "rc_certificado": 1,
+      "certifica": true
     },
     {
       "package": "pydantic",
@@ -203,7 +219,9 @@
       "admitted": 2,
       "column_loci": 10,
       "reconciles": true,
-      "rc": 1
+      "rc": 1,
+      "rc_certificado": 1,
+      "certifica": true
     },
     {
       "package": "jsonschema",
@@ -224,7 +242,9 @@
       "admitted": 0,
       "column_loci": 0,
       "reconciles": true,
-      "rc": 0
+      "rc": 0,
+      "rc_certificado": 0,
+      "certifica": true
     },
     {
       "package": "pyflakes",
@@ -244,8 +264,10 @@
       "candidates": 0,
       "admitted": 0,
       "column_loci": 0,
-      "reconciles": false,
-      "rc": 2
+      "reconciles": true,
+      "rc": 0,
+      "rc_certificado": 2,
+      "certifica": false
     },
     {
       "package": "flake8",
@@ -266,7 +288,9 @@
       "admitted": 1,
       "column_loci": 1,
       "reconciles": true,
-      "rc": 1
+      "rc": 1,
+      "rc_certificado": 1,
+      "certifica": true
     },
     {
       "package": "black",
@@ -287,7 +311,9 @@
       "admitted": 0,
       "column_loci": 2,
       "reconciles": true,
-      "rc": 1
+      "rc": 1,
+      "rc_certificado": 1,
+      "certifica": true
     }
   ],
   "totals_seven": {

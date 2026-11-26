@@ -104,7 +104,10 @@ a false red in the safe direction but still a false red. The receipt contract is
 population, no certificate, and `NO_MEDIDO` is a truthful thing to publish.
 
 `tests/test_detect.py` pins the pair on one fixture, `tests/test_cli.py` pins the two codes in one
-payload, and `tests/test_censo.py` pins every row of the census to `stores > 0` for a `true`.
+payload, and `tests/test_censo.py` re-derives the four census surfaces from the terms instead of
+believing them: `certifica` is `stores > 0`, `rc_certificado` is `2` exactly when the universe is
+empty, `reconciles` holds on every row (`0 = 0` included), and `rc` is `1` iff there is at least one
+candidate — a code the linter earned, never a code a receipt may publish.
 
 ## What it classifies
 
@@ -343,17 +346,18 @@ message that publishes this section):
 
 | project | version | files | stores | candidates | admitted | `reconciles` |
 |---|---|---|---|---|---|---|
-| `pyflakes` | 4.1.0 | 23 | 0 | 0 | 0 | no — 0 stores |
+| `pyflakes` | 4.1.0 | 23 | 0 | 0 | 0 | yes — 0 stores, no certificate |
 | `flake8` | 7.5.0 | 33 | 3 | 1 | **1** | yes |
 | `black` | 26.10.1 | 42 | 23 | 2 | 0 | yes |
 | **added** | | **98** | **26** | **3** | **1** | 2/3 |
 
 One correction, published rather than absorbed: the prediction said `reconciles` closes on all
 three, and under the definition in force when it was written that was true — `pyflakes` closes
-`0 = 0 + 0 + 0 + 0 + 0`. It is a tautology over an empty population, not a reconciliation, and the
-`0.4.5` law (below) splits the two questions. The row now says `no`, so the out-of-sample
-population is **26 stores over two packages**, not three. The pre-registered sentence stays verbatim
-above: rewriting a prediction after seeing the answer is how predictions stop being predictions.
+`0 = 0 + 0 + 0 + 0 + 0`. It is a tautology over an empty population: it *reconciles* and it does not
+*certify*, which the `0.4.5` law (below) splits into two fields. The row now says `yes` and carries
+no certificate, so the out-of-sample population is **26 stores over two packages**, not three. The
+pre-registered sentence stays verbatim above: rewriting a prediction after seeing the answer is how
+predictions stop being predictions.
 
 The three rows are pinned in [`censo.json`](censo.json) by wheel and SHA-256 like the rest, and they
 are **not** folded into the `599 files / 308 stores` above. The percentages are not recomputed
@@ -514,7 +518,7 @@ repository in about 54 s, which is the intended use.
 ```yaml
 repos:
   - repo: https://github.com/alexisromtz-lab/fiber-ast-lint
-    rev: v0.4.5
+    rev: v0.4.6
     hooks:
       - id: fiber-ast-lint
 ```
@@ -681,6 +685,23 @@ not edited**: their wheels re-downloaded, their SHA-256 checked against the pins
 re-run, and every measured cell came back identical — only `reconciles` and `rc` moved, which is
 the whole claim: the law changed and the data did not. The defect was found by a downstream
 verifier grading this census, which is the reader this repository did not have.
+
+`0.4.6` gives the two codes their own keys in the census. `0.4.5` separated the questions in
+`--json` and then fixed the census by **overwriting** the two collided values: on `platformdirs` and
+`pyflakes`, `reconciles` came back `false` and `rc` came back `2` — the arithmetic flag and the scan
+code answering with the certificate's answer. Those two rows then contradicted the table four
+paragraphs above them in this same file, which says `reconcilia: true, rc: 0` for `platformdirs`,
+because one key was carrying two subjects. The census now publishes the four names the payload
+already had — `rc`, `rc_certificado`, `reconciles`, `certifica` — and `bench/replay_censo.py`
+**compares and annotates all four**, so a row is a function of the artifact instead of a
+transcription of a decision. The re-run is its own evidence: eleven of thirteen rows identical, and
+the only cells that moved are the two that were wrong — `rc` `2 → 0` and `reconciles` `false → true`
+on both empty universes, with `rc_certificado: 2` and `certifica: false` published beside them.
+
+The reason it matters beyond this repository: `1` is "the scan found candidates" here and "the act
+declared a collision" in the receipt contract. The two ladders share `0`, `1` and `2` and disagree
+in the middle, which is worse than sharing none — partial agreement is what licenses a consumer to
+map the integer and print a claim nobody made.
 
 ## License
 

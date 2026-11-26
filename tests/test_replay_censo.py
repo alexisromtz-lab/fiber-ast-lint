@@ -37,7 +37,9 @@ def _censo(tmp: Path, medido: dict) -> Path:
             "sha256": "0" * 64, "bytes": 1, "scope": ".",
             "files": medido["files"], "stores": medido["stores"], "pierde": medido["pierde"],
             "candidates": medido["candidates"], "admitted": medido["admitted"],
-            "column_loci": medido["column_loci"], "reconciles": True, "rc": 1}
+            "column_loci": medido["column_loci"], "reconciles": medido["reconciles"],
+            "rc": medido["rc"], "rc_certificado": medido["rc_certificado"],
+            "certifica": medido["certifica"]}
     ruta = tmp / "censo.json"
     ruta.write_text(json.dumps({"instrument_version": "0.4.1", "rows": [fila],
                                 "totals_seven": {}}, indent=2), encoding="utf-8")
@@ -53,7 +55,9 @@ def _medido(desde: Path) -> dict:
     return {"files": d["archivos"], "stores": d["almacenes"], "pierde": d["pierde"],
             "candidates": len(cand),
             "admitted": sum(1 for c in cand if c["severidad"] == "CANDIDATO"),
-            "column_loci": sum(1 for c in cand if c["forma"] == "SELECCION_COLUMNA_BUCLE")}
+            "column_loci": sum(1 for c in cand if c["forma"] == "SELECCION_COLUMNA_BUCLE"),
+            "rc": d["rc"], "rc_certificado": d["rc_certificado"],
+            "reconciles": d["reconcilia"], "certifica": d["certifica"]}
 
 
 def test_identical_divergent_and_unmeasured(tmp_path: Path) -> None:
