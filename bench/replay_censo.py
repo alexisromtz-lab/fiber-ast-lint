@@ -138,7 +138,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{r['package']} {r['version']} {r['scope']}:")
             if a.desde:
                 raiz = Path(a.desde) / f"{r['package']}-{r['version']}" / r["scope"]
-                if not raiz.is_dir():
+                if not raiz.exists():
                     print(f"  NO_MEDIDO: falta {raiz}")
                     peor = combinar_rc(peor, NO_MEDIDO)
                     continue
@@ -171,8 +171,11 @@ def main(argv: list[str] | None = None) -> int:
                 with zipfile.ZipFile(rueda) as z:
                     z.extractall(destino)
             raiz = destino / r["scope"]
-            if not raiz.is_dir():
-                print(f"  RUPTURA: el artefacto no contiene {r['scope']}/")
+            # El escaner acepta un arbol o un modulo suelto, asi que el pin no
+            # puede exigir directorio: `six.py` es un scope legitimo y pedirle
+            # una carpeta era una suposicion del lector, no del objeto.
+            if not raiz.exists():
+                print(f"  RUPTURA: el artefacto no contiene {r['scope']}")
                 peor = combinar_rc(peor, RUPTURA)
                 continue
             real = _medir(raiz)

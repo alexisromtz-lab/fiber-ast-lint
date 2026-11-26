@@ -465,6 +465,58 @@ use is the other way round: **it is the instrument that prices the job**, becaus
 from 0 loci in 10 stores (`click` + `tabulate`) to 11 in 28. A quote written before that scan is a
 guess; after it, it is a count.
 
+### A batch named before it was fetched: four predictions, four survivors
+
+Everything above is exploratory, and it says so in a field: the five rows were measured before any
+prediction existed, so they may name directions and may not name rates. This batch inverts the
+order. `prediccion-batch-2.json` was committed at `9a85d69` — with the five packages named, the four
+claims written and their `cota_error` declared — **before a single byte of the wheels existed**. The
+commit is the receipt for the order; the file carries the digest of the prediction so a later edit
+cannot pass for it.
+
+| package | version | files | stores | `sin_len` | candidates | cand / `sin_len` |
+|---|---:|---:|---:|---:|---:|---:|
+| jinja2 | 3.1.6 | 25 | 12 | 7 | 1 | 14.3 % |
+| urllib3 | 2.8.0 | 36 | 7 | 3 | 0 | 0 % |
+| packaging | 26.4 | 22 | 18 | 15 | 5 | 33.3 % |
+| idna | 3.20 | 10 | 0 | 0 | 0 | — |
+| six | 1.17.0 | 1 | 0 | 0 | 0 | — |
+| **added** | | **94** | **37** | **25** | **6** | **24.0 %** |
+
+| | claim | declared | measured | |
+|---|---|---|---|---|
+| P1 | `candidates <= sin_len` in every row | 5 of 5 | 5 of 5 | passes (control) |
+| P2 | per-row `candidates / sin_len <= 0.50` | 5 of 5 | 3 of 3 with `sin_len > 0` | passes |
+| P3 | pooled quotient in `[0.10, 0.45]` | 0.25 | 0.240 | passes |
+| P4 | seconds in `[0.0238·F, 0.055·F]` | `[2.24, 5.17]` | 2.75 | passes |
+
+P1 is declared a **control**, not a finding: the mechanism makes it nearly a theorem, and confirming
+a theorem informs nothing. The one with content is P3 — the declared point was 0.25, the measured
+0.240, and the band was written before knowing it would agree that closely. What the four survivors
+do **not** establish is a rate for the population: the batch is one I chose, and a band wide enough
+to survive is a band wide enough to be uninformative about its own width.
+
+Two things the batch found that no prediction asked for. `packaging` contributes a **second species**
+of candidate — `PROYECCION_ARRIBA_CON_PERDIDA`, five of the six, four of them inside `parse_email` —
+where batch 1 was 12 of 14 `SELECCION_COLUMNA_BUCLE`; the earlier stratum simply did not contain the
+other mechanism, which is the argument against reading one sample as the shape of the instrument.
+And the six candidates are **three** keys: `extension.identifier` once, `normed_group_name` once,
+and `name` four times in one function. Adjudication is priced per group, so the quote is 3 decisions.
+
+**The cost model chose its regressor.** Fitted on the ten out-of-sample rows, files give
+`s = 0.2034 + 0.01847·ficheros` with `R² = 0.457` and a worst residual of 279 %; loops give
+`s = 0.1578 + 0.00649·bucles` with `R² = 0.845` and 120 %. Loops explain almost twice the variance
+and neither explains the clock: between 0.08 s and 0.16 s of interpreter start dominates a scan this
+size. So the honest quote is a band with a fixed term and a per-loop term — and `R² = 0.845` over ten
+points with two parameters is an ordering between two regressors, not a model.
+
+**The reader had the assumption, not the object.** `six` is a module, not a package, and the scanner
+accepts a file — it checks `is_file()` before `is_dir()`. `bench/replay_censo.py` demanded a
+directory, so it declared `RUPTURA` on a correct pin. That is the class of defect this repository
+keeps finding: a fact about the reader mistaken for a fact about the subject. Fixed on both branches
+and pinned by `tests/test_replay_scope.py`, whose two tests each kill the `is_dir()` mutant of their
+own branch.
+
 ### Does it fire when the defect is planted?
 
 Three candidates establish precision and nothing else — a sample that small cannot say whether a

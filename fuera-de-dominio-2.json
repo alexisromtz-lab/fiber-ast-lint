@@ -1,0 +1,280 @@
+{
+ "schema": "fiber-ast-lint/censo/1",
+ "instrument": "fiber-ast-lint",
+ "instrument_version": "0.4.6",
+ "measured_at": "2026-11-26",
+ "interpreter": "CPython 3.12.13",
+ "method": "wheels puros de PyPI, digest verificado contra el sha256 publicado; escaneo del subarbol de importacion con python -m fiber_ast_lint --json; segundos_min = minimo de tres corridas, arranque del interprete incluido",
+ "reproduce": "python bench/replay_censo.py --censo fuera-de-dominio-2.json",
+ "prediction": {
+  "file": "prediccion-batch-2.json",
+  "sha256": "bc276e7a9144f88edecebc121964d13861ff7f1dc458e642846310548ac70951",
+  "commit": "9a85d69",
+  "order": "prediccion commiteada antes de la primera descarga; este archivo se escribio despues"
+ },
+ "sample": {
+  "rule": "cinco proyectos de Python puro que el censo y fuera-de-dominio.json no tocan, elegidos por estar en la mochila de casi cualquier backend de cliente, nombrados antes de descargar nada",
+  "declared_before_reading_code": true,
+  "packages": [
+   "jinja2",
+   "urllib3",
+   "packaging",
+   "idna",
+   "six"
+  ],
+  "excluded_before_seeing": [
+   "pyyaml",
+   "markupsafe"
+  ],
+  "stratum": "librerias de tiempo de ejecucion de un backend web"
+ },
+ "status": {
+  "verdict": "CONFIRMATORIO",
+  "why": "las cuatro predicciones se commitearon en 9a85d69 antes de que existiera un byte del lote, y las cuatro sobreviven. Es el primer archivo de este censo que puede nombrar una tasa, y la nombra sobre el cociente que declaro, no sobre otro",
+  "limit": "confirmatorio de estas cuatro predicciones, no de la poblacion: el lote lo elegi yo y una prediccion que se cumple dentro de una banda ancha no mide la banda, la cruza"
+ },
+ "predictions": [
+  {
+   "id": "P1",
+   "claim": "candidates <= sin_len en cada una de las 5 filas",
+   "predicted": "5 de 5",
+   "observed": "5 de 5",
+   "verdict": "PASA",
+   "role": "control"
+  },
+  {
+   "id": "P2",
+   "claim": "candidates/sin_len <= 0.50 en cada fila con sin_len > 0",
+   "predicted": "5 de 5",
+   "observed": "3 de 3 filas con sin_len > 0 (0.143, 0.000, 0.333); las otras dos tienen sin_len = 0",
+   "verdict": "PASA"
+  },
+  {
+   "id": "P3",
+   "claim": "candidates/sin_len agrupado en [0.10, 0.45]",
+   "predicted": 0.25,
+   "observed": 0.24,
+   "verdict": "PASA"
+  },
+  {
+   "id": "P4",
+   "claim": "segundos del lote entre 0.0238*F y 0.055*F",
+   "predicted": "[2.24, 5.17] para F=94",
+   "observed": 2.75,
+   "verdict": "PASA"
+  }
+ ],
+ "predictions_summary": "4 de 4 pasan. La de valor mas alto es P3: el punto declarado fue 0,25 y el medido 0,240, un 4% por debajo, y la banda [0,10; 0,45] se declaro antes de saber que iba a estrecharse tanto hacia abajo. P1 se cumplio como se esperaba y no informa: el mecanismo la hace casi teorema.",
+ "rows": [
+  {
+   "package": "jinja2",
+   "version": "3.1.6",
+   "artifact": "jinja2-3.1.6-py3-none-any.whl",
+   "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+   "bytes": 134899,
+   "scope": "jinja2",
+   "files": 25,
+   "stores": 12,
+   "pierde": 0,
+   "guardadas": 3,
+   "acumulacion": 0,
+   "posicional": 2,
+   "sin_len": 7,
+   "loops": 139,
+   "candidates": 1,
+   "admitted": 1,
+   "column_loci": 1,
+   "reconciles": true,
+   "rc": 1,
+   "rc_certificado": 1,
+   "certifica": true,
+   "segundos_min": 0.898
+  },
+  {
+   "package": "urllib3",
+   "version": "2.8.0",
+   "artifact": "urllib3-2.8.0-py3-none-any.whl",
+   "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3",
+   "bytes": 135717,
+   "scope": "urllib3",
+   "files": 36,
+   "stores": 7,
+   "pierde": 0,
+   "guardadas": 2,
+   "acumulacion": 1,
+   "posicional": 1,
+   "sin_len": 3,
+   "loops": 56,
+   "candidates": 0,
+   "admitted": 0,
+   "column_loci": 0,
+   "reconciles": true,
+   "rc": 0,
+   "rc_certificado": 0,
+   "certifica": true,
+   "segundos_min": 0.455
+  },
+  {
+   "package": "packaging",
+   "version": "26.4",
+   "artifact": "packaging-26.4-py3-none-any.whl",
+   "sha256": "81383611a09c1bc0b08b76e0fd5829d7c6824c65b27a6aee339da133f4233ea2",
+   "bytes": 140049,
+   "scope": "packaging",
+   "files": 22,
+   "stores": 18,
+   "pierde": 0,
+   "guardadas": 2,
+   "acumulacion": 0,
+   "posicional": 1,
+   "sin_len": 15,
+   "loops": 100,
+   "candidates": 5,
+   "admitted": 5,
+   "column_loci": 0,
+   "reconciles": true,
+   "rc": 1,
+   "rc_certificado": 1,
+   "certifica": true,
+   "segundos_min": 0.95
+  },
+  {
+   "package": "idna",
+   "version": "3.20",
+   "artifact": "idna-3.20-py3-none-any.whl",
+   "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+   "bytes": 69583,
+   "scope": "idna",
+   "files": 10,
+   "stores": 0,
+   "pierde": 0,
+   "guardadas": 0,
+   "acumulacion": 0,
+   "posicional": 0,
+   "sin_len": 0,
+   "loops": 14,
+   "candidates": 0,
+   "admitted": 0,
+   "column_loci": 0,
+   "reconciles": true,
+   "rc": 0,
+   "rc_certificado": 2,
+   "certifica": false,
+   "segundos_min": 0.332
+  },
+  {
+   "package": "six",
+   "version": "1.17.0",
+   "artifact": "six-1.17.0-py2.py3-none-any.whl",
+   "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
+   "bytes": 11050,
+   "scope": "six.py",
+   "files": 1,
+   "stores": 0,
+   "pierde": 0,
+   "guardadas": 0,
+   "acumulacion": 0,
+   "posicional": 0,
+   "sin_len": 0,
+   "loops": 13,
+   "candidates": 0,
+   "admitted": 0,
+   "column_loci": 0,
+   "reconciles": true,
+   "rc": 0,
+   "rc_certificado": 2,
+   "certifica": false,
+   "segundos_min": 0.11
+  }
+ ],
+ "invariant": {
+  "claim": "candidates <= sin_len",
+  "rows_checked": 23,
+  "rows_held": 23,
+  "why_cumulative": "el lote 2 suma sus 5 filas a las 18 ya medidas; cada archivo declara la poblacion que midio y ninguno reescribe el anterior",
+  "checked_by": "tests/test_censo_fuera.py::test_ningun_candidato_nace_fuera_de_sin_len"
+ },
+ "totals": {
+  "files": 94,
+  "stores": 37,
+  "pierde": 0,
+  "guardadas": 7,
+  "acumulacion": 1,
+  "posicional": 4,
+  "sin_len": 25,
+  "loops": 322,
+  "candidates": 6,
+  "admitted": 6,
+  "column_loci": 1,
+  "segundos_min": 2.75
+ },
+ "conservation_check": "0 + 7 + 1 + 4 + 25 = 37 almacenes, y 94 - 37 = 57 ficheros sin almacen. reconciles y certifica en 5 de 5 filas",
+ "contrast": {
+  "batch_1": {
+   "rows": 5,
+   "stores": 47,
+   "sin_len": 35,
+   "candidates": 14,
+   "ratio": 0.4
+  },
+  "batch_2": {
+   "rows": 5,
+   "stores": 37,
+   "sin_len": 25,
+   "candidates": 6,
+   "ratio": 0.24
+  },
+  "census_13": {
+   "rows": 13,
+   "stores": 308,
+   "sin_len": 209,
+   "candidates": 30,
+   "ratio": 0.1435
+  },
+  "no_se_promedia": "tres cocientes de tres estratos elegidos por mi; promediarlos seria la seleccion que la tabla existe para rechazar. Lo unico legible es que los tres caen dentro de la banda que P3 declaro"
+ },
+ "sites_vs_groups": {
+  "sites": 6,
+  "groups": 3,
+  "detail": [
+   "jinja2 extension.identifier (1 sitio, load_extensions)",
+   "packaging normed_group_name (1 sitio, _normalize_group_names)",
+   "packaging name (4 sitios, todos en parse_email)"
+  ],
+  "why": "la adjudicacion cuesta por grupo: 3 decisiones cierran 6 sitios. La factura se estima en grupos, no en sitios"
+ },
+ "new_species": {
+  "form": "PROYECCION_ARRIBA_CON_PERDIDA",
+  "sites": 5,
+  "where": "packaging, cuatro de ellos en parse_email",
+  "why_it_matters": "en las 5 filas del lote 1 los candidatos eran SELECCION_COLUMNA_BUCLE (12 de 14). Aqui aparece la otra especie y es mayoria en su paquete: el instrumento ve dos mecanismos distintos y el lote 1 no lo mostraba porque el estrato no lo tenia"
+ },
+ "zero_with_certificate": {
+  "packages": [
+   "idna",
+   "six"
+  ],
+  "why": "0 almacenes con rc_certificado 2 y certifica false: la ausencia de almacen esta certificada, no es un cero ciego. six es un modulo suelto (1 fichero) y el escaner acepta fichero, no solo arbol"
+ },
+ "cost": {
+  "regressors_fitted_on_10_out_of_sample_rows": {
+   "files": {
+    "model": "s = 0.2034 + 0.01847*ficheros",
+    "r2": 0.457,
+    "worst_residual": "279%"
+   },
+   "loops": {
+    "model": "s = 0.1578 + 0.00649*bucles",
+    "r2": 0.845,
+    "worst_residual": "120%"
+   }
+  },
+  "reading": "los bucles explican casi el doble de la varianza que los ficheros, y ninguno de los dos explica el reloj: entre 0,08 y 0,16 s de arranque del interprete dominan escaneos de este tamano. Para cotizar sirve una banda con termino fijo, no una recta",
+  "honestidad": "R2 0,845 sobre 10 puntos y 2 parametros con un peor residual del 120% no es un modelo: es un orden entre dos regresores",
+  "seconds_total": 2.75
+ },
+ "replay": {
+  "command": "python bench/replay_censo.py --censo fuera-de-dominio-2.json",
+  "line": "REPLAY IDENTICO · 5 filas · instrumento 0.4.6"
+ }
+}
