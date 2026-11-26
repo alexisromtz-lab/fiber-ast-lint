@@ -1,0 +1,66 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "instrument_version": "0.4.6",
+  "written_at": "2026-11-26",
+  "declared_before_fetch": true,
+  "why_this_file_exists": "El lote 2 predijo una tasa de rendimiento y sobrevivio. Este lote no predice otra tasa: predice la UNIDAD DE FACTURA. Un sitio de hallazgo no es una decision: adjudicar cuesta por clave, porque cuatro sitios de la misma clave se cierran con un solo juicio. Eso es un cociente -- el conjunto de sitios partido por la relacion 'comparte clave' -- y hasta hoy ese cociente se midio en un unico lote (6 sitios, 3 claves). Con un solo punto no hay ni banda ni ley, y sin banda no hay cotizacion.",
+  "population": {
+    "rule": "cinco proyectos de Python puro que ni el censo ni los lotes 1 y 2 tocan, nombrados aqui antes de descargar nada, elegidos por estar en la mochila de casi cualquier backend y por cubrir a proposito los dos extremos de tamano del dominio de coste",
+    "packages": ["charset-normalizer", "pyparsing", "pygments", "tomli", "colorama"],
+    "excluded": "descartados antes de verlos: pyyaml, markupsafe y cryptography, porque su nucleo no es Python y el escaner mide Python",
+    "stratum": "librerias de tiempo de ejecucion de un backend web, dos grandes y tres pequenas"
+  },
+  "derivation": {
+    "from": "fuera-de-dominio-2.json (5 filas con grupos), fuera-de-dominio.json (5 filas sin grupos) y censo.json (13 filas, sin reloj)",
+    "fiber_ratio_measured": 2.0,
+    "fiber_ratio_where": "lote 2: 6 sitios, 3 claves, un solo punto",
+    "fiber_ratio_note": "un cociente medido una vez no tiene banda: el lote 3 la construye o la refuta",
+    "cost_model_in_flight": "s = 0.1578 + 0.00649*bucles, ajustada sobre 10 filas fuera de muestra, R2 0.845, peor residuo 120%",
+    "cost_model_ratios_observed": [0.98, 1.9, 0.7, 0.94, 1.18, 1.18, 1.15, 0.85, 0.75, 2.2],
+    "cost_model_ratio_range": [0.70, 2.20],
+    "r2_gap_in_flight": 0.388,
+    "r2_gap_note": "bucles 0.845 contra ficheros 0.457 sobre 10 filas; el lote 3 lo re-mide sobre 15"
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "las 5 filas reconcilian y publican candidates <= sin_len",
+      "value": "5 de 5 filas",
+      "cota_error": "0 filas",
+      "status": "control",
+      "why_control": "la conservacion es identidad y el candidato nace de un almacen sin cardinalidad publicada: confirmarla no informa, pero fallarla invalida el lote entero"
+    },
+    {
+      "id": "P2",
+      "claim": "en al menos 3 de las 5 filas hay una clave repetida, es decir grupos < candidatos, y el cociente agrupado sitios/grupos es >= 1.3",
+      "value": ">=3 de 5 filas; cociente agrupado en [1.3, infinito)",
+      "cota_error": "0 filas en el conteo; 0.3 en la cota inferior del cociente",
+      "why": "es la unica prediccion de este lote que puede morir por el objeto y no por el reloj: si las claves de estos cinco proyectos son casi todas singulares, el cociente baja a 1.0 y la factura por grupo se vuelve indistinguible de la factura por sitio, que es exactamente lo contrario de lo que el lote 2 dejo medido",
+      "honestidad": "el valor 1.3 esta elegido por debajo del 2.0 medido, no encima: la prediccion es que la fibra sobrevive al cambio de estrato, no que se repite el numero"
+    },
+    {
+      "id": "P3",
+      "claim": "en las filas con bucles >= 50, el cociente reloj_medido / reloj_predicho por s = 0.1578 + 0.00649*bucles cae en [0.55, 2.60]",
+      "value": "0 filas fuera de la banda",
+      "cota_error": "0.55 y 2.60 son los extremos observados (0.70 y 2.20) estirados un 25% por cada lado",
+      "why": "la banda se declara ANTES de ver los datos del lote: estirar los extremos un 25% es el margen que se paga por cotizar con un modelo de R2 0.845 en vez de con una recta",
+      "domain": "bucles >= 50. Por debajo el termino fijo domina y el modelo no aplica; ese borde se declara aqui y no se predice, porque el corpus ya tiene filas pequenas con cociente 0.75 y 2.20 en ambos lados"
+    },
+    {
+      "id": "P4",
+      "claim": "reajustados los dos regresores sobre las 15 filas fuera de muestra, bucles sigue explicando mas que ficheros y la diferencia de R2 no baja de 0.20",
+      "value": "R2(bucles) - R2(ficheros) >= 0.20",
+      "cota_error": "0.20",
+      "why": "es la unica razon por la que una cotizacion se cobra por bucle y no por fichero. Si la ventaja se cierra, la unidad de la cotizacion no la sostiene la muestra y se publica el negativo"
+    }
+  ],
+  "falsification": [
+    "P1 cae si una sola fila no reconcilia o publica candidates > sin_len",
+    "P2 cae si 2 o mas filas tienen todas sus claves distintas, o si el cociente agrupado queda por debajo de 1.3",
+    "P3 cae con una sola fila de bucles >= 50 fuera de [0.55, 2.60]",
+    "P4 cae si la diferencia de R2 baja de 0.20 o si ficheros pasa a bucles",
+    "el lote entero cae como muestra si el replay no reproduce las 5 filas"
+  ],
+  "what_a_refutation_means": "P2 refutada no es un fallo del instrumento: es la respuesta a como se factura. Si las claves de codigo ajeno son singulares, la unidad de la factura es el sitio y el lote 2 fue un caso. P3 refutada dice que la banda de 10 puntos no transfiere a proyectos grandes y la cotizacion tiene que ir por tramos. P4 refutada cierra la pregunta del coste en 'no se predice', y entonces el precio se declara por grupo de adjudicacion, no por tiempo.",
+  "procedure": "python bench/lote.py --paquetes charset-normalizer,pyparsing,pygments,tomli,colorama --out fuera-de-dominio-3.json, que descarga el wheel puro de PyPI, verifica el digest publicado, escanea el subarbol de importacion tres veces y anota el minimo; despues python bench/replay_censo.py --censo fuera-de-dominio-3.json"
+}
