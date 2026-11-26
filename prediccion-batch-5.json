@@ -1,0 +1,50 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 5,
+ "title": "la cotizacion que no da un numero",
+ "declared_before_computation": true,
+ "declared_at": "2026-11-20",
+ "why": "El lote 4 dejo la unidad de factura en el conteo y el reloj como dato de planificacion. Falta el instrumento que convierte un arbol cualquiera en una cotizacion. Si ese instrumento imprime un solo numero, hereda el defecto que el lote 4 midio: el error del modelo va de 16,7 % a 81,5 %. La unica forma honesta de publicar tiempo es un intervalo con garantia, y la garantia se puede comprobar: cobertura empirica sobre sujetos que no participaron en el ajuste.",
+ "what_is_new": "Nada se descarga. Se re-analiza fuera-de-dominio-4.json (15 filas de calibracion, 5 de retencion) y se mide un arbol local. Las cantidades que esta prediccion nombra no se han calculado todavia.",
+ "method": {
+  "score": "residuo relativo leave-one-out del modelo cpu = a + b*bytes, ajustado sin la fila puntuada",
+  "band": "conforme partido: cuantil de los n=15 residuos de calibracion en el indice ceil((n+1)*(1-alfa))",
+  "interval": "[predicho * (1 - q), predicho * (1 + q)] con q el cuantil elegido",
+  "alfa": 0.2,
+  "coverage_subject": "las 5 filas de retencion del lote 4, puntuadas con el modelo ajustado solo con las 15"
+ },
+ "predictions": [
+  {
+   "id": "P1",
+   "kind": "control",
+   "claim": "El cotizador re-lee las 20 filas del lote 4 y reproduce sus conteos sin tocar el escaner: 20 de 20 filas identicas en files, stores, pierde, candidates, admitted, column_loci, las cuatro cubetas, rc, rc_certificado, reconciles y certifica. Band: 20 de 20.",
+   "ratio_orientation": "no_aplica: es una identidad, no un cociente"
+  },
+  {
+   "id": "P2",
+   "kind": "estructural",
+   "claim": "Con n=15 y alfa=0,2 el cuantil conforme cae en el indice 13 de 15, no en el maximo, y su valor sigue siendo grande: el semiancho relativo mediano del intervalo es >= 0,50. Es decir: la banda que el metodo puede sostener es mas ancha que el factor 2, y por tanto ningun punto de la banda sirve como precio. Band: q >= 0,50.",
+   "ratio_orientation": "q / predicho (denominador: el modelo)"
+  },
+  {
+   "id": "P3",
+   "kind": "cuantitativa",
+   "claim": "La banda construida solo con las 15 filas de calibracion cubre al menos 3 de los 5 sujetos de retencion. Band: cobertura >= 3/5, cuando alfa=0,2 promete 4/5 -- el intervalo es valido, la muestra de calibracion es corta.",
+   "ratio_orientation": "dentro / previstos (denominador: el numero de sujetos de retencion)"
+  },
+  {
+   "id": "P4",
+   "kind": "estructural",
+   "claim": "Sin tarifa firmada el cotizador no inventa un precio: publica precio.estado = NO_COTIZADO y sale con un codigo distinto de cero, y con tarifa el precio es exactamente suma(coeficiente * conteo) sobre las unidades declaradas, sin redondeo intermedio. Band: igualdad al entero o al centavo.",
+   "ratio_orientation": "no_aplica: es una identidad, no un cociente"
+  },
+  {
+   "id": "P5",
+   "kind": "extrapolacion",
+   "claim": "Sobre un arbol que no viene de PyPI -- src/fiber_ast_lint del propio repositorio -- las dos corridas devuelven conteos identicos y el semiancho relativo de la banda supera 0,50, asi que la cotizacion de muestra se entrega como conteos exactos mas banda, nunca como cifra unica. Band: semiancho >= 0,50 y conteos identicos 2 de 2.",
+   "ratio_orientation": "q / predicho (denominador: el modelo)"
+  }
+ ],
+ "falsification": "Cae P2 si el cuantil conforme resulta menor que 0,50 (la banda seria util y el lote 4 habria exagerado el defecto). Cae P3 si la cobertura es 2 de 5 o menos (el intervalo no seria valido ni con 15 puntos). Cae P4 si el cotizador imprime un precio sin tarifa o redondea un producto. Cae P5 si el arbol local da conteos distintos entre corridas o una banda estrecha.",
+ "what_it_would_mean": "Si P2 y P3 sobreviven, la conclusion comercial no es 'no se puede cotizar' sino 'se cotiza en conteos y se agenda con banda': el conteo es exacto y reproducible (lote 4, 15 de 15) y el tiempo se declara como intervalo con la cobertura medida al lado. El instrumento existe para que el cliente pueda re-contar la banda sin nuestro codigo."
+}
