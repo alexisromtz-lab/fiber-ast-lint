@@ -508,7 +508,8 @@ and `name` four times in one function. Adjudication is priced per group, so the 
 `s = 0.1578 + 0.00649·bucles` with `R² = 0.845` and 120 %. Loops explain almost twice the variance
 and neither explains the clock: between 0.08 s and 0.16 s of interpreter start dominates a scan this
 size. So the honest quote is a band with a fixed term and a per-loop term — and `R² = 0.845` over ten
-points with two parameters is an ordering between two regressors, not a model.
+points with two parameters is an ordering between two regressors, not a model. **That ordering was
+retired by the next batch**: see *A batch that killed its own unit of invoice*, below.
 
 **The reader had the assumption, not the object.** `six` is a module, not a package, and the scanner
 accepts a file — it checks `is_file()` before `is_dir()`. `bench/replay_censo.py` demanded a
@@ -517,7 +518,78 @@ keeps finding: a fact about the reader mistaken for a fact about the subject. Fi
 and pinned by `tests/test_replay_scope.py`, whose two tests each kill the `is_dir()` mutant of their
 own branch.
 
-### Does it fire when the defect is planted?
+### A batch that killed its own unit of invoice
+
+The batch before this one left a sentence that could be sold: adjudication is priced per group, and
+the clock is priced per loop. Both claims rested on five packages. `prediccion-batch-3.json` was
+committed at `a713ad2` naming five *other* packages — `charset-normalizer`, `pyparsing`, `pygments`,
+`tomli`, `colorama` — and four claims, **before any byte was fetched**; `bench/lote.py` is the reader
+that goes and gets them, so the batch no longer depends on a shell transcript.
+
+| package | version | files | stores | `sin_len` | loops | sites | keys | s |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| charset-normalizer | 3.5.3 | 12 | 7 | 2 | 43 | 0 | 0 | 0.263 |
+| pyparsing | 3.3.3 | 17 | 9 | 9 | 82 | 4 | 1 | 0.701 |
+| pygments | 2.21.0 | 343 | 51 | 44 | 369 | 2 | 2 | 4.941 |
+| tomli | 2.5.0 | 4 | 0 | 0 | 6 | 0 | 0 | 0.100 |
+| colorama | 0.4.6 | 13 | 0 | 0 | 9 | 0 | 0 | 0.136 |
+| **added** | | **389** | **67** | **55** | **509** | **6** | **3** | **6.141** |
+
+| | claim | declared | measured | |
+|---|---|---|---|---|
+| P1 | every row reconciles, `candidates <= sin_len` | 5 of 5 | 5 of 5 | passes (control) |
+| P2 | ≥ 3 of 5 rows have a repeated key, and pooled sites/keys ≥ 1.3 | ≥ 3 rows | 1 row; 6/3 = 2.0 | **refuted on the count** |
+| P3 | `measured / predicted` in `[0.55, 2.60]` for rows with ≥ 50 loops | 0 rows outside | 1.016 and 1.936 | **not readable** |
+| P4 | loops still beat files out of sample, by ≥ 0.20 in `R²` | ≥ 0.20 | −0.0177 | **refuted, order inverted** |
+
+**What died was the frequency, not the fibre.** Six sites closed by three decisions is the same
+quotient as the previous batch — 2.0, exactly. What the previous batch had no right to infer from one
+case is that collisions are *common*: across ten rows that have any site at all, two have a repeated
+key. The fibre is real and its prevalence was never measured; P2 asserted the second and died on it.
+
+**P3 is the one that cannot be read, and that is the finding.** Its band says
+`measured / predicted`, and the extremes it was stretched from — 0.70 and 2.20 — had been written down
+in the other orientation. Under its own words the two rows in the domain land at 1.016 and 1.936 and
+survive; read as `predicted / measured` the large row is 0.517 and dies. One key, two subjects: a
+prediction whose orientation is chosen after the datum is not a prediction. The schema now demands
+`ratio_orientation` on any claim that compares a measurement to a model, and
+`tests/test_censo_fuera.py` fails a new prediction file that omits it; this file is the documented
+exception, pinned as such so it cannot become a silent one.
+
+**The loop model is gone.** Re-fitted on the fifteen out-of-sample rows:
+
+| regressor | model | `R²` | worst residual |
+|---|---|---:|---|
+| bytes | `s = 0.12027 + 0.0000039·bytes` | 0.9822 | 361 % (attrs, 6 files) |
+| files | `s = 0.23382 + 0.0138009·ficheros` | 0.9664 | 281 % (attrs, 6 files) |
+| loops | `s = -0.12141 + 0.0126910·bucles` | 0.9487 | 246 % (attrs, 6 files) |
+
+Loops drop from best to worst. The previous batch fitted files from 1 to 36; this one adds a project
+of 343 files carrying 369 loops — 1.08 loops per file against 5.6 in `jinja2`. The advantage was the
+sample's narrow range, not the object's structure. Note the negative intercept: a line that says a
+scan of nothing takes minus a tenth of a second is not a model, it is a fit. All three regressors fail
+on the same row, the four-file project, where interpreter start is larger than the scan. So the quote
+is a fixed term plus size, and relative error is only punitive above roughly ten files — **nothing is
+priced per loop**.
+
+**The rate is a property of the project, not of the instrument.** Pooled `candidates / sin_len`:
+
+| batch | candidates | `sin_len` | pooled |
+|---|---:|---:|---:|
+| 1 (exploratory) | 14 | 35 | 40.0 % |
+| 2 (confirmatory) | 6 | 25 | 24.0 % |
+| 3 (this one) | 6 | 55 | 10.9 % |
+| **cumulative** | **26** | **115** | **22.6 %** |
+
+Within the single stratum "runtime library of a backend" the per-project quotient runs from 0 of 2 to
+11 of 26. 22.6 % over 115 stores is defensible as a summary of a heterogeneous population and is not
+a rate to quote per project.
+
+Two rows certify their own emptiness (`tomli`, `colorama`: zero stores, `rc_certificado = 2`,
+`certifica = false`), and five of the six sites are `PROYECCION_ARRIBA_CON_PERDIDA` — the species
+batch 1 never saw in 14 sites. Six sites do not support a species ratio; the direction is worth
+recording and the number is not.
+
 
 Three candidates establish precision and nothing else — a sample that small cannot say whether a
 defect of a given class is *caught*. So the other direction, measured on truth I constructed, which

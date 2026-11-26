@@ -1,0 +1,325 @@
+{
+  "schema": "fiber-ast-lint/censo/1",
+  "instrument": "fiber-ast-lint",
+  "instrument_version": "0.4.6",
+  "measured_at": "2026-11-26",
+  "interpreter": "CPython 3.12.13",
+  "method": "wheel puro de PyPI (py3-none-any), digest verificado contra el sha256 publicado; escaneo del subarbol de importacion con python -m fiber_ast_lint --json; segundos_min = minimo de tres corridas, arranque del interprete incluido",
+  "measured_by": "python bench/lote.py --paquetes charset-normalizer,pyparsing,pygments,tomli,colorama --out fuera-de-dominio-3.json",
+  "reproduce": "python bench/replay_censo.py --censo fuera-de-dominio-3.json",
+  "prediction": {
+    "file": "prediccion-batch-3.json",
+    "sha256": "4dfa24e9bfb4b5825d4fc0f7b8feb29544acbdce6f46fae4053ba8b3e567318d",
+    "commit": "a713ad2",
+    "order": "la prediccion se commiteo antes de la primera descarga; este archivo se escribio despues"
+  },
+  "sample": {
+    "rule": "cinco proyectos de Python puro que ni el censo ni los lotes 1 y 2 tocan, nombrados antes de descargar nada, elegidos por cubrir a proposito los dos extremos del dominio de coste",
+    "declared_before_reading_code": true,
+    "packages": [
+      "charset-normalizer",
+      "pyparsing",
+      "pygments",
+      "tomli",
+      "colorama"
+    ],
+    "excluded_before_seeing": [
+      "pyyaml",
+      "markupsafe",
+      "cryptography"
+    ],
+    "stratum": "librerias de tiempo de ejecucion de un backend web, dos grandes y tres pequenas"
+  },
+  "status": {
+    "verdict": "MIXTO: 1 de 4 sobrevive, 1 es control, 2 mueren",
+    "why": "P1 sobrevive como control y no informa. P2 muere en su conteo. P3 no se puede leer: su banda admite dos orientaciones y el pre-registro no fijo cual, asi que el defecto es del pre-registro y la prediccion no cuenta como evidencia. P4 muere, y era la unica que sostenia una unidad de factura",
+    "limit": "el lote mide cinco proyectos elegidos por mi; la mitad salio sin almacenes, y una fila de 343 ficheros domina el reloj del lote entero. Ni la tasa ni el coste se generalizan desde aqui"
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "las 5 filas reconcilian y publican candidates <= sin_len",
+      "observed": "5 de 5 reconcilian; 0<=2, 4<=9, 2<=44, 0<=0, 0<=0",
+      "verdict": "Sobrevive (control), y no informa"
+    },
+    {
+      "id": "P2",
+      "claim": "en al menos 3 de las 5 filas hay una clave repetida, y el cociente agrupado sitios/grupos es >= 1.3",
+      "observed": "1 de 5 filas tiene una clave repetida: pyparsing, 4 sitios y 1 clave. pygments tiene 2 sitios y 2 claves. Las otras tres filas no tienen ni un sitio, asi que no pueden colisionar. El cociente agrupado salio 6/3 = 2.0",
+      "verdict": "Refutada en el conteo, cumplida en el cociente: la conjuncion cae",
+      "why_it_died": "el segundo lote midio 6 sitios y 3 claves en 5 ficheros-pequenos con 6 candidatos; ese cociente 2.0 era la fibra de UNA clave grande (packaging name, 4 sitios). Extrapolarlo a 'al menos 3 de 5 filas' confundio un caso con una prevalencia. La fibra sobrevive donde hay sitios; lo que no sobrevive es la frecuencia con la que aparecen"
+    },
+    {
+      "id": "P3",
+      "claim": "en filas con bucles >= 50, medido/predicho de s = 0.1578 + 0.00649*bucles cae en [0.55, 2.60]",
+      "observed": "dominio: solo pyparsing (82 bucles, 0.701 s contra 0.690 predichos, 1.016) y pygments (369 bucles, 4.941 s contra 2.553 predichos, 1.936). Las dos caen dentro. Leida al reves, predicho/medido, pygments da 0.517 y cae fuera",
+      "verdict": "NO CONCLUYENTE: el pre-registro admite dos lecturas y no fijo cual",
+      "why_it_died": "los numeros de la banda (0.55 y 2.60) se estiraron desde los extremos 0.70 y 2.20 que el lote 2 anoto como predicho/medido, pero la letra de P3 pide medido/predicho. Bajo la letra sobrevive 2 de 2; bajo la convencion de sus propios extremos muere en la fila grande. Una prediccion con dos orientaciones no predice: lo que mide es la orientacion que el lector elija despues de ver el dato"
+    },
+    {
+      "id": "P4",
+      "claim": "reajustados los dos regresores sobre las 15 filas, bucles sigue explicando mas que ficheros y la diferencia de R2 no baja de 0.20",
+      "observed": "bucles R2 0.9487 contra ficheros 0.9664: la diferencia es -0.0177, no +0.20",
+      "verdict": "Refutada, y el orden se invirtio",
+      "why_it_died": "el lote 2 ajusto sobre ficheros de 1 a 36; el lote 3 mete uno de 343 con 369 bucles, es decir 1.08 bucles por fichero contra los 5.6 de jinja2. La ventaja de los bucles no era del objeto: era del rango estrecho del muestreo. Con 15 filas, bucles es el peor de los tres regresores"
+    }
+  ],
+  "predictions_summary": "4 predicciones, 4 commitadas antes del primer byte: 1 control que se cumple, 1 refutada en su conteo, 1 refutada invirtiendo el orden de los regresores y 1 que no se puede leer porque la escribi con dos orientaciones. El lote no confirma la unidad de factura por bucles; la entierra con el dato que la sostenia",
+  "defect_found": {
+    "name": "UNA BANDA, DOS ORIENTACIONES",
+    "where": "prediccion-batch-3.json, P3",
+    "what": "el cociente se escribio como medido/predicho y los extremos que lo justifican se habian anotado como predicho/medido. La misma llave, dos sujetos",
+    "why_it_matters": "una prediccion refutada ensena; una prediccion ambigua permite elegir el veredicto despues. Es el modo de fallo que se estaba intentando evitar",
+    "fix": "el esquema de prediccion exige ahora ratio_orientation explicita en toda prediccion que publique un cociente, y un test lo hace fallar si falta"
+  },
+  "rate_is_a_property_of_the_project": {
+    "lotes": [
+      {
+        "lote": 1,
+        "candidates": 14,
+        "sin_len": 35,
+        "ratio": 0.4
+      },
+      {
+        "lote": 2,
+        "candidates": 6,
+        "sin_len": 25,
+        "ratio": 0.24
+      },
+      {
+        "lote": 3,
+        "candidates": 6,
+        "sin_len": 55,
+        "ratio": 0.1091
+      }
+    ],
+    "cumulative_out_of_sample": {
+      "candidates": 26,
+      "sin_len": 115,
+      "ratio": 0.2261,
+      "rows": 15
+    },
+    "reading": "el cociente agrupado de los tres lotes baja 40%, 24%, 11%. Dentro del mismo estrato 'libreria de backend' el rango por proyecto va de 0/2 (charset-normalizer) a 11/26 (attrs). La tasa no es una propiedad del instrumento ni del estrato: es una propiedad del proyecto, y por eso ningun numero unico puede cotizarse como rendimiento esperado",
+    "honesty": "el cociente acumulado 0.2261 sobre 115 almacenes sin_len es el unico numero defendible, y lo es como resumen de una poblacion heterogenea, no como tasa"
+  },
+  "rows": [
+    {
+      "package": "charset-normalizer",
+      "version": "3.5.3",
+      "artifact": "charset_normalizer-3.5.3-py3-none-any.whl",
+      "sha256": "96e268b0cbda016ac519513294fcd17032264085b600abaac58b93049477e132",
+      "bytes": 68878,
+      "scope": "charset_normalizer",
+      "species": {},
+      "files": 12,
+      "stores": 7,
+      "pierde": 0,
+      "loops": 43,
+      "guardadas": 4,
+      "acumulacion": 1,
+      "posicional": 0,
+      "sin_len": 2,
+      "candidates": 0,
+      "admitted": 0,
+      "column_loci": 0,
+      "rc": 0,
+      "rc_certificado": 0,
+      "reconciles": true,
+      "certifica": true,
+      "segundos_min": 0.263,
+      "sites": 0,
+      "groups": 0,
+      "sites_per_group": null
+    },
+    {
+      "package": "pyparsing",
+      "version": "3.3.3",
+      "artifact": "pyparsing-3.3.3-py3-none-any.whl",
+      "sha256": "ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4",
+      "bytes": 126420,
+      "scope": "pyparsing",
+      "species": {
+        "PROYECCION_ARRIBA_CON_PERDIDA": 4
+      },
+      "files": 17,
+      "stores": 9,
+      "pierde": 0,
+      "loops": 82,
+      "guardadas": 0,
+      "acumulacion": 0,
+      "posicional": 0,
+      "sin_len": 9,
+      "candidates": 4,
+      "admitted": 4,
+      "column_loci": 0,
+      "rc": 1,
+      "rc_certificado": 1,
+      "reconciles": true,
+      "certifica": true,
+      "segundos_min": 0.701,
+      "sites": 4,
+      "groups": 1,
+      "sites_per_group": 4.0
+    },
+    {
+      "package": "pygments",
+      "version": "2.21.0",
+      "artifact": "pygments-2.21.0-py3-none-any.whl",
+      "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9",
+      "bytes": 1250147,
+      "scope": "pygments",
+      "species": {
+        "PROYECCION_ARRIBA_CON_PERDIDA": 1,
+        "SELECCION_COLUMNA_BUCLE": 1
+      },
+      "files": 343,
+      "stores": 51,
+      "pierde": 0,
+      "loops": 369,
+      "guardadas": 3,
+      "acumulacion": 1,
+      "posicional": 3,
+      "sin_len": 44,
+      "candidates": 2,
+      "admitted": 1,
+      "column_loci": 1,
+      "rc": 1,
+      "rc_certificado": 1,
+      "reconciles": true,
+      "certifica": true,
+      "segundos_min": 4.941,
+      "sites": 2,
+      "groups": 2,
+      "sites_per_group": 1.0
+    },
+    {
+      "package": "tomli",
+      "version": "2.5.0",
+      "artifact": "tomli-2.5.0-py3-none-any.whl",
+      "sha256": "32a7b79ac57a2e83670ce329ccf675798bc5a2094783a63676866b70503f2e2b",
+      "bytes": 14765,
+      "scope": "tomli",
+      "species": {},
+      "files": 4,
+      "stores": 0,
+      "pierde": 0,
+      "loops": 6,
+      "guardadas": 0,
+      "acumulacion": 0,
+      "posicional": 0,
+      "sin_len": 0,
+      "candidates": 0,
+      "admitted": 0,
+      "column_loci": 0,
+      "rc": 0,
+      "rc_certificado": 2,
+      "reconciles": true,
+      "certifica": false,
+      "segundos_min": 0.1,
+      "sites": 0,
+      "groups": 0,
+      "sites_per_group": null
+    },
+    {
+      "package": "colorama",
+      "version": "0.4.6",
+      "artifact": "colorama-0.4.6-py2.py3-none-any.whl",
+      "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+      "bytes": 25335,
+      "scope": "colorama",
+      "species": {},
+      "files": 13,
+      "stores": 0,
+      "pierde": 0,
+      "loops": 9,
+      "guardadas": 0,
+      "acumulacion": 0,
+      "posicional": 0,
+      "sin_len": 0,
+      "candidates": 0,
+      "admitted": 0,
+      "column_loci": 0,
+      "rc": 0,
+      "rc_certificado": 2,
+      "reconciles": true,
+      "certifica": false,
+      "segundos_min": 0.136,
+      "sites": 0,
+      "groups": 0,
+      "sites_per_group": null
+    }
+  ],
+  "totals": {
+    "files": 389,
+    "stores": 67,
+    "pierde": 0,
+    "guardadas": 7,
+    "acumulacion": 2,
+    "posicional": 3,
+    "sin_len": 55,
+    "loops": 509,
+    "candidates": 6,
+    "admitted": 5,
+    "column_loci": 1,
+    "sites": 6,
+    "groups": 3,
+    "segundos_min": 6.141
+  },
+  "conservation_check": "0+4+1+0+2 = 7; 0+0+0+0+9 = 9; 0+3+1+3+44 = 51; 0 = 0; 0 = 0. Las cinco filas reconcilian y solo las tres con almacenes certifican",
+  "invariant": {
+    "claim": "candidates <= sin_len",
+    "rows_checked": 28,
+    "rows_held": 28,
+    "why_cumulative": "el lote 3 suma sus 5 filas a las 23 ya medidas; cada archivo declara la poblacion que midio y ninguno reescribe el anterior",
+    "checked_by": "tests/test_censo_fuera.py::test_ningun_candidato_nace_fuera_de_sin_len"
+  },
+  "cost": {
+    "regresores_sobre_15_filas": {
+      "bytes": {
+        "model": "s = 0.12027 + 0.0000039*bytes",
+        "r2": 0.9822,
+        "peor_residuo": "361% (attrs, 6 ficheros)"
+      },
+      "files": {
+        "model": "s = 0.23382 + 0.0138009*ficheros",
+        "r2": 0.9664,
+        "peor_residuo": "281% (attrs, 6 ficheros)"
+      },
+      "loops": {
+        "model": "s = -0.12141 + 0.0126910*bucles",
+        "r2": 0.9487,
+        "peor_residuo": "246% (attrs, 6 ficheros)"
+      }
+    },
+    "reading": "con 15 filas el mejor regresor unico es el tamano del artefacto, no los bucles, y el orden que el lote 2 publico era del muestreo. Los tres fallan en el mismo sitio: el proyecto minimo, donde el arranque del interprete pesa mas que el escaneo. El intercepto negativo de bucles lo dice sin ambiguedad: la recta no puede pasar por cero",
+    "honesty": "R2 0.9822 sobre 15 puntos y 2 parametros no es un modelo de coste: es un orden entre tres regresores sobre una muestra en la que una fila de 343 ficheros pesa mas que las otras catorce juntas",
+    "pricing_consequence": "no se cotiza por bucles. Si se cotiza con estos datos, se cotiza con termino fijo mas tamano, y el error relativo solo es punible por encima de los 10 ficheros, donde el arranque deja de mandar"
+  },
+  "sites_vs_groups": {
+    "sites": 6,
+    "groups": 3,
+    "fiber_pooled": 2.0,
+    "detail": [
+      "pyparsing PROYECCION_ARRIBA_CON_PERDIDA, 4 sitios en 1 clave",
+      "pygments PROYECCION_ARRIBA_CON_PERDIDA 1 sitio, SELECCION_COLUMNA_BUCLE 1 sitio"
+    ],
+    "reading": "6 sitios se cierran con 3 juicios, el mismo cociente que el lote 2. Lo que este lote refuta no es la fibra sino su frecuencia: 5 lotes de 5 proyectos dieron colision en 2 de 10 filas con sitios"
+  },
+  "new_species": {
+    "form": "PROYECCION_ARRIBA_CON_PERDIDA",
+    "sites": 5,
+    "where": "pyparsing 4 de 4, pygments 1 de 2",
+    "why_it_matters": "el lote 3 no trae ni un solo SELECCION_COLUMNA_BUCLE dominante: en 5 de 6 sitios la especie es la que el lote 1 no vio en 14 sitios. Con dos lotes la especie rara parece la comun en proyectos grandes, y eso es una direccion, no una tasa: 6 sitios no sostienen un cociente de especies"
+  },
+  "zero_with_certificate": {
+    "packages": [
+      "tomli",
+      "colorama"
+    ],
+    "why": "0 almacenes con rc_certificado 2 y certifica false: la ausencia esta certificada. tomli es 4 ficheros y colorama 13; los dos tienen bucles y ninguno tiene un almacen que perder, y eso es un cero medido, no un cero ciego"
+  },
+  "replay": {
+    "command": "python bench/replay_censo.py --censo fuera-de-dominio-3.json",
+    "line": "REPLAY IDENTICO · 5 filas"
+  }
+}

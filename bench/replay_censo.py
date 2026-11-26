@@ -100,7 +100,14 @@ def _medir(raiz: Path) -> dict:
         raise RuntimeError(f"sin JSON para {raiz}: {p.stderr.strip()[:400]}")
     d = json.loads(p.stdout)
     cand = d["candidatos"]
-    return {"files": d["archivos"], "stores": d["almacenes"], "pierde": d["pierde"],
+    # `claves` is not compared by the replay; it is what the invoice is counted
+    # in -- one adjudication closes every site that shares a key -- and a second
+    # definition of a row would be a second thing to keep in sync.
+    return {"claves": [c["clave"] for c in cand],
+            "species": {f: sum(1 for c in cand if c["forma"] == f)
+                        for f in sorted({c["forma"] for c in cand})},
+            "files": d["archivos"], "stores": d["almacenes"], "pierde": d["pierde"],
+            "loops": d["for_medidos"],
             **{k: d[k] for k in CUBETAS},
             "candidates": len(cand),
             "admitted": sum(1 for c in cand if c["severidad"] == "CANDIDATO"),

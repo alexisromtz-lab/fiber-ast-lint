@@ -297,3 +297,177 @@ def test_los_veredictos_y_el_cociente_del_readme_son_los_del_archivo():
     assert s["sites"] == SEGUNDO["totals"]["candidates"]
     assert s["groups"] == len(s["detail"])
     assert "3 decisions" in README
+
+
+# --- lote 3: el lote que mato su propia unidad de factura --------------------
+#
+# El lote 2 predijo una tasa y sobrevivio. Este predijo la UNIDAD de la factura
+# -- sitios partido por claves -- y al medirla mato la unidad de coste que el
+# lote 2 habia dejado en pie. Los tests de este bloque recalculan los veredictos
+# desde las filas: un veredicto que solo vive en la prosa envejece en silencio.
+TERCERO = json.loads((RAIZ / "fuera-de-dominio-3.json").read_text(encoding="utf-8"))
+PREDICCION_3 = RAIZ / "prediccion-batch-3.json"
+SECCION_3 = "### A batch that killed its own unit of invoice"
+
+
+def _ajuste(filas, clave):
+    """s = a + b*clave por minimos cuadrados; devuelve (a, b, R2)."""
+    n = len(filas)
+    xs = [r[clave] for r in filas]
+    ys = [r["segundos_min"] for r in filas]
+    mx, my = sum(xs) / n, sum(ys) / n
+    b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sum((x - mx) ** 2 for x in xs)
+    a = my - b * mx
+    ss = sum((y - my) ** 2 for y in ys)
+    return a, b, 1 - sum((y - (a + b * x)) ** 2 for x, y in zip(xs, ys)) / ss
+
+
+def _quince():
+    return FUERA["rows"] + SEGUNDO["rows"] + TERCERO["rows"]
+
+
+def test_el_pin_de_la_prediccion_del_lote_3_es_el_archivo_que_viaja():
+    assert TERCERO["prediction"]["sha256"] == _sha(PREDICCION_3)
+    declarado = json.loads(PREDICCION_3.read_text(encoding="utf-8"))
+    assert declarado["declared_before_fetch"] is True
+    assert list(declarado["population"]["packages"]) == [r["package"] for r in TERCERO["rows"]], \
+        "el lote medido no es el lote nombrado en la prediccion"
+
+
+def test_las_filas_del_lote_3_anaden_campos_sin_perder_ninguno():
+    # El esquema crecio: las fibras y la especie son medida nueva. Lo que no puede
+    # pasar es que una fila del lote 3 pierda una clave que el lector del lote 2
+    # compara, porque entonces el replay leeria None como si fuera un cero.
+    faltan = set(SEGUNDO["rows"][0]) - set(TERCERO["rows"][0])
+    assert not faltan, faltan
+    for r in TERCERO["rows"]:
+        assert len(r["sha256"]) == 64 and len(set(r["sha256"])) > 8, r["package"]
+        assert sum(r[k] for k in CUBETAS) == r["stores"], r["package"]
+        assert r["candidates"] <= r["sin_len"], r["package"]
+        assert r["reconciles"] is True, r["package"]
+        assert r["sites"] == r["candidates"], r["package"]
+        assert r["groups"] <= r["sites"], r["package"]
+        assert sum(r["species"].values()) == r["sites"], r["package"]
+    assert len({r["sha256"] for r in TERCERO["rows"]}) == len(TERCERO["rows"])
+
+
+def test_las_fibras_se_recalculan_y_la_frecuencia_sigue_refutando_p2():
+    filas = TERCERO["rows"]
+    con_sitios = [r for r in filas if r["sites"]]
+    con_colision = [r for r in con_sitios if r["groups"] < r["sites"]]
+    assert len(con_colision) == 1, [r["package"] for r in con_colision]
+    assert con_colision[0]["package"] == "pyparsing"
+    agrupado = TERCERO["totals"]["sites"] / TERCERO["totals"]["groups"]
+    assert abs(agrupado - TERCERO["sites_vs_groups"]["fiber_pooled"]) < 1e-9
+    # La conjuncion de P2 exige >= 3 de 5 filas con colision; el archivo la declara
+    # refutada y este recalculo tiene que seguir dandole la razon.
+    assert len(con_colision) < 3
+
+
+def test_los_totales_del_lote_3_son_la_suma_de_sus_filas():
+    for k, v in TERCERO["totals"].items():
+        suma = sum(r[k] for r in TERCERO["rows"])
+        if isinstance(v, float):
+            assert _cuadra(suma, v), (k, v, suma)
+        else:
+            assert v == suma, k
+
+
+def test_p4_se_recalcula_y_loops_ya_no_gana():
+    filas = _quince()
+    assert len(filas) == 15
+    ajustes = {k: round(_ajuste(filas, k)[2], 4) for k in ("bytes", "files", "loops")}
+    publicado = {k: v["r2"] for k, v in TERCERO["cost"]["regresores_sobre_15_filas"].items()}
+    assert ajustes == publicado, (ajustes, publicado)
+    # P4 exigia bucles - ficheros >= 0.20; el recalculo da negativo: la prediccion
+    # murio y el orden de los regresores se invirtio.
+    assert ajustes["loops"] - ajustes["files"] < 0.20
+    assert ajustes["files"] > ajustes["loops"] > 0
+    assert ajustes["bytes"] >= ajustes["files"], "el mejor regresor unico ya no es el tamano"
+
+
+def test_la_tasa_de_los_tres_lotes_se_recalcula():
+    lotes = {"1": FUERA, "2": SEGUNDO, "3": TERCERO}
+    publicado = {str(d["lote"]): d for d in TERCERO["rate_is_a_property_of_the_project"]["lotes"]}
+    acumulado = [0, 0]
+    for clave, doc in lotes.items():
+        c, d = doc["totals"]["candidates"], doc["totals"]["sin_len"]
+        assert c == publicado[clave]["candidates"] and d == publicado[clave]["sin_len"], clave
+        assert abs(c / d - publicado[clave]["ratio"]) < 1e-3, clave
+        acumulado = [acumulado[0] + c, acumulado[1] + d]
+    total = TERCERO["rate_is_a_property_of_the_project"]["cumulative_out_of_sample"]
+    assert [total["candidates"], total["sin_len"]] == acumulado
+    assert abs(acumulado[0] / acumulado[1] - total["ratio"]) < 1e-3
+    # Un cociente por lote que baja 40, 24, 11 no sostiene ninguna tasa unica.
+    assert publicado["1"]["ratio"] > publicado["2"]["ratio"] > publicado["3"]["ratio"]
+
+
+def test_toda_prediccion_con_cociente_declara_su_orientacion():
+    """Un cociente entre medicion y modelo tiene dos lecturas y la llave no lo dice.
+
+    El pre-registro de este lote escribio la banda como medido/predicho y la
+    justifico con extremos anotados como predicho/medido. Bajo una letra
+    sobrevive y bajo la otra muere, asi que el defecto es del pre-registro. La
+    regla vale para todo archivo nuevo; la excepcion se nombra aqui y tiene que
+    seguir documentada en el artefacto, o deja de ser una excepcion y pasa a ser
+    un agujero.
+    """
+    exentos = {("prediccion-batch-3.json", "P3")}
+    for fichero in sorted(RAIZ.glob("prediccion-batch-*.json")):
+        doc = json.loads(fichero.read_text(encoding="utf-8"))
+        for p in doc["predictions"]:
+            texto = p["claim"].lower()
+            if "predicho" not in texto and "modelo" not in texto:
+                continue
+            if (fichero.name, p["id"]) in exentos:
+                continue
+            assert p.get("ratio_orientation") in ("medido/predicho", "predicho/medido"), \
+                f"{fichero.name} {p['id']}: un cociente sin orientacion admite dos veredictos"
+    defecto = TERCERO["defect_found"]
+    assert defecto["where"].startswith("prediccion-batch-3.json")
+    assert "P3" in defecto["where"]
+    assert "ratio_orientation" in defecto["fix"]
+    assert "ratio_orientation" in README, "la regla del esquema se lee en el archivo, no solo en el test"
+
+
+def test_la_tabla_del_lote_3_es_el_archivo():
+    lineas = README[README.index(SECCION_3):]
+    inicio = next(i for i, l in enumerate(lineas.splitlines())
+                  if l.startswith("| package | version | files | stores |"))
+    filas = []
+    for linea in lineas.splitlines()[inicio + 1:]:
+        if not linea.startswith("|"):
+            break
+        celdas = [c.strip().replace("**", "").replace("`", "")
+                  for c in linea.strip().strip("|").split("|")]
+        if all(set(c) <= set("-: ") for c in celdas):
+            continue
+        filas.append(celdas)
+    publicadas = [f for f in filas if f[0] != "added"]
+    assert len(publicadas) == len(TERCERO["rows"])
+    for celda, r in zip(publicadas, TERCERO["rows"]):
+        assert celda[0] == r["package"], celda[0]
+        assert celda[1] == r["version"], celda[1]
+        for celda_i, clave in ((2, "files"), (3, "stores"), (4, "sin_len"),
+                               (5, "loops"), (6, "sites"), (7, "groups")):
+            assert _num(celda[celda_i]) == r[clave], (r["package"], clave)
+        assert float(celda[8]) == r["segundos_min"], (r["package"], celda[8])
+    total = [f for f in filas if f[0] == "added"][0]
+    for celda_i, clave in ((2, "files"), (3, "stores"), (4, "sin_len"),
+                           (5, "loops"), (6, "sites"), (7, "groups")):
+        assert _num(total[celda_i]) == TERCERO["totals"][clave], clave
+    assert float(total[8]) == TERCERO["totals"]["segundos_min"]
+
+
+def test_las_cifras_del_readme_del_lote_3_son_las_del_archivo():
+    trozo = README[README.index(SECCION_3):]
+    plano = trozo.replace("\n", " ")
+    for k in ("bytes", "files", "loops"):
+        assert str(TERCERO["cost"]["regresores_sobre_15_filas"][k]["r2"]) in trozo, k
+    for d in TERCERO["rate_is_a_property_of_the_project"]["lotes"]:
+        assert f"{100 * d['ratio']:.1f} %" in trozo, d["lote"]
+    total = TERCERO["rate_is_a_property_of_the_project"]["cumulative_out_of_sample"]
+    assert f"{100 * total['ratio']:.1f} %" in trozo
+    assert "nothing is priced per loop" in plano
+    for p in TERCERO["predictions"]:
+        assert p["id"] in trozo, p["id"]
