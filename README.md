@@ -407,6 +407,64 @@ The three shapes are distilled into `tests/test_out_of_sample.py`, which recompu
 (`CANDIDATO` / `LATENTE` / no store) on every run, offline. The upstream disclosure for `flake8` is
 drafted in [`docs/FLAKE8_REPORT_DRAFT.md`](docs/FLAKE8_REPORT_DRAFT.md) and is **not filed**.
 
+### Four domains the census never touches, and the denominator that was wrong
+
+The section above tests *precision*, and it cannot test *yield*, because its three packages were
+chosen for density: they are more linters. The first question a buyer asks is the opposite one —
+*how much work does my repository generate?* — and it needs strata the census does not contain.
+
+The rule, fixed before a line of their code was read: **one package per domain** — command line
+(`click`), HTTP client (`requests`), attribute model (`attrs`), tabulation (`tabulate`). Latest PyPI
+wheel of each on 2026-11-26, pin checked against PyPI's own digest, named subtree analysed, no
+install, no network during analysis.
+
+What was **not** fixed is a number. These five rows were measured before any prediction existed, so
+this section is **exploratory** and publishes no constant — the mirror image of the paragraph above,
+where the prediction came first and survived. The status travels in
+[`fuera-de-dominio.json`](fuera-de-dominio.json) as a field the tests read, not as prose.
+
+| package | version | scope | files | stores | `sin_len` | candidates | admitted | `reconciles` |
+|---|---|---|---:|---:|---:|---:|---:|---|
+| `attrs` | 26.1.0 | `attr/` | 13 | 28 | 26 | **11** | 9 | yes |
+| `attrs` | 26.1.0 | `attrs/` | 6 | 0 | 0 | 0 | 0 | yes — 0 stores, no certificate |
+| `click` | 8.5.1 | `click/` | 17 | 6 | 2 | 0 | 0 | yes |
+| `requests` | 2.34.2 | `requests/` | 19 | 9 | 6 | **3** | 1 | yes |
+| `tabulate` | 0.10.0 | `tabulate/` | 1 | 4 | 1 | 0 | 0 | yes |
+| **added** | | | **56** | **47** | **35** | **14** | **10** | 5/5 |
+
+`attrs` ships two trees and both are analysed: `attr/` is the package, `attrs/` the newer namespace,
+and the empty row is published as an empty row — a zero with a certificate, not a blind spot.
+
+**The denominator was wrong.** Across the 13 rows of [`censo.json`](censo.json) and these 5 — 18
+rows over 18 distinct artifacts — `candidates ≤ sin_len` holds without exception. A candidate can
+only be born of a store whose cardinality is not published, so `almacenes` is the pre-filter
+population and `sin_len` the post-filter one, and a quotient over `almacenes` divides one population
+by the other. Over the right denominator:
+
+| population | stores | `sin_len` | candidates | cand / stores | cand / `sin_len` |
+|---|---:|---:|---:|---:|---:|
+| 13 census rows | 308 | 209 | 30 | 9.74 % | 14.35 % |
+| these 5 rows | 47 | 35 | 14 | 29.79 % | 40.00 % |
+
+The two samples are **not added and not averaged**: the census samples development tooling and this
+one samples four other domains, so a pooled mean would be a mean over a stratum the table chose.
+What the pair says is the thing a rate cannot say — the yield is a property of the *code*, not of
+the instrument, and it moves by a factor of three between two strata of the same language.
+
+**A site is not a finding.** The 14 candidates are 11 sites of one key in `attr/` — `a.name`, in
+`asdict`, `_collect_base_attrs`, `_collect_base_attrs_broken`, `_ClassBuilder.add_setattr` and
+`_make_init_script` — plus three single sites in `requests/`. Counted as constructs that a human
+adjudicates, they are **8**, not 14; the same key over five places is one judgment and five loci.
+`tabulate` writes `d[key] = row` over a list it derived, and loses 2 stores doing it, with zero
+candidates: losing a store is not finding one.
+
+**What it costs, measured.** The five scans are 2.06 s of wall clock for 56 files, minimum of three
+runs each, interpreter start included (`0.083 s` of the `attrs/` row is almost all start). At that
+price the scan is not the audit — adjudicating the 8 constructs is — and the scan's real commercial
+use is the other way round: **it is the instrument that prices the job**, because the load ranges
+from 0 loci in 10 stores (`click` + `tabulate`) to 11 in 28. A quote written before that scan is a
+guess; after it, it is a count.
+
 ### Does it fire when the defect is planted?
 
 Three candidates establish precision and nothing else — a sample that small cannot say whether a
@@ -702,6 +760,15 @@ The reason it matters beyond this repository: `1` is "the scan found candidates"
 declared a collision" in the receipt contract. The two ladders share `0`, `1` and `2` and disagree
 in the middle, which is worse than sharing none — partial agreement is what licenses a consumer to
 map the integer and print a claim nobody made.
+
+After `0.4.6` the pin grew again and the wheel did not: `fuera-de-dominio.json` is a **second
+instance of the same schema** (`fiber-ast-lint/censo/1`), five rows over four domains, and `src/` is
+untouched — so it mints no version, by the rule stated above. Its status is a field, not an
+adjective: `EXPLORATORIO`, because the rows were measured before any prediction existed, and a
+sample that was not predicted may name directions and may not name rates. What it establishes
+without a rate is the containment `candidates ≤ sin_len`, which holds on all 18 rows of both files,
+and what it publishes without a rate is the denominator correction: `almacenes` is the pre-filter
+population, `sin_len` the post-filter one.
 
 ## License
 
