@@ -570,7 +570,8 @@ sample's narrow range, not the object's structure. Note the negative intercept: 
 scan of nothing takes minus a tenth of a second is not a model, it is a fit. All three regressors fail
 on the same row, the four-file project, where interpreter start is larger than the scan. So the quote
 is a fixed term plus size, and relative error is only punitive above roughly ten files — **nothing is
-priced per loop**.
+priced per loop**. *Fixed term plus size* does not survive either: see the next section, where the byte
+turns out to identify neither the subject nor the work.
 
 **The rate is a property of the project, not of the instrument.** Pooled `candidates / sin_len`:
 
@@ -589,6 +590,57 @@ Two rows certify their own emptiness (`tomli`, `colorama`: zero stores, `rc_cert
 `certifica = false`), and five of the six sites are `PROYECCION_ARRIBA_CON_PERDIDA` — the species
 batch 1 never saw in 14 sites. Six sites do not support a species ratio; the direction is worth
 recording and the number is not.
+
+### The invoice is not denominated in seconds
+
+Batch 3 closed with a pricing rule — *fixed term plus size* — derived from an `R²` of 0.9822. Two
+things were wrong with it and only one of them was arithmetic. `R²` measures how the rows order, not
+how far a prediction lands: the leave-one-out relative error of that same fit runs 14 % to 80 %. And
+the fitted variable, artifact bytes, is not the thing the scanner works on.
+
+So this batch stops fitting and asks the prior question: **is the clock a subject at all?** Twenty
+subjects measured with two clocks in the same run — wall (`perf_counter` around the subprocess) and
+CPU of the child (`getrusage(RUSAGE_CHILDREN)`, `utime + stime`, delta around the same call) — five
+repetitions each. Fifteen of the twenty are the pinned subjects of batches 1–3, re-downloaded and
+re-verified by sha256, so the comparison is paired: same subject, two clocks, one difference.
+
+| id | claim | band | measured | verdict |
+|---|---|---|---|---|
+| P1 | control: pins and counts replay | 15 of 15 | 15 of 15 sha256, 15 of 15 counts | **survives** |
+| P2 | CPU clock quotable | LOO median ≤ 10 %, max ≤ 25 % | median **16.7 %**, max **81.5 %** | **refuted** |
+| P3 | the noise is the wall clock's | median spread ratio ≥ 2.0 | **2.77** (wall 3.03×, CPU 1.12×) | **survives** |
+| P4 | the intercept is start-up | ratio in [0.5, 2.0] | **0.66** (wall: 0.38) | **survives** |
+| P5 | extrapolates to five new packages | every row ≤ 25 % | 4 of 5; `docutils` **66.3 %** | **refuted** |
+
+The CPU clock wins every paired comparison — lower error than wall (median 16.7 % against 26.4 %),
+`R²` 0.9404 against 0.7327 over all twenty rows, and an intercept that matches the measured start-up of
+the tool on an empty tree to within a factor of 1.5 while the wall clock's misses by 2.6×. It still
+does not quote, and the reason is not the clock:
+
+| same artifact, two sessions | published | CPU today | wall today | CPU / published | wall / published |
+|---|---:|---:|---:|---:|---:|
+| `pygments` (343 files, 1 250 147 B) | 4.941 s | 10.370 s | 16.204 s | 2.10× | 3.28× |
+
+Across the fifteen re-measured subjects the drift is **1.23×–2.27× in CPU** and **1.26×–3.93× in
+wall** (medians 1.81× and 2.50×). Nothing about the work changed: same `sha256`, same file count,
+same candidate list, byte for byte. A tariff in seconds has to absorb that factor in the price, and a
+number that absorbs an unknown factor is a margin, not a price.
+
+The two refutations are defects of the **regressor**, and they are worth naming because a fit cannot
+see them. `attrs` ships one wheel and the tool can scan either subtree of it: `attr/` (13 files,
+0.654 s of CPU) or `attrs/` (6 files, 0.126 s). Both rows carry `bytes = 67548`, because bytes
+measures the artifact and not the subject — a 5.2× difference in work under one value of the
+variable. `docutils` goes the other way: 634 701 B in 129 files cost 8.859 s of CPU, more than
+`setuptools` at 876 263 B in 227 files (8.279 s). Bytes see neither which subtree you scan nor how
+dense the code is.
+
+**What this buys, and what it withdraws.** What reproduced between sessions was the count: fifteen of
+fifteen subjects returned the same files, stores, loops, buckets and signatures, and no subject
+returned the same time. So the unit of the invoice is the **unit of work** — a site closed by its key
+(batch 3) inside an area certified by its receipt (`conservation/1`) — and the clock is a scheduling
+input: how long delivery takes, not what it costs. The rule this batch withdraws is batch 3's own
+"fixed term plus size": the byte neither predicts the work nor identifies the subject. What it does
+not withdraw is CPU over wall for planning — that survived, at 1.6× less error.
 
 
 Three candidates establish precision and nothing else — a sample that small cannot say whether a

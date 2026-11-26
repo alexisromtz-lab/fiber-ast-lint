@@ -12,6 +12,7 @@ and `bench/replay_censo.py --censo fuera-de-dominio.json` is the reader for it.
 """
 import json
 import re
+import statistics
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -402,6 +403,28 @@ def test_la_tasa_de_los_tres_lotes_se_recalcula():
     assert publicado["1"]["ratio"] > publicado["2"]["ratio"] > publicado["3"]["ratio"]
 
 
+ORIENTACIONES = ("medido/predicho", "predicho/medido")
+
+
+def _orientacion(p):
+    """La orientacion de un cociente, en cualquiera de sus dos formas admitidas.
+
+    La canonica nombra los dos terminos (`medido/predicho`). El lote 4 estreno dos
+    formas mas sin romper la regla: la formula que escribe el cociente entero
+    (`error = |medido - predicho| / predicho`, `a_cpu / t0_cpu`) y la que declara
+    que no hay cociente (`no_aplica: es una identidad`). Las tres se leen sin
+    inferir nada -- lo que sigue sin pasar es una llave ausente o un cociente con un
+    lado vacio, porque entonces el lector tiene que adivinar el denominador.
+    """
+    declarada = (p.get("ratio_orientation") or "").strip()
+    if declarada in ORIENTACIONES or declarada.startswith("no_aplica"):
+        return declarada
+    izquierda, barra, derecha = declarada.partition("/")
+    if barra and izquierda.strip() and derecha.strip():
+        return declarada
+    return None
+
+
 def test_toda_prediccion_con_cociente_declara_su_orientacion():
     """Un cociente entre medicion y modelo tiene dos lecturas y la llave no lo dice.
 
@@ -421,7 +444,7 @@ def test_toda_prediccion_con_cociente_declara_su_orientacion():
                 continue
             if (fichero.name, p["id"]) in exentos:
                 continue
-            assert p.get("ratio_orientation") in ("medido/predicho", "predicho/medido"), \
+            assert _orientacion(p), \
                 f"{fichero.name} {p['id']}: un cociente sin orientacion admite dos veredictos"
     defecto = TERCERO["defect_found"]
     assert defecto["where"].startswith("prediccion-batch-3.json")
@@ -471,3 +494,201 @@ def test_las_cifras_del_readme_del_lote_3_son_las_del_archivo():
     assert "nothing is priced per loop" in plano
     for p in TERCERO["predictions"]:
         assert p["id"] in trozo, p["id"]
+
+
+# --- lote 4: dos relojes y la unidad de factura ------------------------------
+#
+# El lote 3 cerro con "termino fijo mas tamano", apoyado en una R2. Este lote
+# mide dos relojes sobre los mismos sujetos y encuentra que lo unico que
+# reproduce entre sesiones es el conteo. Se recalculan los cinco veredictos: un
+# veredicto que solo vive en la prosa envejece en silencio, y este decide que se
+# cobra.
+CUARTO = json.loads((RAIZ / "fuera-de-dominio-4.json").read_text(encoding="utf-8"))
+PREDICCION_4 = RAIZ / "prediccion-batch-4.json"
+SECCION_4 = "### The invoice is not denominated in seconds"
+# Lo que los cuatro lotes comparten. `sites`/`groups` nacieron en el lote 3 y se
+# exigen aparte: comparar contra una clave que la fila vieja no tiene seria comparar
+# contra None.
+CONTEOS = ("files", "stores", "pierde", "candidates", "admitted", "column_loci", "loops",
+           "rc", "rc_certificado", "reconciles", "certifica")
+CONTEOS_3 = ("sites", "groups", "species")
+
+
+def _veredictos(doc):
+    return {p["id"]: p for p in doc["predictions"]}
+
+
+def _modelo(filas, clave, reloj):
+    """s = a + b*clave por minimos cuadrados, con el reloj elegido en la y."""
+    n = len(filas)
+    xs = [r[clave] for r in filas]
+    ys = [r[reloj] for r in filas]
+    mx, my = sum(xs) / n, sum(ys) / n
+    b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sum((x - mx) ** 2 for x in xs)
+    a = my - b * mx
+    ss = sum((y - my) ** 2 for y in ys)
+    return a, b, 1 - sum((y - (a + b * x)) ** 2 for x, y in zip(xs, ys)) / ss
+
+
+def _loo(filas, reloj):
+    """Error relativo leave-one-out contra el modelo que excluye esa fila."""
+    out = []
+    for i, r in enumerate(filas):
+        a, b, _ = _modelo([x for j, x in enumerate(filas) if j != i], "bytes", reloj)
+        predicho = a + b * r["bytes"]
+        out.append(abs(r[reloj] - predicho) / predicho)
+    return sorted(out)
+
+
+def _conocidos():
+    return CUARTO["rows"][:15]
+
+
+def _por_sujeto(*docs):
+    return {(r["package"], r["scope"]): r for d in docs for r in d["rows"]}
+
+
+def test_el_pin_del_lote_4_es_el_archivo_que_viaja():
+    assert CUARTO["prediction"]["sha256"] == _sha(PREDICCION_4)
+    declarado = json.loads(PREDICCION_4.read_text(encoding="utf-8"))
+    assert declarado["declared_before_fetch"] is True
+    # Los quince sujetos conocidos que la prediccion nombra son los que los lotes
+    # 1-3 publicaron: si aqui se colara una fila nueva, la comparacion dejaria de
+    # ser pareada y la ventaja del reloj de CPU no seria atribuible al reloj.
+    publicados = _por_sujeto(FUERA, SEGUNDO, TERCERO)
+    for pin in declarado["subjects"]["conocidos"]:
+        assert pin["sha256"] == publicados[(pin["package"], pin["scope"])]["sha256"], pin["package"]
+    assert len(declarado["subjects"]["conocidos"]) == 15
+    assert declarado["subjects"]["total"] == 20 == len(CUARTO["rows"])
+
+
+def test_p1_los_conteos_replayan_contra_lo_publicado():
+    publicados = _por_sujeto(FUERA, SEGUNDO, TERCERO)
+    identicos = [r for r in _conocidos()
+                 if all(r[k] == publicados[(r["package"], r["scope"])][k] for k in CONTEOS)]
+    assert len(identicos) == 15
+    assert CUARTO["determinism"]["identicos_contra_lo_publicado"] == "15 de 15"
+    assert _veredictos(CUARTO)["P1"]["verdict"] == "SOBREVIVE"
+    for r in _conocidos():
+        assert r["sha256_medido"] == r["sha256"], r["package"]
+
+
+def test_p2_la_direccion_sobrevive_y_la_banda_no():
+    cpu, pared = _loo(_conocidos(), "cpu_min"), _loo(_conocidos(), "wall_min")
+    medido = _veredictos(CUARTO)["P2"]["medido"]
+    # El archivo declara refutada porque la banda se paso de optimista. El recobro
+    # tiene que dar los mismos numeros Y la misma direccion (cpu mejor que pared).
+    assert round(100 * statistics.median(cpu), 1) == medido["cpu_p50_loo"]
+    assert round(100 * max(cpu), 1) == medido["cpu_max_loo"]
+    assert a_sostiene_refutacion(medido), "P2 ya no estaria refutada"
+    assert statistics.median(cpu) < statistics.median(pared)
+    assert _veredictos(CUARTO)["P2"]["verdict"] == "REFUTADA"
+
+
+def a_sostiene_refutacion(medido):
+    return medido["cpu_p50_loo"] > 10.0 and medido["cpu_max_loo"] > 25.0
+
+
+def test_p3_el_ruido_es_del_reloj_de_pared():
+    filas = CUARTO["rows"]
+    for r in filas:
+        assert r["cpu_min"] <= r["cpu_max"] and r["wall_min"] <= r["wall_max"], r["package"]
+        assert r["wall_min"] >= r["cpu_min"], r["package"]
+    cocientes = sorted(r["wall_max"] / r["wall_min"] / (r["cpu_max"] / r["cpu_min"]) for r in filas)
+    mediana = round(statistics.median(cocientes), 2)
+    assert mediana == _veredictos(CUARTO)["P3"]["medido"]["cociente_mediano"] == 2.77
+    assert mediana >= 2.0
+    assert _veredictos(CUARTO)["P3"]["verdict"] == "SOBREVIVE"
+
+
+def test_p4_el_intercepto_es_el_arranque_y_no_un_parametro_libre():
+    a, _, _ = _modelo(_conocidos(), "bytes", "cpu_min")
+    ratio = a / CUARTO["arranque_vacio"]["cpu_min"]
+    assert 0.5 <= ratio <= 2.0
+    assert round(ratio, 2) == _veredictos(CUARTO)["P4"]["medido"]["ratio"] == 0.66
+    # Con el reloj de pared el mismo cociente se sale de la banda: la coincidencia
+    # es del reloj, no del ajuste.
+    a_pared, _, _ = _modelo(_conocidos(), "bytes", "wall_min")
+    assert round(a_pared / CUARTO["arranque_vacio"]["wall_min"], 2) == 0.38
+
+
+def test_p5_docutils_mata_la_extrapolacion():
+    a, b, _ = _modelo(_conocidos(), "bytes", "cpu_min")
+    errores = {r["package"]: abs(r["cpu_min"] - (a + b * r["bytes"])) / (a + b * r["bytes"])
+               for r in CUARTO["rows"][15:]}
+    publicado = {n["package"]: n["error_relativo"] for n in _veredictos(CUARTO)["P5"]["medido"]["filas"]}
+    assert set(errores) == set(publicado)
+    for paquete, error in errores.items():
+        assert round(error, 4) == publicado[paquete], paquete
+    assert sum(1 for e in errores.values() if e <= 0.25) == 4
+    assert errores["docutils"] > 0.25
+    assert _veredictos(CUARTO)["P5"]["verdict"] == "REFUTADA"
+
+
+def test_las_dos_fallas_son_del_regresor_y_no_del_reloj():
+    # attrs: un artefacto, dos subarboles, el mismo bytes y cinco veces mas trabajo.
+    attrs = [r for r in CUARTO["rows"] if r["package"] == "attrs"]
+    assert {r["scope"] for r in attrs} == {"attr", "attrs"}
+    assert len({r["bytes"] for r in attrs}) == 1, "bytes no distingue el sujeto escaneado"
+    assert len({r["files"] for r in attrs}) == 2
+    assert max(r["cpu_min"] for r in attrs) / min(r["cpu_min"] for r in attrs) > 5.0
+    # docutils: menos bytes que setuptools y mas CPU -- bytes tampoco mide densidad.
+    nuevos = {r["package"]: r for r in CUARTO["rows"][15:]}
+    assert nuevos["docutils"]["bytes"] < nuevos["setuptools"]["bytes"]
+    assert nuevos["docutils"]["files"] < nuevos["setuptools"]["files"]
+    assert nuevos["docutils"]["cpu_min"] > nuevos["setuptools"]["cpu_min"]
+    assert {"attrs", "docutils"} <= set(CUARTO["failures_anatomy"])
+
+
+def test_la_deriva_entre_sesiones_se_recalcula():
+    publicados = _por_sujeto(FUERA, SEGUNDO, TERCERO)
+    cpu, pared = [], []
+    for r in _conocidos():
+        previo = publicados[(r["package"], r["scope"])]["segundos_min"]
+        cpu.append(r["cpu_min"] / previo)
+        pared.append(r["wall_min"] / previo)
+    deriva = CUARTO["clock_drift"]
+    for clave, valores in (("cpu_sobre_publicado", cpu), ("pared_sobre_publicado", pared)):
+        assert round(statistics.median(valores), 2) == deriva[clave]["p50"], clave
+        assert round(min(valores), 2) == deriva[clave]["min"], clave
+        assert round(max(valores), 2) == deriva[clave]["max"], clave
+    # Ningun reloj reproduce: la deriva es un factor que depende de la maquina.
+    assert min(cpu) > 1.0 and max(cpu) > 2.0
+    assert max(pared) > 3.0
+
+
+def test_la_seccion_del_lote_4_publica_el_archivo():
+    trozo = README[README.index(SECCION_4):]
+    for fijo in ("| P1 |", "| P2 |", "| P3 |", "| P4 |", "| P5 |",
+                 "15 of 15", "2.77", "0.66", "66.3 %", "16.7 %", "81.5 %",
+                 "10.370 s", "16.204 s", "1.23×–2.27×", "1.26×–3.93×", "5.2×"):
+        assert fijo in trozo, fijo
+    assert "unit of work" in trozo
+    # La retirada del lote 3 se anuncia donde el lector la busca: al final del
+    # parrafo que la sostuvo, no solo en la seccion nueva.
+    anterior = README[README.index(SECCION_3):README.index(SECCION_4)]
+    assert "does not survive either" in anterior
+
+
+def test_cada_prediccion_del_lote_4_declara_su_orientacion():
+    # La regla del lote 3, cumplida por las dos formas admitidas: tres predicciones
+    # nombran su denominador y dos declaran que no son un cociente.
+    declarado = json.loads(PREDICCION_4.read_text(encoding="utf-8"))
+    assert len(declarado["predictions"]) == 5
+    for p in declarado["predictions"]:
+        assert p.get("ratio_orientation"), p["id"]
+        assert _orientacion(p), p["id"]
+
+
+def test_el_lote_4_no_abre_un_esquema_paralelo():
+    # El esquema crece (dos relojes) sin perder lo que el lote 3 ya media: una
+    # clave perdida la leeria el censo como cero.
+    faltan = set(CONTEOS + CONTEOS_3) - set(CUARTO["rows"][0])
+    assert not faltan, faltan
+    for k in ("wall_min", "wall_max", "cpu_min", "cpu_max", "sha256_medido", "segundos_min_publicado"):
+        assert k in CUARTO["rows"][0]
+    for r in CUARTO["rows"]:
+        assert sum(r[k] for k in CUBETAS) == r["stores"], r["package"]
+        assert sum(r["species"].values()) == r["sites"], r["package"]
+        assert r["sites"] == r["candidates"], r["package"]
+        assert len(r["wall_muestras"]) == len(r["cpu_muestras"]) == 5, r["package"]
