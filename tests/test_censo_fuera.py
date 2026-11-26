@@ -14,6 +14,7 @@ import json
 import math
 import re
 import statistics
+import sys
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -1426,7 +1427,7 @@ NOVENO = RAIZ / "prediccion-batch-9.json"
 
 
 def _seccion_8():
-    return README[README.index(SECCION_8):README.index("## Fixtures census, recomputed")]
+    return README[README.index(SECCION_8):README.index(SECCION_9)]
 
 
 def _prosa_8():
@@ -1688,7 +1689,7 @@ DECIMO = RAIZ / "prediccion-batch-10.json"
 
 
 def _seccion_9():
-    return README[README.index(SECCION_9):README.index("## Fixtures census, recomputed")]
+    return README[README.index(SECCION_9):README.index(SECCION_10)]
 
 
 def _prosa_9():
@@ -1994,3 +1995,468 @@ def test_la_orden_del_lote_10_esta_escrita_antes_de_su_acto():
     assert orden["cost"]["relojes_nuevos"] == 270
     assert orden["cost"]["relojes_reutilizados"] == 450
     assert orden["cost"]["escrituras_en_platino_labs"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Lote 10. La orden congelada en `prediccion-batch-10.json` pidio tres cosas y el
+# lote devolvio una que no estaba decidida: M1 cae entre su umbral (3,00) y su
+# falsador (2,00), asi que se publica como no decidida y el hueco queda declarado.
+# M2 y M3 sobreviven. Estos tests recomponen los ocho actos desde sus 720 lecturas,
+# sostienen cada veredicto contra la orden, prueban que los cinco actos reutilizados
+# no se vuelven a cronometrar, comprueban la factorizacion exacta de la dispersion y
+# pinean cada celda de las cuatro tablas y cada cifra de la prosa.
+DECIMO_ARTE = json.loads((RAIZ / "fuera-de-dominio-10.json").read_text(encoding="utf-8"))
+SECCION_10 = "### The session is the regime"
+PIN_10 = "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1"
+
+
+def _seccion_10():
+    return README[README.index(SECCION_10):README.index("## Fixtures census, recomputed")]
+
+
+def _prosa_10():
+    return " ".join(_seccion_10().split())
+
+
+def _tabla_10(encabezado):
+    lineas = _seccion_10().splitlines()
+    inicio = next(i for i, l in enumerate(lineas) if l.startswith(encabezado))
+    filas = []
+    for linea in lineas[inicio + 1:]:
+        if not linea.startswith("|"):
+            break
+        celdas = [c.strip().replace("**", "").replace("`", "")
+                  for c in linea.strip().strip("|").split("|")]
+        if all(set(c) <= set("-: ") for c in celdas):
+            continue
+        filas.append(celdas)
+    return filas
+
+
+def _acto_10(nombre):
+    return next(a for a in DECIMO_ARTE["actos"] if a["nombre"] == nombre)
+
+
+def _k_por_sesion():
+    return ([a["jitter_relativo"] for a in DECIMO_ARTE["actos"][2:5]],
+            [a["jitter_relativo"] for a in DECIMO_ARTE["actos"][5:]])
+
+
+def test_el_lote_10_es_un_sujeto_y_ocho_actos_sobre_el_mismo_pin():
+    assert DECIMO_ARTE["lote"] == 10
+    assert DECIMO_ARTE["prediction"]["archivo"] == "prediccion-batch-10.json"
+    assert DECIMO_ARTE["prediction"]["sha256"] == _sha(DECIMO)
+    assert DECIMO_ARTE["prediction"]["declared_before_computation"] is True
+    assert re.fullmatch(r"[0-9a-f]{40}", DECIMO_ARTE["prediction"]["git_blob"])
+    assert [a["nombre"] for a in DECIMO_ARTE["actos"]] == list("ABCDEFGH")
+    assert {a["sha256"] for a in DECIMO_ARTE["actos"]} == {PIN_10}
+    assert {a["bytes_py_pin"] for a in DECIMO_ARTE["actos"]} == {296870}
+    assert {a["relojes"] for a in DECIMO_ARTE["actos"]} == {90}
+    assert all(len(a["bloques"]) == 9 for a in DECIMO_ARTE["actos"])
+    cost = DECIMO_ARTE["cost"]
+    assert cost["sujetos"] == 1 and cost["actos"] == 8
+    assert cost["actos_nuevos"] == 3 and cost["actos_reutilizados"] == 5
+    assert cost["relojes_nuevos"] == 270
+    assert cost["relojes_reutilizados"] == 450
+    assert cost["relojes_totales"] == 720
+    assert cost["escrituras_en_platino_labs"] == 0
+    assert cost["clones_externos"] == 0
+
+
+def test_los_tres_actos_nuevos_son_una_sola_sesion_encadenada():
+    f, g, h = (_acto_10(n) for n in "FGH")
+    assert f["ventana"]["fin"] == g["ventana"]["inicio"]
+    assert g["ventana"]["fin"] == h["ventana"]["inicio"]
+    assert f["ventana"]["fin"] < DECIMO_ARTE["cost"]["medido_en"]
+    # Los reutilizados conservan la ventana de su artefacto de origen; A y B no la declaran.
+    for nombre in "CDE":
+        assert _acto_10(nombre)["ventana"]["fin"] < f["ventana"]["inicio"]
+    assert _acto_10("A")["ventana"] is None and _acto_10("B")["ventana"] is None
+
+
+def test_los_cinco_actos_reutilizados_se_releen_sin_volver_a_cronometrar():
+    octavo = json.loads((RAIZ / "fuera-de-dominio-8.json").read_text(encoding="utf-8"))
+    origen = {"A": octavo["acto_a"], "B": octavo["acto_b"],
+              "C": NOVENO_ARTE["actos"][2], "D": NOVENO_ARTE["actos"][3],
+              "E": NOVENO_ARTE["actos"][4]}
+    for nombre, fuente in origen.items():
+        acto = _acto_10(nombre)
+        assert acto["reutilizado"] is True
+        assert acto["fuente"] != "acto propio del lote 10"
+        assert [b["lecturas"] for b in acto["bloques"]] == [b["lecturas"] for b in fuente["bloques"]]
+        assert acto["ventana"] == fuente.get("ventana")
+    for nombre in "FGH":
+        acto = _acto_10(nombre)
+        assert acto["reutilizado"] is False
+        assert acto["fuente"] == "acto propio del lote 10"
+    # Los reutilizados no traen coste de compuerta propio del lote 10: no se re-cronometraron.
+    assert DECIMO_ARTE["cost"]["coste_compuerta_s"] == [
+        _acto_10(n)["coste_compuerta_s"] for n in "FGH"]
+
+
+def test_cada_bloque_nuevo_guarda_su_primera_lectura_en_orden_cronologico():
+    for nombre in "FGH":
+        bloques = _acto_10(nombre)["bloques"]
+        assert sum(b["n"] for b in bloques) == 90
+        for bloque in bloques:
+            assert bloque["primera_s"] in bloque["lecturas"]
+            assert bloque["min_s"] <= bloque["primera_s"] <= bloque["max_s"]
+        # Una lectura por bloque, nueve en total: eso es la sonda de nueve relojes.
+        assert len({b["primera_s"] for b in bloques}) == 9
+    # Los artefactos viejos no se reescriben: sus bloques no llevan primera_s.
+    for nombre in "ABCDE":
+        assert not any("primera_s" in b for b in _acto_10(nombre)["bloques"])
+
+
+def test_la_sonda_de_nueve_relojes_se_recompone_desde_los_bloques():
+    for nombre in "FGH":
+        acto = _acto_10(nombre)
+        primeras = [b["primera_s"] for b in acto["bloques"]]
+        assert acto["sonda"]["lecturas"] == primeras
+        assert acto["sonda"]["n"] == 9
+        assert acto["sonda"]["sonda_min_s"] == min(primeras)
+        assert acto["sonda"]["sonda_max_s"] == max(primeras)
+        assert round(max(primeras) - min(primeras), 4) == acto["sonda"]["sonda_jitter_s"]
+        # La sonda es un subconjunto de las noventa: solo puede sobrestimar el minimo.
+        assert acto["minimo_s"] <= acto["sonda"]["sonda_min_s"]
+        assert round(acto["sonda"]["sonda_min_s"] / acto["minimo_s"], 4) == acto["sonda_sobre_min"]
+        # Y el arranque en frio se lee aparte: el piso de la sonda contra la primera lectura del
+        # acto. Por debajo de 1, esa primera lectura fue mas lenta que el piso.
+        assert round(min(primeras) / primeras[0], 4) == acto["arranque_sobre_sonda"]
+
+
+def test_m2_sobrevive_en_los_tres_actos_nuevos():
+    son = {x["acto"]: x for x in DECIMO_ARTE["comparacion"]["sonda"]}
+    m2 = DECIMO_ARTE["veredictos"][1]
+    assert m2["id"] == "M2"
+    assert m2["umbral"]["sobrestimacion_max"] == 1.15
+    assert m2["umbral"]["sonda_jitter_sobre_jitter_min"] == 0.50
+    assert [son[n]["sonda_sobre_min"] for n in "FGH"] == [1.0268, 1.0507, 1.0]
+    assert [son[n]["sonda_jitter_sobre_jitter"] for n in "FGH"] == [0.6266, 1.5071, 0.7518]
+    assert all(x["sonda_sobre_min"] <= 1.15 for x in son.values())
+    assert all(x["sonda_jitter_sobre_jitter"] >= 0.50 for x in son.values())
+    assert m2["sobrevive"] is True and m2["falsador"] is False
+    # Acierta el piso y no la banda: en F la sonda ve menos jitter que el acto, en G mas.
+    assert son["F"]["sonda_jitter_sobre_jitter"] < 1.0 < son["G"]["sonda_jitter_sobre_jitter"]
+
+
+def test_m3_cotiza_la_compuerta_y_separa_el_arnes_del_sujeto():
+    cos = {x["acto"]: x for x in DECIMO_ARTE["comparacion"]["coste"]}
+    m3 = DECIMO_ARTE["veredictos"][2]
+    assert m3["id"] == "M3" and m3["umbral"] == [3.0, 6.5]
+    assert [cos[n]["coste_sobre_trabajo"] for n in "FGH"] == [3.8493, 4.1044, 3.474]
+    for nombre in "FGH":
+        fila = cos[nombre]
+        assert m3["umbral"][0] <= fila["coste_sobre_trabajo"] <= m3["umbral"][1]
+        assert fila["trabajo_s"] == round(90 * _acto_10(nombre)["mediana_s"], 3)
+        assert fila["coste_arnes_s"] == round(fila["coste_compuerta_s"] - fila["trabajo_s"], 4)
+        assert fila["coste_compuerta_s"] == _acto_10(nombre)["coste_compuerta_s"]
+        # Entre 71 % y 76 % de la compuerta es arnes: el recargo es del instrumento.
+        assert round(fila["coste_arnes_s"] / fila["coste_compuerta_s"], 2) in (0.74, 0.76, 0.71)
+    assert m3["sobrevive"] is True and m3["falsador"] is False
+    cost = DECIMO_ARTE["cost"]
+    assert cost["coste_compuerta_total_s"] == 468.1
+    assert cost["coste_arnes_total_s"] == 345.9601
+    assert round(sum(cos[n]["trabajo_s"] for n in "FGH"), 3) == 122.157
+
+
+def test_m1_no_sobrevive_ni_dispara_su_falsador_y_el_hueco_se_declara():
+    m1 = DECIMO_ARTE["veredictos"][0]
+    assert m1["id"] == "M1"
+    assert m1["umbral"]["dispersion_k_dentro_max"] == 1.30
+    assert m1["umbral"]["dispersion_k_entre_sesiones_min"] == 3.00
+    medido = m1["medido"]
+    assert medido["dispersion_k_lote_9"] == 1.1532
+    assert medido["dispersion_k_dentro_lote_10"] == 1.1426
+    assert medido["dispersion_k_entre_sesiones"] == 2.6414
+    assert m1["sobrevive"] is False
+    assert m1["falsador"] is False
+    assert m1["zona_muerta"] is True
+    # 2,6414 cae dentro del intervalo que la orden no decidio: ni 3,00 ni 2,00.
+    assert 2.00 < medido["dispersion_k_entre_sesiones"] < 3.00
+    resumen = DECIMO_ARTE["predictions_summary"]
+    assert resumen["caen"] == ["M1"]
+    assert resumen["sobreviven"] == ["M2", "M3"]
+    assert resumen["zona_muerta"] == ["M1"]
+    defecto = DECIMO_ARTE["defectos_de_la_orden"][0]
+    assert defecto["id"] == "M1"
+    assert defecto["umbral_entre_sesiones"] == 3.00
+    assert defecto["falsador_entre_sesiones"] == 2.00
+    assert defecto["medido"]["dispersion_k_entre_sesiones"] == 2.6414
+    # Las dos sesiones coinciden a 1,01x: la dispersion interna no es del dia.
+    assert round(medido["dispersion_k_lote_9"] / medido["dispersion_k_dentro_lote_10"], 2) == 1.01
+
+
+def test_la_dispersion_se_factoriza_sin_residuo_y_el_factor_grande_es_la_sesion():
+    k9, k10 = _k_por_sesion()
+    ses = DECIMO_ARTE["comparacion"]["sesiones"]
+    des = DECIMO_ARTE["comparacion"]["descomposicion"]
+    assert round(max(k10) / min(k9), 4) == des["total_sobre_las_dos_sesiones"] == 3.2545
+    assert des["producto"] == 3.2545
+    assert round(des["entre_sesiones"] * des["posicion_dentro_de_lote_9"]
+                 * des["posicion_dentro_de_lote_10"], 4) == 3.2545
+    # Cada factor sale de los actos, no de una constante copiada.
+    assert round(ses["lote_10"]["mediana_k"] / ses["lote_9"]["mediana_k"], 4) == des["entre_sesiones"]
+    assert round(ses["lote_9"]["mediana_k"] / min(k9), 4) == des["posicion_dentro_de_lote_9"]
+    assert round(max(k10) / ses["lote_10"]["mediana_k"], 4) == des["posicion_dentro_de_lote_10"]
+    assert round(max(k9) / min(k9), 4) == ses["lote_9"]["dispersion_k"] == 1.1532
+    assert round(max(k10) / min(k10), 4) == ses["lote_10"]["dispersion_k"] == 1.1426
+    # Lo que la sesion explica es el factor grande; la posicion dentro de la sesion, el chico.
+    assert round(des["posicion_dentro_de_lote_9"] * des["posicion_dentro_de_lote_10"], 4) == 1.2321
+    assert des["entre_sesiones"] > des["posicion_dentro_de_lote_9"] * des["posicion_dentro_de_lote_10"]
+
+
+def test_publicable_se_invierte_con_la_sesion_y_no_con_el_sujeto():
+    p = DECIMO_ARTE["predictions_summary"]["publicable_por_acto"]
+    assert p == {"A": False, "B": True, "C": True, "D": True,
+                 "E": True, "F": False, "G": False, "H": False}
+    assert sum(p.values()) == 4
+    for acto in DECIMO_ARTE["actos"]:
+        assert acto["publicable"] == (acto["jitter_s"] < acto["predicho_s"] * acto["q"])
+        assert acto["q"] == 0.3018
+    # Mismo pin, mismo protocolo: el booleano no distingue el sujeto, distingue la ventana.
+    assert {a["sha256"] for a in DECIMO_ARTE["actos"]} == {PIN_10}
+    assert {p["A"], p["B"], p["C"], p["D"], p["E"], p["F"], p["G"], p["H"]} == {True, False}
+
+
+def test_las_cuatro_tablas_del_lote_10_cuentan_lo_que_el_artefacto_mide():
+    filas = _tabla_10("| act | session |")
+    assert [f[0] for f in filas] == list("ABCDEFGH")
+    assert [f[1] for f in filas] == ["own", "own", "1", "1", "1", "2", "2", "2"]
+    for fila in filas:
+        acto = _acto_10(fila[0])
+        assert fila[2] == _coma(acto["jitter_relativo"])
+        assert fila[3] == ("yes" if acto["publicable"] else "no")
+
+    filas = _tabla_10("| id | pre-registered threshold |")
+    assert [f[0] for f in filas] == ["M1", "M2", "M3"]
+    assert [f[3] for f in filas] == ["not decided", "holds", "holds"]
+    assert "1,1426 and 2,6414" in filas[0][2]
+    assert "1,0000 to 1,0507" in filas[1][2] and "0,6266 to 1,5071" in filas[1][2]
+    assert "3,4740 to 4,1044" in filas[2][2]
+
+    son = {x["acto"]: x for x in DECIMO_ARTE["comparacion"]["sonda"]}
+    filas = _tabla_10("| act | nine-clock minimum |")
+    assert [f[0] for f in filas] == ["F", "G", "H"]
+    for fila in filas:
+        x = son[fila[0]]
+        assert fila[1] == _coma(x["sonda_min_s"])
+        assert fila[2] == _coma(x["min_s"])
+        assert fila[3] == _coma(x["sonda_sobre_min"])
+        assert fila[4] == _coma(x["sonda_jitter_s"])
+        assert fila[5] == _coma(x["jitter_s"])
+        assert fila[6] == _coma(x["sonda_jitter_sobre_jitter"])
+
+    cos = {x["acto"]: x for x in DECIMO_ARTE["comparacion"]["coste"]}
+    filas = _tabla_10("| act | gate wall |")
+    assert [f[0] for f in filas] == ["F", "G", "H"]
+    for fila in filas:
+        x = cos[fila[0]]
+        assert fila[1] == f"{_coma(x['coste_compuerta_s'], 1)} s"
+        assert fila[2] == f"{_coma(x['trabajo_s'], 1)} s"
+        assert fila[3] == f"{_coma(x['coste_arnes_s'], 1)} s"
+        assert fila[4] == _coma(x["coste_sobre_trabajo"])
+
+
+def test_cada_cifra_de_la_prosa_del_lote_10_tiene_lector():
+    prosa = _prosa_10()
+    actos = DECIMO_ARTE["actos"]
+    c = DECIMO_ARTE["comparacion"]
+    k9, k10 = _k_por_sesion()
+    son = {x["acto"]: x for x in c["sonda"]}
+    cos = {x["acto"]: x for x in c["coste"]}
+    cost = DECIMO_ARTE["cost"]
+    minimo_nuevos = [a["minimo_s"] for a in actos[5:]]
+    jitter_nuevos = [a["jitter_s"] for a in actos[5:]]
+    anclas = [
+        # El booleano se invierte con la misma madera: cuatro si, cuatro no.
+        "**The same tree, the same hash, the same protocol: four acts are publishable and four are not.**",
+        f"Acts C, D and E sit at `k` {_coma(k9[0])}, {_coma(k9[1])} and {_coma(k9[2])} against "
+        f"`q` = {_coma(actos[2]['q'])}; acts F, G and H sit at {_coma(k10[0])}, {_coma(k10[1])} "
+        f"and {_coma(k10[2])}",
+        # Dentro de la sesion el acto apenas se mueve; entre sesiones si el regimen.
+        f"the minimum moves {_coma(max(minimo_nuevos) / min(minimo_nuevos), 2)}\u00d7 and the worst "
+        f"block jitter {_coma(max(jitter_nuevos) / min(jitter_nuevos), 2)}\u00d7",
+        f"moves {_coma(c['dispersion_k_entre_sesiones'], 4)}\u00d7, and the two within-session "
+        f"dispersions \u2014 {_coma(c['sesiones']['lote_9']['dispersion_k'])} in session 1 and "
+        f"{_coma(c['sesiones']['lote_10']['dispersion_k'])} in session 2 \u2014 agree with each "
+        f"other to {_coma(c['sesiones']['lote_9']['dispersion_k'] / c['sesiones']['lote_10']['dispersion_k'], 2)}\u00d7",
+        # La factorizacion, escrita como se lee.
+        f"{_coma(c['descomposicion']['total_sobre_las_dos_sesiones'])} = "
+        f"{_coma(c['descomposicion']['entre_sesiones'])} \u00d7 "
+        f"{_coma(c['descomposicion']['posicion_dentro_de_lote_9'])} \u00d7 "
+        f"{_coma(c['descomposicion']['posicion_dentro_de_lote_10'])}",
+        f"session medians is {_coma(c['descomposicion']['entre_sesiones'])}\u00d7 and the position of an "
+        f"act inside its own session adds {_coma(c['descomposicion']['posicion_dentro_de_lote_9'] * c['descomposicion']['posicion_dentro_de_lote_10'])}",
+        # M1: la zona muerta, con los dos bordes.
+        f"It measured {_coma(c['dispersion_k_entre_sesiones'])} \u2014 below the threshold and above "
+        f"the falsifier",
+        # La palabra del veredicto sale de la zona muerta del artefacto, no del teclado.
+        f"M1 is published as **{'not decided' if DECIMO_ARTE['predictions_summary']['zona_muerta'] else 'decided'}**",
+        # Y el "a lo sumo" de la prosa es el mayor de los tres porcentajes de la tabla.
+        f"was how much, and the answer is at most "
+        f"{_coma(max((son[k]['sonda_sobre_min'] - 1) * 100 for k in 'FGH'), 2)} %",
+        # El arranque en frio: la primera lectura de H contra el piso que dan las nueve.
+        f"the first clock of act H took {_coma(_acto_10('H')['bloques'][0]['primera_s'])} s, "
+        f"{_coma(_acto_10('H')['bloques'][0]['primera_s'] / _acto_10('H')['sonda']['sonda_min_s'], 2)}\u00d7 "
+        f"the floor the nine later ones found",
+        # M2: cuanto sobrestima y cuanto se le escapa la banda.
+        f"overstates the minimum of ninety by "
+        f"{_coma((son['F']['sonda_sobre_min'] - 1) * 100, 2)} %, "
+        f"{_coma((son['G']['sonda_sobre_min'] - 1) * 100, 2)} % and "
+        f"{_coma((son['H']['sonda_sobre_min'] - 1) * 100, 2)} %",
+        f"Its jitter is a different story: {_coma(son['F']['sonda_jitter_sobre_jitter'], 2)}\u00d7, "
+        f"{_coma(son['G']['sonda_jitter_sobre_jitter'], 2)}\u00d7 and "
+        f"{_coma(son['H']['sonda_jitter_sobre_jitter'], 2)}\u00d7 of the act's worst block",
+        # El precio de la sonda, que es aritmetica y no medida.
+        f"ninety clocks took {_coma(cos['F']['coste_compuerta_s'] / 90, 2)} s per clock in F, "
+        f"{_coma(cos['G']['coste_compuerta_s'] / 90, 2)} s in G and "
+        f"{_coma(cos['H']['coste_compuerta_s'] / 90, 2)} s in H",
+        f"so nine should cost {round(9 * cos['F']['coste_compuerta_s'] / 90)} to "
+        f"{round(9 * cos['G']['coste_compuerta_s'] / 90)} s instead of "
+        f"{round(cos['H']['coste_compuerta_s'])} to {round(cos['G']['coste_compuerta_s'])}",
+        # M3: el arnes es la mayor parte de la compuerta.
+        f"{_coma(min(x['coste_arnes_s'] / x['coste_compuerta_s'] for x in cos.values()) * 100, 1)} % to "
+        f"{_coma(max(x['coste_arnes_s'] / x['coste_compuerta_s'] for x in cos.values()) * 100, 1)} % "
+        f"of a gate is the harness",
+        f"the split is {_coma(cost['coste_arnes_total_s'], 1)} s of harness against "
+        f"{_coma(sum(x['trabajo_s'] for x in cos.values()), 1)} s of work",
+        f"the certificate costs {_coma(min(x['coste_sobre_trabajo'] for x in cos.values()), 1)}\u00d7 "
+        f"to {_coma(max(x['coste_sobre_trabajo'] for x in cos.values()), 1)}\u00d7 the work",
+        # El contrato que el lote propone, con sus cuatro campos.
+        "`(k, threshold, within-session dispersion, cost)`",
+    ]
+    for ancla in anclas:
+        assert ancla in prosa, ancla
+    assert "bench/sonda.py --dir /tmp/censo10 --artefacto" in prosa
+    assert "fuera-de-dominio-10.json" in prosa
+    assert "prediccion-batch-11.json" in prosa
+
+
+def test_la_seccion_del_lote_10_va_despues_de_la_del_9_y_antes_del_censo():
+    assert README.index(SECCION_9) < README.index(SECCION_10)
+    assert README.index(SECCION_10) < README.index("## Fixtures census, recomputed")
+    # Y la seccion del lote 9 ya no se lleva por delante el texto del lote 10.
+    assert "fuera-de-dominio-10.json" not in _seccion_9()
+    assert SECCION_10 not in _seccion_9()
+
+
+# ---------------------------------------------------------------------------
+# El instrumento, ejercitado con bloques sinteticos.
+#
+# Hasta el lote 9 la suite solo leia artefactos: un mutante de `bench/*.py` era
+# equivalente para el banco porque ningun test importaba el codigo que produce las
+# cifras. Estos cuatro tests cargan `bench/sonda.py` y lo falsan con entradas que no
+# salen del artefacto, asi que un mutante del instrumento muere aqui.
+sys.path.insert(0, str(RAIZ / "bench"))
+import sonda  # noqa: E402
+
+
+def test_la_sonda_toma_la_primera_lectura_de_cada_bloque_y_solo_esa():
+    bloques = [{"lecturas": [9.0, 1.0, 2.0], "primera_s": 9.0},
+               {"lecturas": [3.0, 0.5, 4.0], "primera_s": 3.0},
+               {"lecturas": [0.1, 7.0], "primera_s": 7.0}]
+    s = sonda._sonda(bloques)
+    assert s["lecturas"] == [9.0, 3.0, 7.0]
+    assert s["n"] == 3
+    # 0,1 y 0,5 estan en las crudas pero no son la primera lectura de su bloque:
+    # la sonda no las ve, y por eso solo puede sobrestimar el minimo.
+    assert s["sonda_min_s"] == 3.0
+    assert s["sonda_max_s"] == 9.0
+    assert s["sonda_jitter_s"] == 6.0
+
+
+def test_la_cotizacion_resta_el_trabajo_del_coste_y_no_al_reves():
+    acto = {"relojes": 90, "mediana_s": 0.5, "minimo_s": 0.4, "jitter_s": 0.2,
+            "sonda": {"sonda_min_s": 0.42, "sonda_jitter_s": 0.1},
+            "bloques": [{"primera_s": 0.6}, {"primera_s": 0.42}],
+            "coste_compuerta_s": 200.0}
+    c = sonda._cotizacion(acto)
+    assert c["trabajo_s"] == 45.0
+    assert c["coste_arnes_s"] == 155.0
+    assert c["coste_sobre_trabajo"] == round(200 / 45, 4)
+    assert c["sonda_sobre_min"] == 1.05
+    assert c["sonda_jitter_sobre_jitter"] == 0.5
+    # El arranque se lee contra la primera lectura del acto, no contra la del ultimo bloque.
+    assert c["arranque_sobre_sonda"] == round(0.42 / 0.6, 4)
+    # Sin coste medido no se inventa arnes: el campo no existe.
+    sin = sonda._cotizacion({**acto, "coste_compuerta_s": None})
+    assert "coste_arnes_s" not in sin and "coste_sobre_trabajo" not in sin
+
+
+def test_los_veredictos_distinguen_zona_muerta_de_falsador():
+    pred = {"predictions": [
+        {"claim": "m1", "umbral": {"dispersion_k_dentro_max": 1.30,
+                                   "dispersion_k_entre_sesiones_min": 3.00}},
+        {"claim": "m2", "umbral": {"sobrestimacion_max": 1.15,
+                                   "sonda_jitter_sobre_jitter_min": 0.50}},
+        {"claim": "m3", "umbral": [3.0, 6.5]}]}
+    def comp(entre, dentro):
+        return {"sesiones": {"lote_9": {"dispersion_k": 1.15, "mediana_k": 0.12},
+                             "lote_10": {"dispersion_k": dentro, "mediana_k": 0.33}},
+                "dispersion_k_entre_sesiones": entre,
+                "sonda": [{"acto": "X", "sonda_sobre_min": 1.05,
+                           "sonda_jitter_sobre_jitter": 0.60}],
+                "coste": [{"acto": "X", "coste_sobre_trabajo": 4.0}]}
+    # En medio: no sobrevive y el falsador no dispara. Eso es zona muerta, no caida.
+    m1 = sonda._veredictos(comp(2.64, 1.14), pred)[0]
+    assert (m1["sobrevive"], m1["falsador"], m1["zona_muerta"]) == (False, False, True)
+    # Por encima del umbral: sobrevive.
+    assert sonda._veredictos(comp(3.20, 1.20), pred)[0]["sobrevive"] is True
+    # Por debajo del falsador: cae, y entonces no hay zona muerta.
+    m1 = sonda._veredictos(comp(1.90, 1.20), pred)[0]
+    assert (m1["sobrevive"], m1["falsador"], m1["zona_muerta"]) == (False, True, False)
+    # Y la dispersion interna sola, con `entre` sano, no basta para sobrevivir.
+    assert sonda._veredictos(comp(3.20, 1.50), pred)[0]["sobrevive"] is False
+    assert sonda._veredictos(comp(3.20, 1.14), pred)[1]["sobrevive"] is True
+    assert sonda._veredictos(comp(3.20, 1.14), pred)[2]["sobrevive"] is True
+    malo = comp(3.20, 1.14)
+    malo["sonda"] = [{"acto": "X", "sonda_sobre_min": 1.31,
+                      "sonda_jitter_sobre_jitter": 0.60}]
+    assert sonda._veredictos(malo, pred)[1]["falsador"] is True
+    malo["sonda"] = [{"acto": "X", "sonda_sobre_min": 1.05,
+                      "sonda_jitter_sobre_jitter": 0.29}]
+    assert sonda._veredictos(malo, pred)[1]["falsador"] is True
+    malo = comp(3.20, 1.14)
+    malo["coste"] = [{"acto": "X", "coste_sobre_trabajo": 6.6}]
+    assert sonda._veredictos(malo, pred)[2]["sobrevive"] is False
+
+
+def test_la_factorizacion_sale_de_la_funcion_y_no_de_una_constante():
+    k9 = [0.25, 0.20, 0.10]
+    k10 = [0.50, 0.40, 0.80]
+    actos = [{"nombre": n, "jitter_relativo": k}
+             for n, k in zip("ABCDEFGH", [0.9, 0.9] + k9 + k10)]
+    out = sonda._sesiones(actos)
+    assert out["sesiones"]["lote_9"]["k"] == k9
+    assert out["sesiones"]["lote_10"]["k"] == k10
+    assert out["sesiones"]["lote_9"]["dispersion_k"] == 2.5
+    assert out["sesiones"]["lote_10"]["dispersion_k"] == 2.0
+    assert out["dispersion_k_entre_sesiones"] == 2.5
+    d = out["descomposicion"]
+    assert d["total_sobre_las_dos_sesiones"] == 8.0
+    assert (d["entre_sesiones"], d["posicion_dentro_de_lote_9"],
+            d["posicion_dentro_de_lote_10"]) == (2.5, 2.0, 1.6)
+    assert d["producto"] == d["total_sobre_las_dos_sesiones"]
+    # `dispersion_k` es el cociente de extremos; `posicion_dentro_de_*` divide la
+    # mediana de la sesion entre su minimo. Dos cuentas distintas sobre la misma lista.
+    assert out["sesiones"]["lote_10"]["mediana_k"] == 0.5
+    assert out["sesiones"]["lote_9"]["dispersion_k"] == round(max(k9) / min(k9), 4)
+    # Y los actos fuera de las dos sesiones no entran en la cuenta.
+    assert out["sesiones"]["lote_9"]["actos"] == ["C", "D", "E"]
+    assert 0.9 not in out["sesiones"]["lote_9"]["k"]
+
+
+def test_la_rama_del_resumen_se_deriva_de_los_veredictos_y_no_se_elige():
+    veredictos = DECIMO_ARTE["veredictos"]
+    resumen = DECIMO_ARTE["predictions_summary"]
+    sobre = [x["id"] for x in veredictos if x["sobrevive"]]
+    caen = [x["id"] for x in veredictos if not x["sobrevive"]]
+    assert resumen["sobreviven"] == sobre
+    assert resumen["caen"] == caen
+    # Tres ramas y ninguna cuarta: o todas sobreviven, o ninguna, o queda partida.
+    # Una `rama` que no salga de aqui es una etiqueta elegida, no una medida.
+    esperado = ("todas_sobreviven" if not caen
+                else "ninguna_sobrevive" if not sobre else "parcial")
+    assert resumen["rama"] == esperado
+    assert resumen["zona_muerta"] == [x["id"] for x in veredictos if x.get("zona_muerta")]

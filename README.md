@@ -1140,6 +1140,118 @@ declared defect of L3 and the wall cost of each gate. Acts A and B are read back
 `fuera-de-dominio-8.json` and never re-timed, so the sample is paired; `--desde` recomposes the
 document from acts already paid, so a recomposition can never quietly become a fourth act.
 
+### The session is the regime, and the regime is not the act
+
+Batch 9 left one observation and said so: the three acts of one session agreed to 1,15× while the
+five acts of the pin sat 5,24× apart. One session is one observation. This batch pays for a second
+one — acts F, G and H, ninety clocks each, run back to back, the same 296 870-byte tree by both
+controls — and reads the five acts already paid back from their artifacts without re-timing them.
+Eight acts, 720 clocks, one pin.
+
+| act | session | `k` | publishable |
+|---|---|---:|---|
+| A | own | 0,6054 | no |
+| B | own | 0,2498 | yes |
+| C | 1 | 0,1280 | yes |
+| D | 1 | 0,1332 | yes |
+| E | 1 | 0,1155 | yes |
+| F | 2 | 0,3290 | no |
+| G | 2 | 0,3381 | no |
+| H | 2 | 0,3759 | no |
+
+**The same tree, the same hash, the same protocol: four acts are publishable and four are not.** The
+bit flipped with the session and not with the subject. Acts C, D and E sit at `k` 0,1280, 0,1332 and
+0,1155 against `q` = 0,3018; acts F, G and H sit at 0,3290, 0,3381 and 0,3759. A receipt that says
+`publicable: true` is saying something about the window it was written in, and the only way that
+sentence survives is if the window travels with it.
+
+**Inside a session the act hardly moves; between sessions the regime does.** Across acts F, G and H
+the minimum moves 1,03× and the worst block jitter 1,14×. Across the two sessions the median `k`
+moves 2,6414×, and the two within-session dispersions — 1,1532 in session 1 and 1,1426 in session 2
+— agree with each other to 1,01×. Two independent sessions of three acts each land on the same
+internal dispersion, which is the strongest evidence in this corpus that the internal one is a
+property of the measurement and not of the day.
+
+**And the dispersion factorises without remainder.** The range of `k` over the six acts of the two
+sessions is 3,2545, and it can be written as
+
+    3,2545  =  2,6414  ×  1,1082  ×  1,1118
+
+the gap between session medians, then how far each session's minimum and maximum sit from its own
+median. The factors are not a decomposition of variance with degrees of freedom — they are three
+ratios that multiply by construction — but they do say something a variance cannot: the gap
+between the two session medians is 2,6414× and the position of an act inside its own session adds
+1,2321× on top, so four fifths of the movement is regime between sessions. Grouping acts inside a
+session buys the small factor and not the big one; the session is a better unit than the act and
+it is not the last one.
+
+| id | pre-registered threshold | measured | verdict |
+|---|---|---|---|
+| M1 | `k` dispersion ≤ 1,30 inside the new session **and** ≥ 3,00 between sessions | 1,1426 and 2,6414 | **not decided** |
+| M2 | probe / act minimum ≤ 1,15 and probe jitter ≥ 0,50 × act jitter, all three acts | 1,0000 to 1,0507 and 0,6266 to 1,5071 | holds |
+| M3 | gate / (clocks × median) in [3,0; 6,5], all three acts | 3,4740 to 4,1044 | holds |
+
+**M1 does not survive, and its falsifier does not fire, and that is the finding.** The claim asked
+for ≥ 3,00 between sessions; the falsifier was written at < 2,00. It measured 2,6414 — below the
+threshold and above the falsifier, in an interval the order never decided. Calling that "falls"
+would decide after the fact what the order declined to decide, and moving the threshold to 2,50
+would be the same sin with better manners. M1 is published as **not decided** and the gap is
+declared in `defectos_de_la_orden`: a prediction whose claim and whose falsifier do not touch has a
+dead zone, and the dead zone is where this one landed.
+
+**M2 holds, and it is the one that pays.** A gate of nine clocks — the first reading of each of the
+nine blocks, one per block, spread through the act instead of run at the start — overstates the
+minimum of ninety by 2,68 %, 5,07 % and 0,00 %:
+
+| act | nine-clock minimum | ninety-clock minimum | ratio | probe jitter | act jitter | ratio |
+|---|---:|---:|---:|---:|---:|---:|
+| F | 0,3483 | 0,3392 | 1,0268 | 0,1715 | 0,2737 | 0,6266 |
+| G | 0,3686 | 0,3508 | 1,0507 | 0,4238 | 0,2812 | 1,5071 |
+| H | 0,3445 | 0,3445 | 1,0000 | 0,2351 | 0,3127 | 0,7518 |
+
+The probe is a subset by construction, so it can only overstate the minimum; what the order asked
+was how much, and the answer is at most 5,07 %. Its jitter is a different story: 0,63×, 1,51× and
+0,75× of the act's worst block. Nine points can find the floor of an act and cannot size its worst
+block, and in act G the probe saw more jitter than the block that won — which is why the frozen
+claim asked for a ratio and not for equality. And it is spread through the act instead of run at the
+start, because a probe paid at t = 0 quotes the cold reading: the first clock of act H took 0,5499
+s, 1,60× the floor the nine later ones found. The cost is arithmetic and not measured: ninety clocks
+took 1,55 s per clock in F, 2,18 s in G and 1,47 s in H, so nine should cost 14 to 20 s instead of
+132 to 196. That is one tenth of the clocks, not one tenth of the certificate.
+
+**M3 holds, and the bill says the gate is mostly harness.** A clock is three scans of the tree, so
+`coste / (clocks × median)` is the surcharge the certificate charges over the work it certifies:
+
+| act | gate wall | subject's work | harness | gate / work |
+|---|---:|---:|---:|---:|
+| F | 139,6 s | 36,3 s | 103,3 s | 3,8493 |
+| G | 196,2 s | 47,8 s | 148,4 s | 4,1044 |
+| H | 132,4 s | 38,1 s | 94,3 s | 3,4740 |
+
+71,2 % to 75,6 % of a gate is the harness and not the subject, and across the batch the split is
+346,0 s of harness against 122,2 s of work. So the surcharge is a property of the instrument, not of
+the tree: it is the same three-scan protocol, and making the gate cheaper means walking it fewer
+times and not analysing less code.
+
+**What this leaves a quote, now that the second session is paid.** The floor is bounded by the
+session to 2,64× and not to 1; nine clocks size that floor within 5,07 %; the certificate costs 3,5×
+to 4,1× the work it certifies, most of it overhead; and `publicable` is a sentence about a window. A
+receipt that carries `(k, threshold, within-session dispersion, cost)` says all four things and a
+boolean says none of them — which is the change this batch makes to the contract, and the reason the
+next order is `prediccion-batch-11.json` and not another boolean.
+
+```bash PYTHONPATH=src:bench python bench/sonda.py --dir /tmp/censo10 --artefacto ```
+
+It writes `fuera-de-dominio-10.json`: eight acts with their pins, the two sessions with their
+internal dispersions and their factorisation, the probe of every new act against its ninety clocks,
+the gate's bill split into work and harness, the verdicts against the frozen prediction and the
+declared dead zone of M1. Acts A to E are read back from `fuera-de-dominio-8.json` and
+`fuera-de-dominio-9.json` and never re-timed, so the sample is paired; `--desde` recomposes from
+acts already paid, so a recomposition can never quietly become a fourth act. The instrument itself
+changed in one place: `sujeto._ruido` now keeps `primera_s`, the first reading of each block in
+chronological order, before it sorts — sorting is what made a nine-clock probe impossible to
+reconstruct from the artifact.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

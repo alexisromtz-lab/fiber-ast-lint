@@ -132,8 +132,12 @@ def _ruido(arbol: Path, n: int = 10, bloques: int = 9) -> dict:
     """
     out = []
     for _ in range(bloques):
-        xs = sorted(cotizar._tiempo(arbol, 3)["cpu_min"] for _ in range(n))
+        crudas = [cotizar._tiempo(arbol, 3)["cpu_min"] for _ in range(n)]
+        xs = sorted(crudas)
+        # `primera_s` is kept before sorting: the first reading of a block is the only
+        # evidence of what a cold start costs, and sorting is what made it unrecoverable.
         out.append({"lecturas": [round(x, 4) for x in xs], "n": n,
+                    "primera_s": round(crudas[0], 4),
                     "min_s": round(xs[0], 4), "p50_s": round(statistics.median(xs), 4),
                     "max_s": round(xs[-1], 4), "jitter_s": round(xs[-1] - xs[0], 4)})
     peor = max(out, key=lambda x: x["jitter_s"])
