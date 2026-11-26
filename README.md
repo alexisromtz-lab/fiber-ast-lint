@@ -1252,6 +1252,55 @@ changed in one place: `sujeto._ruido` now keeps `primera_s`, the first reading o
 chronological order, before it sorts — sorting is what made a nine-clock probe impossible to
 reconstruct from the artifact.
 
+### The boolean lied at the frontier, and the receipt says where
+
+Batch 8 closed with a boolean: `publicable = predicho * q > jitter`. It is the answer to one
+question, "is this act on the right side of the threshold", and nothing else. Over the eight acts
+of batch 10, on one pin of 296 870 B (`b2e05e6b`), that boolean said yes four times and no four
+times without a byte of the tree changing. A verdict that inverts on a still subject is not a
+verdict about the subject.
+
+What a buyer of a gate needs is the distance to the frontier, the dispersion of the session that
+produced it, and what it cost to establish. `bench/recibo.py` emits that and re-times nothing: it
+reads a sealed `fuera-de-dominio-N.json` and reduces it. On the eight acts:
+
+| act | session | k | q/2 | q | margin | margin % | zone | boolean |
+|---|--:|--:|--:|--:|--:|--:|---|---|
+| A | 7 | 0,6054 | 0,1509 | 0,3018 | -0,3036 | -100,60 | out of bounds | no |
+| B | 8 | 0,2498 | 0,1509 | 0,3018 | 0,0520 | 17,23 | risk band | yes |
+| C | 9 | 0,1280 | 0,1509 | 0,3018 | 0,1738 | 57,59 | healthy margin | yes |
+| D | 9 | 0,1332 | 0,1509 | 0,3018 | 0,1686 | 55,86 | healthy margin | yes |
+| E | 9 | 0,1155 | 0,1509 | 0,3018 | 0,1863 | 61,73 | healthy margin | yes |
+| F | 10 | 0,3290 | 0,1509 | 0,3018 | -0,0272 | -9,01 | out of bounds | no |
+| G | 10 | 0,3381 | 0,1509 | 0,3018 | -0,0363 | -12,03 | out of bounds | no |
+| H | 10 | 0,3759 | 0,1509 | 0,3018 | -0,0741 | -24,55 | out of bounds | no |
+
+3 acts sit in the healthy half, 1 in the risk band and 4 out of bounds. The boolean and the band
+disagree exactly once, and that once is act B: the boolean says yes with 17,23 % of its margin
+left over, and a certificate that only says yes cannot tell that buyer from the one who bought C
+at 57,59 %. That is not a refinement of the boolean, it is the information the boolean threw away.
+
+Two more things live in the receipt. Verifying it costs of the order of a microsecond against the
+468,1 s the gates themselves cost, so a third party recomputes the verdict from four files without
+running the scanner; `--check` returns 0 on the recomputation and 4 on a tampered act, and the
+test suite fails if that ratio ever exceeds 1e-05. And the amortisation does not go the way batch
+9 implied. Re-certifying with a nine-clock probe costs `harness + 9 x p50`, which for the most
+expensive act (G, 196,2 s of gate over 148,4 s of harness) is 153,2 s per use: the ninety-clock
+act pays for itself on the second use, not the twentieth. The optimistic bound that pretends the
+harness is already open is 42 uses. The pre-registered range said 20 to 40, and it fell — which is
+the honest outcome, because a gate that costs three to four times the work it certifies is still
+cheap against repeating it.
+
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-10.json --salida recibo-banda-11.json ```
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-10.json --check recibo-banda-11.json ```
+
+The second command is what a client runs. The seal is a sha256 over the canonical serialisation
+with `huella` and `medicion_de_si_mismo` removed, so it does not move when the receipt costs a
+microsecond more to emit, and it does not need our interpreter either: `jq -S -c 'del(.huella,
+.medicion_de_si_mismo)' recibo-banda-11.json | tr -d '\n' | shasum -a 256` prints
+`507303a9787c0405bb308df03907fa70d9d7b56cc73bdb1cdef6c6c49ce37bcb`, which is the receipt's own
+`huella`. That is the whole sales argument: the verdict is a number two tools agree on.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

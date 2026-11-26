@@ -1,0 +1,252 @@
+{
+ "schema": "fiber-ast-lint/recibo/1",
+ "lote": 11,
+ "sujeto": {
+  "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+  "bytes_py_pin": 296870,
+  "actos": 8,
+  "relojes": 720
+ },
+ "fuente_artefacto": {
+  "ruta": "fuera-de-dominio-10.json",
+  "sha256": "1b0bc7633a777834ffc55a39007d4522c7bc82959d42003d014f414a9aa12db2"
+ },
+ "actos": [
+  {
+   "k": 0.6054,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.3036,
+   "margen_relativo": -1.006,
+   "zona": "fuera_de_cota",
+   "nombre": "A",
+   "sesion": 7,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.2498,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.052,
+   "margen_relativo": 0.1723,
+   "zona": "banda_de_riesgo",
+   "nombre": "B",
+   "sesion": 8,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.128,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.1738,
+   "margen_relativo": 0.5759,
+   "zona": "margen_sano",
+   "nombre": "C",
+   "sesion": 9,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1532,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": 209.5298,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.1332,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.1686,
+   "margen_relativo": 0.5586,
+   "zona": "margen_sano",
+   "nombre": "D",
+   "sesion": 9,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1532,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": 132.1214,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.1155,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.1863,
+   "margen_relativo": 0.6173,
+   "zona": "margen_sano",
+   "nombre": "E",
+   "sesion": 9,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1532,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": 109.6219,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.329,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.0272,
+   "margen_relativo": -0.0901,
+   "zona": "fuera_de_cota",
+   "nombre": "F",
+   "sesion": 10,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1426,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": 139.5794,
+   "trabajo_s": 36.261,
+   "cotizacion": {
+    "relojes_sonda": 9,
+    "sonda_s": 3.6261,
+    "coste_uso_s": 106.9445,
+    "usos_para_amortizar": 2,
+    "usos_sin_arnes": 39
+   }
+  },
+  {
+   "k": 0.3381,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.0363,
+   "margen_relativo": -0.1203,
+   "zona": "fuera_de_cota",
+   "nombre": "G",
+   "sesion": 10,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1426,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": 196.187,
+   "trabajo_s": 47.799,
+   "cotizacion": {
+    "relojes_sonda": 9,
+    "sonda_s": 4.7799,
+    "coste_uso_s": 153.1679,
+    "usos_para_amortizar": 2,
+    "usos_sin_arnes": 42
+   }
+  },
+  {
+   "k": 0.3759,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.0741,
+   "margen_relativo": -0.2455,
+   "zona": "fuera_de_cota",
+   "nombre": "H",
+   "sesion": 10,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1426,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": 132.3507,
+   "trabajo_s": 38.097,
+   "cotizacion": {
+    "relojes_sonda": 9,
+    "sonda_s": 3.8097,
+    "coste_uso_s": 98.0634,
+    "usos_para_amortizar": 2,
+    "usos_sin_arnes": 35
+   }
+  }
+ ],
+ "resumen": {
+  "actos": 8,
+  "publicables_como_booleano": 4,
+  "publicables": [
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "en_banda_de_riesgo": [
+   "B"
+  ],
+  "en_banda_de_riesgo_n": 1,
+  "por_zona": {
+   "margen_sano": [
+    "C",
+    "D",
+    "E"
+   ],
+   "banda_de_riesgo": [
+    "B"
+   ],
+   "fuera_de_cota": [
+    "A",
+    "F",
+    "G",
+    "H"
+   ]
+  },
+  "margen_relativo_min": -1.006,
+  "margen_relativo_max": 0.6173,
+  "dispersiones_por_sesion": {
+   "7": {
+    "n": 1,
+    "k_min": 0.6054,
+    "k_max": 0.6054,
+    "dispersion": null
+   },
+   "8": {
+    "n": 1,
+    "k_min": 0.2498,
+    "k_max": 0.2498,
+    "dispersion": null
+   },
+   "9": {
+    "n": 3,
+    "k_min": 0.1155,
+    "k_max": 0.1332,
+    "dispersion": 1.1532
+   },
+   "10": {
+    "n": 3,
+    "k_min": 0.329,
+    "k_max": 0.3759,
+    "dispersion": 1.1426
+   }
+  }
+ },
+ "veredictos": [
+  {
+   "id": "P1",
+   "prediccion": "La banda no refina el booleano donde ya coincidia: lo corrige donde el booleano decia si con el margen ya consumido. De los actos con publicable = true, al menos uno y como mucho la mitad caen en banda_de_riesgo con k > q/2.",
+   "medido": {
+    "publicables": 4,
+    "en_banda_de_riesgo": 1,
+    "actos": 8
+   },
+   "sobrevive": true,
+   "evalua": "el booleano dice si con el margen ya consumido en al menos un acto y en no mas de la mitad"
+  },
+  {
+   "id": "P4",
+   "prediccion": "La compuerta de noventa relojes solo se amortiza con volumen: usos_para_amortizar del acto mas caro del lote 10 cae entre 20 y 40 comprobaciones de nueve relojes.",
+   "medido": {
+    "acto_mas_caro": "G",
+    "usos_para_amortizar": 2,
+    "usos_sin_arnes": 42
+   },
+   "sobrevive": false,
+   "evalua": "la compuerta de noventa relojes solo se amortiza con volumen, entre veinte y cuarenta usos"
+  }
+ ],
+ "huella": "507303a9787c0405bb308df03907fa70d9d7b56cc73bdb1cdef6c6c49ce37bcb",
+ "medicion_de_si_mismo": {
+  "coste_verificacion_s": 0.000641,
+  "coste_compuerta_total_s": 919.3902,
+  "ratio_sobre_compuerta": 6.97e-07,
+  "P2_sobrevive": true,
+  "reproducible": true
+ }
+}

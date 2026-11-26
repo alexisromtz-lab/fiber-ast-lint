@@ -1,0 +1,50 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 11,
+  "title": "el booleano miente cerca de la frontera; la banda dice donde",
+  "declared_before_computation": true,
+  "declared_at": "2026-11-26",
+  "why": "El lote 8 cerro con un booleano, publicable = predicho * q > jitter, que vale lo mismo para un acto con k = 0,10 que para uno con k = 0,29 cuando el umbral es q = 0,3018. El lote 10 midio ocho actos sobre el mismo pin y el booleano se invirtio cuatro veces sobre un sujeto sin cambios: cuatro publicables y cuatro no. Un veredicto binario sobre una magnitud continua que se mueve 2,64x entre sesiones no certifica nada; lo que certifica es la distancia a la frontera y lo que costo medirla. Este lote sustituye el booleano por la tupla (k, umbral, dispersion_dentro, coste) y publica esa tupla como recibo que un tercero recomputa sin ejecutar el escaner.",
+  "what_is_new": "Un instrumento que no vuelve a cronometrar nada: bench/recibo.py lee un artefacto fuera-de-dominio-N.json ya sellado y emite un recibo canonico con la banda de cada acto (margen absoluto y relativo contra q, zona en tres estados), la dispersion de k dentro de la sesion que lo produjo, el coste de pared de la compuerta y el numero de usos que hacen falta para amortizarla con una comprobacion en caliente de nueve relojes. El recibo lleva su propia huella sha256 sobre la serializacion canonica, de modo que la verificacion es comparar dos numeros y no creer una prosa.",
+  "method": {
+    "sujeto": "fuera-de-dominio-10.json: ocho actos, 720 lecturas, un solo pin (296870 B, sha256 b2e05e6b), sellado en a6c64cc",
+    "relojes_nuevos": 0,
+    "por_que_cero": "el lote 11 no mide el entorno, mide su propio recibo: la reduccion (k, umbral, dispersion, coste) se computa sobre lecturas ya tomadas, y toda cifra del recibo tiene que coincidir con el artefacto del que sale o el test falla",
+    "banda": "para cada acto, margen = q - k, margen_relativo = (q - k) / q, y zona = margen_sano si k <= q/2, banda_de_riesgo si q/2 < k <= q, fuera_de_cota si k > q",
+    "dispersion_dentro": "max(k) / min(k) de los actos de la sesion que produjo el acto; un acto reutilizado hereda la dispersion de su lote de origen",
+    "coste_por_uso": "lo que costaria re-certificar el mismo sujeto con una sonda de nueve relojes: coste_arnes_s del acto (el impuesto de inicializacion, medido en el lote 10) mas relojes_de_la_sonda * p50 del acto",
+    "usos_para_amortizar": "techo(coste_compuerta_s / coste_por_uso), definido con el arnes completo pagado en cada uso: es la cota pesimista. Al lado se publica usos_sin_arnes = techo(coste_compuerta_s / (relojes_de_la_sonda * p50)), la cota optimista para una sesion que ya tiene el arnes abierto. P4 se evalua sobre la pesimista, que es la que no puede salir bien por construccion",
+    "huella": "sha256 del JSON canonico (sort_keys=True, separators=(',', ':'), ensure_ascii=True) del recibo sin su propio campo huella",
+    "verificacion": "bench/recibo.py --artefacto A --check R recomputa desde A y compara la huella con R; RC 0 si coinciden, RC 4 si no, RC 2 si el artefacto no se puede leer"
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "La banda no refina el booleano donde ya coincidia: lo corrige donde el booleano decia si con el margen ya consumido. De los actos con publicable = true, al menos uno y como mucho la mitad caen en banda_de_riesgo con k > q/2.",
+      "conjetura_de_partida": "El lote 8 publico k = 0,2498 con q = 0,3018, que cae entre q/2 = 0,1509 y q: el booleano dijo si con el 83 por ciento del margen gastado. Ese dato no es prediccion; prediccion es cuantos actos de los ocho caen ahi.",
+      "falsador_bajo": "ningun acto publicable con k > q/2: la banda no anade informacion y el booleano bastaba",
+      "falsador_alto": "mas de la mitad de los actos publicables con k > q/2: el umbral q esta mal calibrado, no el booleano"
+    },
+    {
+      "id": "P2",
+      "claim": "Verificar el recibo cuesta menos de una centesima parte de producir el acto que certifica: coste_verificacion_s / coste_compuerta_total_s <= 0,01.",
+      "falsador": "ratio > 0,05: el recibo no es la interfaz barata que dice ser y hay que re-medir para creerlo"
+    },
+    {
+      "id": "P3",
+      "claim": "La huella del recibo es estable y recomputable: dos ejecuciones sobre el mismo artefacto dan el mismo sha256, y --check desde un git archive sin el escaner devuelve RC 0.",
+      "falsador": "dos huellas distintas para el mismo artefacto, o --check distinto de 0 sobre el arbol exportado"
+    },
+    {
+      "id": "P4",
+      "claim": "La compuerta de noventa relojes solo se amortiza con volumen: usos_para_amortizar del acto mas caro del lote 10 cae entre 20 y 40 comprobaciones de nueve relojes.",
+      "falsador": "fuera de [20, 40]: por debajo, la sonda en caliente ya gana desde la primera comprobacion; por encima, ni el volumen amortiza el acto de noventa relojes"
+    }
+  ],
+  "criterio_de_falsacion_del_lote": "El lote cae si P1, P2, P3 o P4 fallan sin retro-ajuste de sus umbrales. Un lote que mueve su propio umbral despues de medir no midio: describio.",
+  "no_se_hace": [
+    "no se recronometra el entorno: los 720 relojes del lote 10 son la unica fuente",
+    "no se toca fuera-de-dominio-10.json: se lee y se cita, y el test ata cada cifra del recibo al acto del que sale",
+    "no se sustituye el booleano en fuera-de-dominio-8.json: el lote 8 queda como se sello, y el recibo lo reexpresa sin reescribir su historia"
+  ]
+}
