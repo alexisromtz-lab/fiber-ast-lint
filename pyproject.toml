@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fiber-ast-lint"
-version = "0.4.4"
+version = "0.4.5"
 description = "Static detection of lossy key projections: names the dict writes that fuse two rows into one key, and checks whether a whitelist can ever be a transversal."
 readme = "README.md"
 requires-python = ">=3.11"

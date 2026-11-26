@@ -28,6 +28,28 @@ def test_sin_candidatos_sale_cero(copia):
     assert rc == 0
 
 
+def test_el_escaneo_y_la_certificacion_publican_codigos_distintos(copia, capsys):
+    """Un linter callado sobre un fichero sin bucles sigue siendo un 0.
+
+    El acta, en cambio, no puede firmar ``certifica`` sobre cero almacenes: el
+    payload publica los dos codigos con nombre para que el recibo no tenga que
+    adivinar cual esta leyendo.
+    """
+    main([str(copia("limpio.py")), "--json"])
+    salida = json.loads(capsys.readouterr().out)
+    assert salida["rc"] == 0
+    assert salida["certifica"] is False
+    assert salida["rc_certificado"] == 2
+
+
+def test_con_almacenes_los_dos_codigos_son_el_mismo(copia, capsys):
+    main([str(copia("espacio_no_transversal.py")), "--json"])
+    salida = json.loads(capsys.readouterr().out)
+    assert salida["almacenes"] > 0
+    assert salida["certifica"] is True
+    assert salida["rc_certificado"] == salida["rc"] == 1
+
+
 def test_un_fichero_es_un_universo(copia, capsys):
     """A linter is called with a single file from an editor or a pre-commit hook."""
     fichero = copia("espacio_no_transversal.py") / "espacio_no_transversal.py"

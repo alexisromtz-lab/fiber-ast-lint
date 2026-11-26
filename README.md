@@ -80,6 +80,32 @@ individual codes under `4 > 1 > 2 > 0`, not the maximum of the integers: an empt
 not hide a candidate proven in another path (`1`), and nothing outranks a broken bucket (`4`).
 `max(1, 2) == 2` — that is why the operator is spelled out instead of inferred.
 
+### Closing is not certifying: the code a receipt may publish
+
+The identity `almacenes == pierde + guardadas + acumulacion + posicional + cardinal_sin_medir` is
+arithmetic: over a package with no store it evaluates `0 = 0` and closes. That closure is a
+tautology, and until `0.4.5` the census published it as `"reconciles": true, "rc": 0` on
+`platformdirs` (15 files, 0 stores) and `pyflakes` (23 files, 0 stores) — two rows certifying a
+conservation over an empty population. A downstream verifier caught it, not this repository.
+
+The two questions are now separate fields, and only one of them is a signature:
+
+| field | question | `platformdirs` |
+|---|---|---|
+| `rc` | did the **scan** find anything to report? | `0` — a linter on a file with no loop says nothing |
+| `reconcilia` | does the discard census add up? | `true` — `0 = 0` is the identity, and it holds |
+| `certifica` | may a **receipt** sign a conservation? | `false` — there is no population to conserve |
+| `rc_certificado` | the code an `acta` publishes | `2` (`NO_MEDIDO`) |
+
+`reconcilia` and `certifica` differ on exactly one case — zero stores — and that is the case the
+census had wrong. The scan's exit code is deliberately **not** changed: a package with no store is
+out of this instrument's scope, not broken, and failing a pre-commit hook for being out of scope is
+a false red in the safe direction but still a false red. The receipt contract is the strict one: no
+population, no certificate, and `NO_MEDIDO` is a truthful thing to publish.
+
+`tests/test_detect.py` pins the pair on one fixture, `tests/test_cli.py` pins the two codes in one
+payload, and `tests/test_censo.py` pins every row of the census to `stores > 0` for a `true`.
+
 ## What it classifies
 
 For every `for` loop, each write into an accumulator falls in exactly one class:
@@ -317,10 +343,17 @@ message that publishes this section):
 
 | project | version | files | stores | candidates | admitted | `reconciles` |
 |---|---|---|---|---|---|---|
-| `pyflakes` | 4.1.0 | 23 | 0 | 0 | 0 | yes |
+| `pyflakes` | 4.1.0 | 23 | 0 | 0 | 0 | no — 0 stores |
 | `flake8` | 7.5.0 | 33 | 3 | 1 | **1** | yes |
 | `black` | 26.10.1 | 42 | 23 | 2 | 0 | yes |
-| **added** | | **98** | **26** | **3** | **1** | 3/3 |
+| **added** | | **98** | **26** | **3** | **1** | 2/3 |
+
+One correction, published rather than absorbed: the prediction said `reconciles` closes on all
+three, and under the definition in force when it was written that was true — `pyflakes` closes
+`0 = 0 + 0 + 0 + 0 + 0`. It is a tautology over an empty population, not a reconciliation, and the
+`0.4.5` law (below) splits the two questions. The row now says `no`, so the out-of-sample
+population is **26 stores over two packages**, not three. The pre-registered sentence stays verbatim
+above: rewriting a prediction after seeing the answer is how predictions stop being predictions.
 
 The three rows are pinned in [`censo.json`](censo.json) by wheel and SHA-256 like the rest, and they
 are **not** folded into the `599 files / 308 stores` above. The percentages are not recomputed
@@ -481,7 +514,7 @@ repository in about 54 s, which is the intended use.
 ```yaml
 repos:
   - repo: https://github.com/alexisromtz-lab/fiber-ast-lint
-    rev: v0.4.4
+    rev: v0.4.5
     hooks:
       - id: fiber-ast-lint
 ```
@@ -638,6 +671,16 @@ that had aged was indistinguishable from one that had been edited. Every documen
 re-run over all thirteen pinned artifacts with `0.4.4` before its `instrument_version` moved: every
 cell identical, `totals_seven` unchanged — a stamp is only a measurement if the run that produced it
 is the run that wrote it.
+
+`0.4.5` splits closing from certifying. Two census rows — `platformdirs` and `pyflakes`, 15 and 23
+files, zero stores each — closed `0 = 0 + 0 + 0 + 0 + 0` and published `"reconciles": true,
+"rc": 0`: a tautology sold as a conservation. The identity stays; the signature now requires a
+population. `--json` publishes both codes with a name (`certifica`, `rc_certificado`) and the scan's
+exit code does not move, because being out of scope is not a defect. The two rows were **re-emitted,
+not edited**: their wheels re-downloaded, their SHA-256 checked against the pins, the analyzer
+re-run, and every measured cell came back identical — only `reconciles` and `rc` moved, which is
+the whole claim: the law changed and the data did not. The defect was found by a downstream
+verifier grading this census, which is the reader this repository did not have.
 
 ## License
 

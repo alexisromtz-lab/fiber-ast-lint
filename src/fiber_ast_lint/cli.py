@@ -80,6 +80,16 @@ def rc_de(a: Analisis) -> int:
     return RC_CANDIDATO if a.candidatos else RC_OK
 
 
+def rc_certificado(a: Analisis) -> int:
+    """El codigo que un recibo puede publicar. Un universo sin almacen es NO_MEDIDO.
+
+    No es el codigo del escaneo: un linter sobre un fichero sin bucles no tiene
+    nada que decir (0), pero un acta que firma ``reconcilia: true`` sobre cero
+    almacenes afirma una conservacion que su poblacion no sostiene.
+    """
+    return RC_VACIO if not a.almacenes else rc_de(a)
+
+
 def _payload(r: dict) -> dict:
     a = r["analisis"]
     c = r["consumos"]
@@ -90,7 +100,8 @@ def _payload(r: dict) -> dict:
         "pierde": r["pierde"], "guardadas": r["guardadas"],
         "acumulacion": r["acumulacion"], "posicional": r["posicional"],
         "sin_len": r["sin_len"], "reconcilia": r["reconcilia"],
-        "rc": rc_de(a), "candidatos": r["candidatos"],
+        "rc": rc_de(a), "rc_certificado": rc_certificado(a),
+        "certifica": a.certifica(), "candidatos": r["candidatos"],
         "consumidores": {k: [str(x) for x in v] for k, v in c.exactos.items()},
         "consumidores_por_nombre": c.sitios_por_nombre,
         "consumidores_por_self": c.sitios_por_self,

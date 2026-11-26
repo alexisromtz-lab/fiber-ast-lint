@@ -543,6 +543,10 @@ class Analisis:
         return self.almacenes == (self.pierde + self.guardadas + self.acumulacion
                                   + self.posicional + self.sin_len)
 
+    def certifica(self) -> bool:
+        """La identidad sola no certifica: 0 = 0 cierra por no haber poblacion."""
+        return self.almacenes > 0 and self.reconcilia()
+
     @property
     def admitidos(self) -> list[Locus]:
         return [x for x in self.loci if x.admitido]

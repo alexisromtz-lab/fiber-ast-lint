@@ -59,7 +59,13 @@ def test_every_row_is_pinned():
         suma = r["pierde"] + r["guardadas"] + r["acumulacion"] + r["posicional"] + r["sin_len"]
         assert suma == r["stores"], (
             f"{r['package']} {r['scope']}: {r['stores']} != {suma} (residuo {r['stores'] - suma})")
-        assert r["reconciles"] is True, f"{r['package']}: el censo de descartes no cuadra"
+        if r["stores"] == 0:
+            # La identidad cierra por vacio: cero unidades no certifican nada, y
+            # la fila tiene que decirlo con el codigo que el instrumento publica.
+            assert r["reconciles"] is False, f"{r['package']}: firma sobre cero almacenes"
+            assert r["rc"] == 2, f"{r['package']}: un universo sin almacen es NO_MEDIDO"
+        else:
+            assert r["reconciles"] is True, f"{r['package']}: el censo de descartes no cuadra"
 
 
 def test_one_artifact_one_digest():

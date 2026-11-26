@@ -130,3 +130,17 @@ def test_universo_vacio_no_es_cero(tmp_path):
     a = analizar(tmp_path)
     assert a.archivos == 0
     assert a.loci == []
+
+
+def test_la_identidad_sobre_cero_almacenes_no_certifica(copia):
+    """0 = 0 cierra por no haber poblacion: cierra, y no certifica nada.
+
+    ``reconcilia`` es aritmetica; ``certifica`` es la firma que un recibo
+    publica. Un universo medido sin un solo almacen sostiene la primera y no la
+    segunda, y confundirlas es lo que dejo a dos filas del censo firmando una
+    conservacion sobre cero unidades.
+    """
+    a = analizar(copia("limpio.py"))
+    assert a.almacenes == 0
+    assert a.reconcilia() is True
+    assert a.certifica() is False
