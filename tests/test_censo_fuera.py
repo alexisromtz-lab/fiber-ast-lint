@@ -14,6 +14,8 @@ import json
 import re
 from pathlib import Path
 
+import pytest
+
 RAIZ = Path(__file__).resolve().parents[1]
 FUERA = json.loads((RAIZ / "fuera-de-dominio.json").read_text(encoding="utf-8"))
 CENSO = json.loads((RAIZ / "censo.json").read_text(encoding="utf-8"))
@@ -80,8 +82,16 @@ def test_ningun_candidato_nace_fuera_de_sin_len():
 
 
 def test_los_totales_son_la_suma_de_las_filas():
+    # Los enteros cuadran exacto. Los segundos no: CPython 3.12 metio suma
+    # compensada (Neumaier) en sum(), asi que la misma lista da 2.06 en 3.12 y
+    # 2.0599999999999996 en 3.11. El total publicado va redondeado a dos
+    # decimales, asi que se compara a la precision a la que se publica.
     for k, v in FUERA["totals"].items():
-        assert v == sum(r[k] for r in FUERA["rows"]), k
+        suma = sum(r[k] for r in FUERA["rows"])
+        if isinstance(v, float):
+            assert v == pytest.approx(suma, abs=5e-3), (k, v, suma)
+        else:
+            assert v == suma, k
 
 
 def test_la_tabla_del_readme_es_el_archivo():
