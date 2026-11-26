@@ -1,0 +1,65 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "instrument_version": "0.4.6",
+  "written_at": "2026-11-26",
+  "declared_before_fetch": true,
+  "why_this_file_exists": "fuera-de-dominio.json es EXPLORATORIO porque se midio antes de predecir. Un sample que no se predijo puede nombrar direcciones y no puede nombrar tasas. Este archivo invierte el orden: se escribe, se commitea, y solo despues se descarga el lote. El commit es el recibo del orden.",
+  "population": {
+    "rule": "cinco proyectos de Python puro que el censo y fuera-de-dominio.json no tocan, elegidos por estar en la mochila de casi cualquier backend de cliente, nombrados aqui antes de descargar nada",
+    "packages": ["jinja2", "urllib3", "packaging", "idna", "six"],
+    "excluded": "descartados antes de verlos: pyyaml y markupsafe, porque su nucleo no es Python y el escaner mide Python",
+    "stratum": "librerias de tiempo de ejecucion de un backend web"
+  },
+  "derivation": {
+    "from": "fuera-de-dominio.json (5 filas) y censo.json (13 filas)",
+    "per_row_max_candidates_over_sin_len": 0.4231,
+    "per_row_max_where": "attrs/attr: 11 candidatos sobre 26 sin_len",
+    "pooled_libs_candidates_over_sin_len": 0.4,
+    "pooled_libs_where": "5 filas: 14 de 35",
+    "pooled_devtools_candidates_over_sin_len": 0.1435,
+    "pooled_devtools_where": "13 filas del censo: 30 de 209",
+    "seconds_per_file_min": 0.0238,
+    "seconds_per_file_max": 0.055,
+    "seconds_per_file_note": "envelope de las 5 filas: 0.083/6 y 0.714/17; el minimo esta dominado por el arranque del interprete y por eso el modelo por fichero se declara como envolvente, no como recta"
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "candidates <= sin_len en cada una de las 5 filas",
+      "value": "5 de 5 filas",
+      "cota_error": "0 filas",
+      "status": "control",
+      "why_control": "el mecanismo lo hace casi teorema: un candidato solo nace de un almacen sin cardinalidad publicada. Se predice como control, no como hallazgo, porque confirmar un teorema no informa nada"
+    },
+    {
+      "id": "P2",
+      "claim": "candidates/sin_len <= 0.50 en cada fila con sin_len > 0",
+      "value": "5 de 5 filas",
+      "cota_error": "0 filas",
+      "why": "el maximo medido por fila es 0.4231; 0.50 deja 7.7 puntos de margen y muere con una sola fila por encima"
+    },
+    {
+      "id": "P3",
+      "claim": "candidates/sin_len agrupado del lote cae en [0.10, 0.45]",
+      "value": 0.25,
+      "cota_error": "banda [0.10, 0.45], que contiene los dos estratos medidos (0.1435 y 0.4000)",
+      "honestidad": "es interpolacion entre dos estratos, no extrapolacion: su valor es que moriria si un tercer estrato cae fuera, y su valor es bajo si lo unico que hace es contener lo ya medido"
+    },
+    {
+      "id": "P4",
+      "claim": "segundos de reloj del lote entero, suma de tres corridas minimas",
+      "value": "entre 0.0238*F y 0.055*F, con F el total de ficheros que resulte",
+      "cota_error": "la banda misma",
+      "honestidad": "condicional a F, que no se conoce antes de descargar: no es una prediccion de un numero, es de una banda por fichero"
+    }
+  ],
+  "falsification": [
+    "P1 cae si una sola fila publica candidates > sin_len",
+    "P2 cae si una sola fila con sin_len > 0 supera 0.50",
+    "P3 cae si el cociente agrupado queda fuera de [0.10, 0.45]",
+    "P4 cae si el total sale de la banda por fichero",
+    "el lote entero cae como muestra si el replay no reproduce las 5 filas"
+  ],
+  "what_a_refutation_means": "P2 o P3 refutadas convierten el cociente en un artefacto del estrato y no del instrumento: se publica el negativo y no se sube ninguna tasa al README. P4 refutada dice que el fichero no es el regresor del coste, que es lo que el ajuste de 5 puntos ya insinua (residuos de -47% a +222%).",
+  "procedure": "descargar los cinco wheels de PyPI con su digest publicado, verificar el pin, escanear cada subarbol con python -m fiber_ast_lint --json, escribir el resultado en fuera-de-dominio-2.json con su status, y correr bench/replay_censo.py --censo fuera-de-dominio-2.json"
+}
