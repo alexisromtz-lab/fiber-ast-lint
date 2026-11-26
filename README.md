@@ -938,6 +938,113 @@ each, the noise of every block, the verdicts against the frozen prediction and t
 scales. Every cell of both tables above is read from that file by the test suite, so a figure that
 stops matching the artifact fails CI instead of ageing quietly.
 
+### The floor is a reading of the act
+
+Batch 7 refused five subjects measured in one window and could not say why the refusal did not order
+by size: the largest tree came back the tightest, so the gate did not look like a property of the
+code — but nothing had yet shown the quantity *moving* on a subject that did not move. This batch is
+one subject and two acts. Act A is the ninety clocks batch 7 already paid on `pyflakes/pyflakes`;
+they are reused exactly as they stand, never re-timed, so the comparison is paired. Act B is the
+same protocol, the same pin and another window: 90 new clocks, 164,3 s of wall, run once and
+published whatever it said.
+
+**The subject is provably one object, by two measurements.** The 296 870 scanned bytes match the
+pin, and the wheel's `sha256` is the one batch 7 recorded: the two checks that would have to
+disagree for the tree to be another one. So the act is the only variable — and act B came back at
+`jitter / predicted` = 0,2498, against 0,6054 in act A.
+
+| statistic | act A | act B | A / B |
+|---|---:|---:|---:|
+| minimum of 90 readings | 0,5011 | 0,2384 | 2,10 |
+| median | 0,6973 | 0,3286 | 2,12 |
+| maximum | 1,0125 | 0,5534 | 1,83 |
+| worst block jitter | 0,5036 | 0,2078 | 2,42 |
+| median block jitter | 0,3570 | 0,1342 | 2,66 |
+| `jitter / predicted` | 0,6054 | 0,2498 | 2,42 |
+| `min / jitter` | 0,9950 | 1,1473 | 1,15 |
+
+The minimum is the discriminant, and it needs no threshold at all. An interruption can add time and
+can never take it away, so the smallest of ninety readings is the closest thing to what the scan
+costs; it moved by **2,10×** on a tree that did not change. The lower half of the distribution moved
+together — minimum 2,10, median 2,12 — while the tail moved less, the maximum by 1,83: the second
+act was faster *and* cleaner, and the relative dispersion fell from 0,7222 to 0,6324 of the median.
+Both published magnitudes moved by 1,83 to 2,42 times; what barely moved is the dimensionless one,
+`min / jitter`, 0,9950 → 1,1473, a factor of **1,15×**.
+
+**The three pre-registered claims, as frozen.** What follows is what was written before the act, not
+what the act made convenient. Two of the three fell:
+
+| id | pre-registered threshold | measured | verdict |
+|---|---|---|---|
+| K1 | `k_B` < 0,1509 | 0,2498, against 0,6054 | **falls** |
+| K2 | halves differ by < 0,1509 | 0,1938 vs 0,2498, difference 0,0560 | **survives** |
+| K3 | `min_B / min_A` in [0,90; 1,10] | 0,2384 / 0,5011 = 0,4758 | **falls** |
+
+**K1 fell, and the fall is a defect of the order, not a finding about the world.** Its threshold was
+`q / 2` = 0,1509, but batch 6 defines `q` as the *half*-width: the interval it publishes for its own
+subject is [0,204, 0,3803] around 0,2921, which is that prediction times 1 ∓ 0,3018 to the last
+published digit. So the boundary every earlier batch applied — and the one the section above states
+in words, *stays under* 0,3018 — is `q`, not `q / 2`. The act landed at 0,2498, strictly inside the
+gap between the two published thresholds: 0,1509 < 0,2498 < 0,3018. Two statements in this
+repository, both about the same act, give **opposite** verdicts on it: the frozen prediction says
+not publishable, the rule written one batch earlier says publishable.
+
+Neither is retro-fitted, and the prediction is not re-scored with a threshold it did not freeze. The
+disjunction needed something other than the threshold: it needed a quantity that survives the change
+of act, and both thresholds only paraphrase one. `min_B / min_A` = 0,4758 — K3, which fell — says
+the minimum does not survive it either, so no single second travels. What the pair does show is
+narrower and firmer: **the same tree, twice, does not keep its floor.** The floor is a reading of
+the act.
+
+**Inside the act the floor is nearly stationary; the tail is where the act shows.** The nine blocks
+of act B, each ten readings of the minimum of three scans:
+
+| block | best | median | worst | jitter |
+|---:|---:|---:|---:|---:|
+| 1 | 0,2384 | 0,2504 | 0,3726 | 0,1342 |
+| 2 | 0,2459 | 0,3009 | 0,3297 | 0,0838 |
+| 3 | 0,2680 | 0,3828 | 0,4292 | 0,1612 |
+| 4 | 0,2543 | 0,2744 | 0,3816 | 0,1273 |
+| 5 | 0,2878 | 0,3309 | 0,3876 | 0,0998 |
+| 6 | 0,2487 | 0,3044 | 0,3707 | 0,1220 |
+| 7 | 0,2972 | 0,3885 | 0,4422 | 0,1450 |
+| 8 | 0,2867 | 0,4099 | 0,4503 | 0,1636 |
+| 9 | 0,3456 | 0,3755 | 0,5534 | 0,2078 |
+
+K2 survives because the two halves of the act agree to 0,0560 — 0,1938 against 0,2498, a ratio of
+1,29 — well inside its threshold. But the spread *inside* the act is 2,48× between its mildest and
+its worst block, the same size as the 2,42× between acts. Both readings are true at once: the worst
+of four blocks is stable, the worst of one is not, and no window — however well chosen — makes a
+single block trustworthy.
+
+**Why this forbids a boolean interface.** `k` is the quantity; `publicable` is that quantity
+projected against a parameter, `q · predicted > jitter`. This act sits in the interval where the two
+published values of that parameter disagree, so the bit would be a coin toss between two documents
+of record. What a receipt can carry is the pair — `k` = 0,2498 and the threshold it was compared
+against — so a reader applies either rule and sees which one it applied. A boolean deletes exactly
+the parameter that is in dispute, and this batch is the proof that it is in dispute.
+
+**What travels is a ratio, not a duration.** Across two acts on one tree, `min` moved 2,10× and
+`jitter` 2,42×, while `min / jitter` moved 1,15×. If that holds over more than two acts, a quote can
+be denominated in the act's own minimum with its uncertainty carried as a dimensionless quotient,
+and the seconds of that uncertainty become free of the act's speed by construction. Two acts are not
+a population, so the claim is frozen before its own measurement in `prediccion-batch-9.json`: three
+further acts on the same pinned tree, with the falsifier written there — the dispersion of `min /
+jitter` exceeding the dispersion of `min` itself.
+
+The batch is one command, and it re-derives every figure above rather than transcribing it:
+
+```bash
+PYTHONPATH=src:bench python bench/piso.py --dir /tmp/censo8 --artefacto
+```
+
+It writes `fuera-de-dominio-8.json`: both acts with their pins and their ninety readings each, the
+noise of every block, the paired comparison and the verdicts against the frozen prediction. Every
+cell of every table above is read from that file by the test suite, so a figure that stops matching
+it fails CI instead of ageing quietly. `--desde` recomposes the document from readings already paid
+— act A rebuilt from the sealed batch-7 artifact, act B read back from its progress file and its
+summary recomputed from the raw blocks — so a recomposition can never quietly become a second act.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

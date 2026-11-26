@@ -1412,3 +1412,262 @@ def test_los_multiplos_que_publica_el_texto_se_recomponen():
                          for s in SEPTIMO_ARTE["sujetos"] if s["jitter_p50_s"] > 0.05)
     assert sobre_techo == [1.4, 2.6, 7.1, 21.7]                                 # J3 contra su techo
     assert round(max(rel.values()) / (Q7 / 2), 2) == 5.41                  # media sobre q/2, sin promedio
+
+
+# --- lote 8: el piso es una lectura del acto, no una propiedad del sujeto ----
+# El lote 8 mide el MISMO sujeto pinneado en dos actos. Estas pruebas no
+# cronometran nada: recomponen de las 180 lecturas selladas el minimo, la
+# mediana, el jitter y la dispersion de cada acto, sostienen los tres veredictos
+# contra la orden congelada, y prueban por aritmetica que `q` es el semicerco
+# relativo y no su doble, que es el defecto que hacia caer K1.
+OCTAVO_ARTE = json.loads((RAIZ / "fuera-de-dominio-8.json").read_text(encoding="utf-8"))
+SECCION_8 = "### The floor is a reading of the act"
+NOVENO = RAIZ / "prediccion-batch-9.json"
+
+
+def _seccion_8():
+    return README[README.index(SECCION_8):README.index("## Fixtures census, recomputed")]
+
+
+def _prosa_8():
+    """La prosa va envuelta a 100 columnas: se compara sin saltos, no se reescribe."""
+    return " ".join(_seccion_8().split())
+
+
+def _tabla_8(encabezado):
+    lineas = _seccion_8().splitlines()
+    inicio = next(i for i, l in enumerate(lineas) if l.startswith(encabezado))
+    filas = []
+    for linea in lineas[inicio + 1:]:
+        if not linea.startswith("|"):
+            break
+        celdas = [c.strip().replace("**", "").replace("`", "")
+                  for c in linea.strip().strip("|").split("|")]
+        if all(set(c) <= set("-: ") for c in celdas):
+            continue
+        filas.append(celdas)
+    return filas
+
+
+def _resumen_8(acto):
+    """Recompone de las lecturas crudas todo resumen del acto, sin heredarlo."""
+    lecturas = sorted(x for b in acto["bloques"] for x in b["lecturas"])
+    jit = [round(max(b["lecturas"]) - min(b["lecturas"]), 4) for b in acto["bloques"]]
+    return {
+        "n_bloques": len(acto["bloques"]),
+        "relojes": len(lecturas),
+        "jitter_s": max(jit),
+        "jitter_p50_s": round(statistics.median(jit), 4),
+        "jitter_min_s": min(jit),
+        "p50_min_s": min(round(statistics.median(b["lecturas"]), 4) for b in acto["bloques"]),
+        "p50_max_s": max(round(statistics.median(b["lecturas"]), 4) for b in acto["bloques"]),
+        "dispersion": round(max(max(b["lecturas"]) for b in acto["bloques"])
+                            / min(min(b["lecturas"]) for b in acto["bloques"]), 4),
+        "minimo_s": round(lecturas[0], 4),
+        "maximo_s": round(lecturas[-1], 4),
+        "mediana_s": round(statistics.median(lecturas), 4),
+    }
+
+
+def test_el_lote_8_es_un_sujeto_y_dos_actos_sobre_el_mismo_pin():
+    a, b = OCTAVO_ARTE["acto_a"], OCTAVO_ARTE["acto_b"]
+    assert OCTAVO_ARTE["lote"] == 8
+    assert OCTAVO_ARTE["prediction"]["sha256"] == _sha(OCTAVO)
+    assert OCTAVO_ARTE["prediction"]["declared_before_computation"] is True
+    assert OCTAVO_ARTE["cost"]["relojes_nuevos"] == 90
+    assert OCTAVO_ARTE["cost"]["relojes_reutilizados"] == 90
+    assert OCTAVO_ARTE["cost"]["relojes_totales"] == 180
+    assert OCTAVO_ARTE["cost"]["segundos_de_pared"] > 0
+    assert OCTAVO_ARTE["cost"]["escrituras_en_platino_labs"] == 0
+    assert OCTAVO_ARTE["cost"]["clones_externos"] == 0
+    # Dos controles independientes del sujeto: el pin de bytes y el sha256 de la
+    # rueda. Tendrian que discrepar los dos para que el acto no fuera el mismo.
+    assert a["bytes_py_pin"] == b["bytes_py_pin"] == b["bytes_py"]
+    assert a["sha256"] == b["sha256"]
+    assert b["pin_ok"] is True
+    assert a["sujeto"] == b["sujeto"] == "pyflakes/pyflakes"
+    # Y el acto A es, literalmente, la fila que el lote 7 ya pago.
+    septimo = next(s for s in SEPTIMO_ARTE["sujetos"] if s["package"] == "pyflakes")
+    assert a["sha256"] == septimo["sha256"]
+    assert a["jitter_s"] == septimo["jitter_s"]
+    assert [x for bl in a["bloques"] for x in bl["lecturas"]] == _todas_7(septimo)
+
+
+def test_el_acto_a_recompuesto_cuadra_con_lo_que_el_lote_7_sello():
+    """El acto A se relee del lote 7 y se recompone aqui: los dos tienen que dar lo mismo."""
+    a = OCTAVO_ARTE["acto_a"]
+    for campo, valor in a["sellado_lote_7"].items():
+        assert a[campo] == valor, (campo, a[campo], valor)
+    # `en_banda` no es la condicion de ruido: es el control del modelo del lote 6.
+    assert a["en_banda"] is True
+    assert a["publicable"] is False
+    assert abs(a["cpu_min_lote6"] - a["predicho_s"]) / a["predicho_s"] <= a["q"]
+
+
+def test_los_dos_actos_se_recomponen_de_sus_ciento_ochenta_lecturas():
+    for nombre in ("acto_a", "acto_b"):
+        acto = OCTAVO_ARTE[nombre]
+        assert len(acto["bloques"]) == 9, nombre
+        for i, bl in enumerate(acto["bloques"], start=1):
+            assert len(bl["lecturas"]) == 10, (nombre, i)
+            assert bl["jitter_s"] == round(max(bl["lecturas"]) - min(bl["lecturas"]), 4)
+        for campo, valor in _resumen_8(acto).items():
+            assert acto[campo] == valor, (nombre, campo, acto[campo], valor)
+
+
+def test_los_veredictos_del_lote_8_son_los_que_la_orden_congelo():
+    octavo = json.loads(OCTAVO.read_text(encoding="utf-8"))
+    c = OCTAVO_ARTE["comparacion"]
+    congelado = {p["id"]: p for p in octavo["predictions"]}
+    veredicto = {v["id"]: v for v in OCTAVO_ARTE["veredictos"]}
+    # K1: k_B < q/2. Cae, y cae por 0,10: el acto esta por encima del umbral.
+    assert c["k_B"] >= congelado["K1"]["umbral"]
+    assert veredicto["K1"]["sobrevive"] is False
+    # K2: las dos mitades del acto, bloques 1-4 contra 6-9, sin compartir el 5.
+    primera = max(x["jitter_s"] for x in OCTAVO_ARTE["acto_b"]["bloques"][:4])
+    ultima = max(x["jitter_s"] for x in OCTAVO_ARTE["acto_b"]["bloques"][5:])
+    assert (c["k_primera_mitad"], c["k_ultima_mitad"]) == (
+        round(primera / c["predicho_s"], 4), round(ultima / c["predicho_s"], 4))
+    assert c["delta_mitades"] == round(c["k_ultima_mitad"] - c["k_primera_mitad"], 4)
+    assert c["delta_mitades"] < congelado["K2"]["umbral"]
+    assert veredicto["K2"]["sobrevive"] is True
+    # K3: el minimo no viaja. Cae por 2,10x.
+    assert c["ratio_min_B_A"] == round(c["min_B_s"] / c["min_A_s"], 4)
+    assert not congelado["K3"]["umbral"][0] <= c["ratio_min_B_A"] <= congelado["K3"]["umbral"][1]
+    assert veredicto["K3"]["sobrevive"] is False
+    assert c["k_A"] == round(c["jitter_A_s"] / c["predicho_s"], 4)
+    assert c["k_B"] == round(c["jitter_B_s"] / c["predicho_s"], 4)
+
+
+def test_q_es_el_semicerco_relativo_y_no_su_mitad():
+    """El defecto del lote 8, probado por aritmetica y no por lectura."""
+    t = SEXTO["cotizacion"]["tiempo"]
+    q = SEXTO["banda"]["codigo"]["q"]
+    assert t["semicerco_relativo"] == q == Q7
+    # Si q fuera el semicerco, el intervalo publicado tiene que salir de el.
+    assert abs(t["predicho_s"] * (1 - q) - t["intervalo_s"][0]) < 0.0001
+    assert abs(t["predicho_s"] * (1 + q) - t["intervalo_s"][1]) < 0.0001
+    # Y entonces el umbral que la orden congelo es la mitad del que la seccion
+    # del lote 7 aplica en palabras: dos documentos, veredictos opuestos.
+    c = OCTAVO_ARTE["comparacion"]
+    assert c["umbral_q_2"] == round(q / 2, 4)
+    assert c["umbral_q_2"] < c["k_B"] < q
+    octavo = json.loads(OCTAVO.read_text(encoding="utf-8"))
+    k1 = next(p for p in octavo["predictions"] if p["id"] == "K1")
+    assert k1["umbral"] == c["umbral_q_2"]
+    assert f"stays under {q}".replace(".", ",") in README
+    # `publicable` con la regla del lote 7 da lo contrario que K1 sobre el acto.
+    assert OCTAVO_ARTE["acto_b"]["publicable"] is True
+    assert OCTAVO_ARTE["acto_b"]["jitter_relativo"] < q
+
+
+def test_las_dos_tablas_del_lote_8_son_las_de_las_lecturas():
+    a, b = OCTAVO_ARTE["acto_a"], OCTAVO_ARTE["acto_b"]
+    c = OCTAVO_ARTE["comparacion"]
+    filas = _tabla_8("| statistic |")
+    assert [f[0] for f in filas] == [
+        "minimum of 90 readings", "median", "maximum", "worst block jitter",
+        "median block jitter", "jitter / predicted", "min / jitter"]
+    esperado = [
+        [a["minimo_s"], b["minimo_s"], a["minimo_s"] / b["minimo_s"]],
+        [a["mediana_s"], b["mediana_s"], a["mediana_s"] / b["mediana_s"]],
+        [a["maximo_s"], b["maximo_s"], a["maximo_s"] / b["maximo_s"]],
+        [a["jitter_s"], b["jitter_s"], c["ratio_jitter_A_B"]],
+        [a["jitter_p50_s"], b["jitter_p50_s"], a["jitter_p50_s"] / b["jitter_p50_s"]],
+        [c["k_A"], c["k_B"], c["ratio_k_A_B"]],
+        [c["min_A_s"] / a["jitter_s"], c["min_B_s"] / b["jitter_s"],
+         (c["min_B_s"] / b["jitter_s"]) / (c["min_A_s"] / a["jitter_s"])],
+    ]
+    for fila, (izq, der, razon) in zip(filas, esperado):
+        assert fila[1] == _coma(izq) and fila[2] == _coma(der), fila
+        assert fila[3] == _coma(razon, 2), fila
+    bloques = _tabla_8("| block |")
+    assert [f[0] for f in bloques] == [str(i) for i in range(1, 10)]
+    for fila, bl in zip(bloques, b["bloques"]):
+        assert fila[1:] == [_coma(bl["min_s"]), _coma(bl["p50_s"]),
+                            _coma(bl["max_s"]), _coma(bl["jitter_s"])], fila
+    veredictos = _tabla_8("| id |")
+    assert [f[0] for f in veredictos] == ["K1", "K2", "K3"]
+    assert [f[3] for f in veredictos] == ["falls", "survives", "falls"]
+
+
+def test_los_multiplos_de_la_prosa_del_lote_8_se_recomponen():
+    """Cada 'veces' de la prosa del lote 8 es un cociente del artefacto, y se ancla
+    en su frase: la tabla ya publica los mismos digitos y sola no distingue la prosa."""
+    a, b = OCTAVO_ARTE["acto_a"], OCTAVO_ARTE["acto_b"]
+    c = OCTAVO_ARTE["comparacion"]
+    texto = _prosa_8()
+    mj_A, mj_B = c["min_A_s"] / a["jitter_s"], c["min_B_s"] / b["jitter_s"]
+    r_min = a["minimo_s"] / b["minimo_s"]
+    r_med = a["mediana_s"] / b["mediana_s"]
+    r_max = a["maximo_s"] / b["maximo_s"]
+    r_jit = c["ratio_jitter_A_B"]
+    r_mj = mj_B / mj_A
+    for frase in (
+            f"it moved by **{_coma(r_min, 2)}×**",                       # 2,10x
+            f"minimum {_coma(r_min, 2)}, median {_coma(r_med, 2)}",      # 2,10 y 2,12
+            f"the maximum by {_coma(r_max, 2)}",                         # 1,83
+            f"moved by {_coma(r_max, 2)} to {_coma(r_jit, 2)} times",    # 1,83 a 2,42
+            f"`min / jitter`, {_coma(mj_A)} → {_coma(mj_B)}",
+            f"factor of **{_coma(r_mj, 2)}×**",                          # 1,15x
+    ):
+        assert frase in texto, frase
+    # Las dos dispersiones relativas son jitter / mediana, no un promedio.
+    assert f"from {_coma(a['jitter_s'] / a['mediana_s'])} to {_coma(b['jitter_s'] / b['mediana_s'])}" in texto
+    # La razon de mitades y la dispersion dentro del acto, en su frase.
+    assert f"a ratio of {_coma(c['k_ultima_mitad'] / c['k_primera_mitad'], 2)}" in texto
+    assert f"is {_coma(c['dispersion_bloques_B'], 2)}× between its mildest" in texto
+    assert f"the {_coma(r_jit, 2)}× between acts" in texto
+    # Dentro del acto hay la misma dispersion que entre actos: el cociente.
+    assert 0.95 <= c["dispersion_bloques_B"] / r_jit <= 1.05
+    # Y lo que casi no se mueve es el adimensional, no el segundo.
+    assert round(r_mj, 2) < round(c["ratio_min_A_B"], 2) < round(r_jit, 2)
+
+
+def test_cada_cifra_de_la_prosa_del_lote_8_tiene_lector():
+    """Ninguna cifra narrada puede quedar sin lector: se recompone y se busca."""
+    a, b, c = OCTAVO_ARTE["acto_a"], OCTAVO_ARTE["acto_b"], OCTAVO_ARTE["comparacion"]
+    texto = _prosa_8()
+    for cifra in (f"{b['bytes_py']:,}".replace(",", " "),          # los bytes escaneados
+                  _coma(b["segundos_de_pared"], 1),                # el reloj de pared
+                  str(b["relojes"]),                               # los relojes nuevos
+                  _coma(c["k_B"]), _coma(c["k_A"]),                # los dos cocientes
+                  _coma(c["umbral_q_2"]), _coma(Q7),               # los dos umbrales
+                  _coma(c["ratio_min_B_A"]),                       # K3
+                  _coma(c["delta_mitades"]),                       # K2
+                  _coma(c["k_primera_mitad"]), _coma(c["k_ultima_mitad"]),
+                  _coma(c["min_A_s"] / a["jitter_s"]), _coma(c["min_B_s"] / b["jitter_s"])):
+        assert cifra in texto, cifra
+    # La aritmetica del defecto se publica con las cifras del lote 6, no con
+    # las del lote 8: el intervalo y su semicerco son los del artefacto sellado.
+    t = SEXTO["cotizacion"]["tiempo"]
+    for cifra in (_coma(t["predicho_s"]), _coma(t["semicerco_relativo"]),
+                  _coma(t["intervalo_s"][1])):
+        assert cifra in texto, cifra
+    assert f"{t['intervalo_s'][0]:.3f}".replace(".", ",") in texto
+
+
+def test_la_orden_del_lote_9_esta_escrita_antes_de_su_acto():
+    noveno = json.loads(NOVENO.read_text(encoding="utf-8"))
+    assert noveno["declared_before_computation"] is True
+    assert noveno["batch"] == 9
+    assert len(noveno["predictions"]) == 3
+    for p in noveno["predictions"]:
+        assert p["falsifier"].strip() and p["cota_error"].strip(), p["id"]
+    assert noveno["cost"]["relojes_nuevos"] == 270
+    assert noveno["cost"]["relojes_reutilizados"] == 180
+    assert noveno["cost"]["actos"] == 5 and noveno["cost"]["actos_nuevos"] == 3
+    assert noveno["cost"]["escrituras_en_platino_labs"] == 0
+    assert noveno["cost"]["clones_externos"] == 0
+    # El umbral del lote 9 se decide antes de medir: q, no q/2. Y la razon que
+    # da es la aritmetica del lote 6, no una preferencia.
+    q = SEXTO["banda"]["codigo"]["q"]
+    assert _coma(q) in noveno["threshold_decision"]
+    assert _coma(round(q / 2, 4)) in noveno["threshold_decision"]
+    assert "semicerco relativo" in noveno["threshold_decision"]
+    # L1 se declara contra las dos dispersiones del lote 8 y con su falsador.
+    l1 = next(p for p in noveno["predictions"] if p["id"] == "L1")
+    c = OCTAVO_ARTE["comparacion"]
+    assert c["ratio_min_A_B"] >= l1["umbral"]["dispersion_min_min"]      # 2,10 >= 1,80
+    assert round(c["min_B_s"] / b"" if False else (c["min_B_s"] / OCTAVO_ARTE["acto_b"]["jitter_s"]) /
+               (c["min_A_s"] / OCTAVO_ARTE["acto_a"]["jitter_s"]), 2) <= 1.30

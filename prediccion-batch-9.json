@@ -1,0 +1,72 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 9,
+ "title": "lo que viaja entre actos es un cociente",
+ "declared_before_computation": true,
+ "declared_at": "2026-11-26",
+ "why": "El lote 8 midio el mismo sujeto pinneado en dos actos y el minimo de noventa lecturas se movio 2,10x sin que cambiara un byte del arbol: el piso es una lectura del acto, no del sujeto. Pero con dos actos no se sabe si lo que viaja es el minimo ni si viaja nada: min_B / min_A = 0,4758 (K3 cayo) mientras min / jitter paso de 0,9950 a 1,1473, un factor de 1,15x. La hipotesis de este lote es que la unica cantidad estable entre actos es adimensional.",
+ "what_is_new": "Nada se reajusta: pin, q y coeficientes son los del lote 6 y el lote 7. Los actos A y B son los del lote 8 y se reutilizan sin volver a cronometrar. Lo nuevo son tres actos mas (C, D, E) sobre el mismo sujeto pinneado, noventa relojes cada uno, para pasar de dos actos a cinco.",
+ "threshold_decision": "Este lote fija el umbral de publicabilidad en q = 0,3018 y no en q/2 = 0,1509. La razon se mide y no se elige: fuera-de-dominio-6.json publica intervalo_s [0.204, 0.3803] alrededor de predicho_s 0,2921, y 0,2921 * (1 - 0,3018) = 0,2039 y 0,2921 * (1 + 0,3018) = 0,3803, luego q es el semicerco relativo y no su doble. El defecto del lote 8 queda declarado en este archivo antes de medir los actos C, D y E.",
+ "method": {
+  "sujeto": "pyflakes/pyflakes, el mismo pin del lote 7 y el lote 8, con dos controles independientes: bytes_py_escaneados y sha256 de la rueda",
+  "actos_reutilizados": "A y B del lote 8, con sus noventa lecturas cada uno, sin volver a cronometrar",
+  "actos_nuevos": "C, D y E: mismo protocolo, mismo pin, ventana distinta; 9 bloques de 10 lecturas de cpu_min con cotizar._tiempo(arbol, 3)",
+  "estadistico": "jitter por bloque = max - min de sus diez lecturas; jitter del acto = max de los nueve; k = jitter del acto / predicho; min = minimo de las noventa lecturas",
+  "dispersion": "dispersion(x) entre actos = max(x) / min(x) sobre los cinco actos",
+  "advertencia": "cada acto se corre una vez y se publica lo que salga; ningun acto se repite por su resultado ni se descarta despues de verlo"
+ },
+ "predictions": [
+  {
+   "id": "L1",
+   "kind": "cuantitativa",
+   "claim": "La dispersion entre los cinco actos de min / jitter es menor que la de min. Concreto: dispersion(min / jitter) <= 1,30 mientras dispersion(min) >= 1,80. La duracion no viaja; el cociente si.",
+   "umbral": {
+    "dispersion_min_sobre_jitter_max": 1.3,
+    "dispersion_min_min": 1.8
+   },
+   "cota_error": "con cinco actos el maximo y el minimo son mas extremos que con dos, lo que empuja las dos dispersiones hacia arriba y favorece la caida de L1",
+   "falsifier": "dispersion(min / jitter) > 1,50 o dispersion(min) < 1,50"
+  },
+  {
+   "id": "L2",
+   "kind": "cuantitativa",
+   "claim": "El cociente tiene piso y techo aunque los segundos no los tengan: en los cinco actos min / jitter cae en [0,90, 1,40]. La cota es la que permite publicar una banda en segundos sin haber medido el acto del cliente.",
+   "umbral": [
+    0.9,
+    1.4
+   ],
+   "cota_error": "el cociente depende del sujeto y aqui hay uno solo; el rango es ancho a proposito y no se extrapola a otro arbol sin medirlo",
+   "falsifier": "cualquier acto con min / jitter fuera de [0,90, 1,40]"
+  },
+  {
+   "id": "L3",
+   "kind": "cuantitativa",
+   "claim": "La dispersion dentro de un acto es del tamano de la dispersion entre actos: (media de max(jitter de bloque) / min(minimo de bloque) sobre los cinco actos) / dispersion(min) cae en [0,80, 1,25]. De ahi que un solo bloque no pueda representar al acto ni el acto a otro acto.",
+   "umbral": [
+    0.8,
+    1.25
+   ],
+   "cota_error": "el lote 8 da 2,4797 / 2,1019 = 1,18 con dos actos; el rango admite que la razon se mueva con ventanas distintas",
+   "falsifier": "la razon fuera de [0,80, 1,25]"
+  }
+ ],
+ "falsification": "Cada prediccion nombra su falsador arriba. El lote se publica igual si las tres caen: lo que cambia es la conclusion, no la entrega. No se admite cambiar el estadistico, ni repetir un acto por su resultado, ni descartar un acto despues de verlo.",
+ "what_it_would_mean": {
+  "L1_y_L2_sobreviven": "una cotizacion puede publicarse como minimo medido mas una banda adimensional acotada, sin depender de la velocidad del acto: el reloj entra al recibo como cociente y no como segundo heredado",
+  "L1_cae": "ni el cociente viaja: no hay magnitud temporal publicable entre actos y la cotizacion se queda en conteos de bytes y de nodos",
+  "L2_cae": "el cociente tiene colas abiertas y la banda solo puede publicarse midiendo el piso en el acto del cliente, con el coste de una ventana por cotizacion",
+  "L3_cae": "dentro del acto hay mas (o menos) dispersion que entre actos y el piso hay que medirlo intercalado, no antes de cotizar"
+ },
+ "cost": {
+  "sujetos": 1,
+  "actos": 5,
+  "actos_reutilizados": 2,
+  "actos_nuevos": 3,
+  "bloques_por_acto": 9,
+  "lecturas_por_bloque": 10,
+  "relojes_nuevos": 270,
+  "relojes_reutilizados": 180,
+  "clones_externos": 0,
+  "escrituras_en_platino_labs": 0
+ }
+}
