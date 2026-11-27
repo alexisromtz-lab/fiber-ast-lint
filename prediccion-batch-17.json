@@ -1,0 +1,58 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 17,
+ "title": "El registro de predicciones no tiene columna de resultado: una promesa no es una medicion",
+ "declared_at": "2026-11-27",
+ "declared_before_computation": true,
+ "why": "Los lotes 13 a 16 subieron un mismo movimiento tres veces: sacar el veredicto del if cableado, exigir que la rama negativa se declare, y meter la prosa publicada en el universo medido. En los tres la cifra que fallaba era el denominador. Falta el eje que ninguno de los tres toca: el registro de predicciones se juzga en prosa y no en dato. Quince pre-registros y cincuenta y siete predicciones viven en el arbol con falsador escrito y sin casilla donde escribir si se cumplieron, asi que la tasa de acierto del metodo es NO_MEDIDO por construccion. Antes de abrir esa casilla hay que medir si el falsador que ya existe es ejecutable: una prediccion cuyo falsador no nombra un artefacto ni un umbral tampoco se puede reconciliar despues, y rellenarla seria inventar.",
+ "lo_ya_medido_antes_de_este_fichero": "El censo de forma si se midio antes de escribir esto y por eso no se declara como prediccion: 15 ficheros prediccion-batch-*.json, 57 predicciones, 0 con campo de resultado escrito. Los dos unicos `status` del corpus valen \"control\", que es tipo de prediccion y no veredicto.",
+ "method": {
+  "universo": "Los 15 ficheros prediccion-batch-*.json de la raiz, excluido este, que declara y no es sujeto. Las 57 predicciones son la poblacion; no se muestrea.",
+  "instrumento": "Lectura del texto del falsador de cada prediccion, tomando el campo `falsifier` y, cuando falta, `falsador`. Una prediccion sin ninguno de los dos cuenta como sin falsador y cae en el denominador.",
+  "sin_retroajuste": "Los dos umbrales se fijan aqui antes de leer una sola prediccion. Si el resultado cae fuera, el lote se publica igual y lo que cambia es la conclusion.",
+  "no_se_hace": "No se rellena ningun resultado historico. Rellenar 57 veredictos que nadie midio en su fecha convertiria el registro en una segunda fuente de verdad, que es lo que los lotes 15 y 16 quitaron."
+ },
+ "predictions": [
+  {
+   "id": "P1",
+   "kind": "cuantitativa",
+   "claim": "Al menos 20 de las 57 predicciones historicas declaran un falsador que nombra un artefacto concreto: una ruta bajo tests/, tools/ o bench/, o un comando git o pytest. El conteo se hace por expresion regular sobre el texto del falsador.",
+   "umbral": [
+   20,
+   57
+   ],
+   "cota_error": "la clasificacion depende de la lista de patrones; se declaran cinco patrones y se cuenta una prediccion como ejecutable si casa al menos uno",
+   "locus": {
+    "poblacion": "los cincuenta y siete falsadores de los pre-registros de lote dos a dieciseis",
+    "instrumento": "tests/test_prediccion_locus.py, clase con_locus del censo"
+   },
+   "falsifier": "un conteo por debajo de 20 sobre las 57"
+  },
+  {
+   "id": "P2",
+   "kind": "cuantitativa",
+   "claim": "Menos de 8 de las 57 predicciones declaran, dentro del mismo falsador, un umbral numerico ademas del artefacto: el falsador suele decir que mirar y no cuando muere la prediccion.",
+   "umbral": [
+   0,
+   8
+   ],
+   "cota_error": "un numero dentro de una ruta cuenta como artefacto y no como umbral; el patron exige comparacion o rango, no un digito suelto",
+   "locus": {
+    "poblacion": "los cincuenta y siete falsadores de los pre-registros de lote dos a dieciseis",
+    "instrumento": "tests/test_prediccion_locus.py, clase con_locus del censo"
+   },
+   "falsifier": "un conteo de 8 o mas, que convertiria el hueco en la sola columna de resultado"
+  }
+ ],
+ "falsification": "Cada prediccion nombra su falsador arriba. El lote se publica igual si alguna cae. No se admite cambiar los patrones despues de ver el conteo, ni retirar una prediccion del denominador por ser incomoda.",
+ "what_it_would_mean": {
+  "P1_alto_y_P2_bajo": "el registro sabe donde mirar y no sabe cuando muere: la reconciliacion retroactiva tiene techo por falta de umbral, no por falta de sujeto, y la casilla de resultado nace con un tope declarado",
+  "P1_bajo": "el falsador es prosa; el registro no es ejecutable y el unico arreglo honesto es hacia adelante, sin reclamar historia",
+  "P2_alto": "contradice la impresion de prosa y el hueco es solo la columna de resultado, lo que abarata el lote"
+ },
+ "cost": {
+  "actos_nuevos": 0,
+  "relojes_nuevos": 0,
+  "razon": "lectura pura sobre ficheros ya commiteados. Cero relojes, cero escrituras fuera del arbol del repo."
+ }
+}

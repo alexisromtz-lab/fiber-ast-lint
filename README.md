@@ -1650,6 +1650,58 @@ The seal is still a number two tools agree on, and now over the whole census rat
 and a prefix printed that has no file. Each kills the suite, which is the difference between a census
 and a count.
 
+## A falsifier without a locus is a threshold with no subject
+
+The corpus has spent sixty-eight rules insisting that a number without a locus is not a finding but
+text. It never applied that rule to its own prediction log. Fifteen pre-registers in this repository
+declare fifty-seven predictions, each with a falsifier written out, and not one carries a field
+saying whether it held: the two `status` keys in the corpus read `control`, which is a kind of
+prediction, not a verdict. The gap is not cosmetic. If a prediction cannot be reconciled, the hit
+rate of the method — the first thing an outside buyer asks — is `NO_MEDIDO` by construction.
+
+Before opening a column for the verdict, `prediccion-batch-17.json` asked whether the falsifier that
+already exists can be reconciled at all. It measured the fifty-seven falsifiers of batches two to
+sixteen, taking `falsifier` and `falsador` as the same object, and classified each one:
+
+| class | count |
+|---|---|
+| `con_locus` | 2 |
+| `umbral_sin_locus` | 36 |
+| `sin_falsador` | 19 |
+
+`con_locus` means the falsifier names a file or a command, so a third party can rerun it. Two out of
+fifty-seven do. `umbral_sin_locus` means the threshold is there — thirty-six predictions do say when
+they die — and the subject is not: `the ratio outside [3,0; 6,5]` does not say over which artefact.
+`sin_falsador` is a prediction with no falsifier at all, which is not a falsifier without a subject
+but the absence of one. The registered prediction P1 of batch 17 said at least twenty of the
+fifty-seven would name an artefact; it named two. The prediction fell, it is published fallen, and
+the conclusion changed with it: the log is not prose, it is arithmetic with no subject.
+
+That reorders the work. Adding an `outcome` column to a log whose entries cannot be located would
+produce fifty-seven verdicts that nobody can check. The census also cost the denominator, for the
+fourth time in this series: three of the fifteen pre-registers (`prediccion-batch-2`, `-3` and `-4`)
+do not declare a `batch` field, so a reader that filtered on the field alone would have published
+forty-four predictions where there are fifty-seven. The lot number is read from the file name when
+the field is missing, and a test pins the three files that need it so the redefinition cannot
+silently reappear.
+
+So batch 17 does two smaller things instead. It
+publishes this census with a reader — `tests/test_prediccion_locus.py` recomputes the three classes
+from the files on disk and fails if any cell of the table above disagrees. And it puts the law in
+force from `batch >= 17`, the same file that declares it, so the first prediction obliged to carry a
+`locus` is the one that asks for it. The historical fifty-seven are left exactly as they are: no
+verdict is invented for a date nobody measured, and `NO_MEDIDO` stays a state rather than degrading
+to zero.
+
+The gate is exercised on synthetic documents, not only on the tree. A guard that runs over an empty
+set returns green by not looking, and the tree today contains exactly one pre-register under the
+law; the validator is therefore tested with a batch-18 document that declares a locus, one that does
+not, and a batch-16 document that predates the rule. Six mutations were applied and all six died: a
+class count edited in this table, one falsifier losing its file name, one `locus` field removed from
+batch 17, the first-lot constant raised to eighteen so the incumbent escaped, a historical prediction
+given a locus so the `sin_falsador` class shrank, and the lot number taken from the field alone so
+the three fieldless files fell out of the denominator again.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the
