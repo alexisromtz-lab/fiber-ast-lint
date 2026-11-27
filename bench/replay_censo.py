@@ -214,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
                 real = medidas.get((r["artifact"], r["scope"]))
                 if real is None:
                     continue
-                for k in CUBETAS + FIRMA:
+                for k in CAMPOS + FIRMA:
                     r[k] = real[k]
                 residuo = r["stores"] - r["pierde"] - sum(real[k] for k in CUBETAS)
                 if residuo:

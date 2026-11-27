@@ -209,14 +209,14 @@ analysed. `tests/test_censo.py` fails if any cell of this table stops matching t
 
 | package | version | scope | files | stores | pierde | candidates | admitted | column loci |
 |---|---|---|---|---|---|---|---|---|
-| `mypy` | 2.4.1 | `mypy/` | 195 | 173 | 4 | 18 | **5** | 16 |
+| `mypy` | 2.4.1 | `mypy/` | 195 | 173 | 2 | 18 | **5** | 16 |
 | `pylint` | 4.1.4 | `.` | 189 | 55 | 1 | 2 | 0 | 2 |
 | `astroid` | 4.3.4 | `.` | 97 | 37 | 0 | 5 | 0 | 5 |
 | `dill` | 0.4.1 | `.` | 46 | 16 | 4 | 0 | 0 | 0 |
 | `isort` | 9.0.2 | `.` | 45 | 21 | 0 | 4 | 0 | 0 |
 | `platformdirs` | 4.14.8 | `.` | 15 | 0 | 0 | 0 | 0 | 0 |
 | `tomlkit` | 0.15.3 | `.` | 12 | 6 | 0 | 1 | 0 | 1 |
-| **total** | | | **599** | **308** | **9** | **30** | **5** | **24** |
+| **total** | | | **599** | **308** | **7** | **30** | **5** | **24** |
 
 All five admitted loci are in `mypy`: `applytype.py:127` (`tvar.id`), `config_parser.py:543`
 (`report_type`), `config_parser.py:666` (`name`), `expandtype.py:113` (`binder.id`) and
@@ -236,7 +236,7 @@ fullname, which mypy refuses to let two modules share. Benign, same family as `t
 
 | package | version | files | stores | pierde | loops | candidates | admitted | column loci |
 |---|---|---|---|---|---|---|---|---|
-| `mypy` (whole wheel) | 2.4.1 | 336 | 226 | 4 | 2 561 | 26 | 6 | 24 |
+| `mypy` (whole wheel) | 2.4.1 | 336 | 226 | 2 | 2 561 | 26 | 6 | 24 |
 | `pydantic` | 2.14.4 | 106 | 143 | 0 | 342 | 10 | **2** | 10 |
 | `jsonschema` | 4.26.0 | 37 | 2 | 0 | 98 | 0 | 0 | 0 |
 
@@ -464,6 +464,11 @@ The two samples are **not added and not averaged**: the census samples developme
 one samples four other domains, so a pooled mean would be a mean over a stratum the table chose.
 What the pair says is the thing a rate cannot say — the yield is a property of the *code*, not of
 the instrument, and it moves by a factor of three between two strata of the same language.
+
+The census cell is quoted as it stood when this contrast was frozen (`sin_len` 209). `0.5.0` moved
+two stores out of `sin_len` inside `totals_seven` without touching a candidate, so the same quotient
+reads **30 / 207 = 14.49 %** against the live [`censo.json`](censo.json); the frozen copy stays frozen
+and the two numbers are published side by side rather than silently re-based.
 
 **A site is not a finding.** The 14 candidates are 11 sites of one key in `attr/` — `a.name`, in
 `asdict`, `_collect_base_attrs`, `_collect_base_attrs_broken`, `_ClassBuilder.add_setattr` and
@@ -1876,6 +1881,69 @@ the sibling witness moves to measured and the function with no witness stays whe
 move, the fix confused watching with accumulating. `tests/test_lote20_universo.py` pins today's
 behaviour on purpose, so the day it changes, the pin has to be broken deliberately.
 
+## The witness is a sibling, and only if the loop feeds it
+
+Batch 20 closed with a pin it could not break: `if k in seen` with `seen` distinct from the
+accumulator received the same verdict as a loop that looks at nothing. The fix is one predicate,
+and the interesting part is the clause it had to grow to be a fix at all.
+
+The first reading — *the witness is any other name compared against the same key* — is refuted by
+this repository before a line of it was written. `tests/fixtures/espacio_no_transversal.py:31` asks
+`if nombre not in REPORTER_NAMES` and then stores `por_nombre[nombre] = k`: same key, different
+name, and that guard is a **whitelist of allowed outputs** which the loop never grows. Accepting it
+would file the one collision this project was built around — six keys in, four names out — under
+`guarded`, and the census would report one store less unmeasured while the defect stayed in the
+code. An observer that cannot lose a defect it has already found is not more precise; it is only
+quieter.
+
+So the sibling must be **fed** with that same key inside the loop — `seen.add(k)`,
+`seen.append(k)`, `seen[k] = None` — because being remembered is the only thing that lets the next
+iteration see the previous one. A container that is only read is a filter, not a witness.
+
+| window | stores | guarded before | guarded after | unmeasured before | unmeasured after | candidates |
+|---|---:|---:|---:|---:|---:|---:|
+| `tests/fixtures` | 9 | 2 | 2 | 5 | 5 | 4 |
+| five pinned files of batch 20 | 16 | 1 | 2 | 15 | 14 | 8 → 7 |
+
+Exactly one locus moved in the external window — `safo/ratebudget.py:1239` — and it moved because
+`seen.add(key)` sits four lines above the store it guards, on a keyspace the loop owns. The five
+loci the previous batch had already refuted by reading did not move, because none of them asks who
+is already there: two write the normalised key without looking, one folds the previous value in
+with `max`, one uses a dict as an ordered set and returns `tuple(seen)`, one indexes a column.
+The fixture battery did not move at all, which is the invariant the previous batch sealed before the
+fix existed. The pinned census is a different subject and it did move: four of its thirteen rows
+changed, because a released wheel is full of exactly this guard. That movement is published in the
+`0.5.0` note below rather than hidden here, and it moved the same way the window did — into
+`guarded`, never into silence.
+
+### What this does not buy
+
+The next move was supposed to be a `--solo-alta-confianza` flag. It is not shipped, and the reason
+is a number rather than a taste. Enumerating all `17325` conjunctions of equalities and inequalities
+over the six features the tool publishes — `familia`, `forma`, `escapa`, `poblacion`, `publica`,
+and whether the key is called at all — **none** accepts the two admitted internal candidates while
+rejecting the seven rows the external window still produces. Two of those features are constant on
+that population (`poblacion` is `cardinal_sin_medir` and `publica` is `SIN_LEN` on all eleven rows),
+so the honest space is `1925` conjunctions over the four features that carry information; the answer
+is the same, zero. That is not a shortage of imagination; it is an identity.
+`device_tracker_evidence.py:539`, refuted because indexing by MAC to keep the last sighting is what
+the function is *for* and its docstring says so, has the same vector as `columna_no_transversal.py:11`
+on all six features. Any function of those features must answer the same for both.
+
+Read the other way — one confirmed defect as the positive set instead of two — `45` do separate, and
+every one of them fixes `familia` (`36` require `ESPACIO+NORMALIZA`, the other `9` exclude
+`CONJUNTO+ESPACIO`). Each silences three of the four internal candidates, and the other three
+families are unmeasured rather than safe. Shipping one would publish *the name of the only defect
+confirmed so far* as if it were a predicate about intent, with a recall of one in four on the only
+bank that has ground truth. What separates the five refuted loci from a real one is what the code is
+trying to do; that is bought by reading six loci, not by thresholding a feature vector.
+
+The batch also returned a defect of its own bookkeeping: the batch-20 receipt's `familia` column
+carries the *forma* value (`PROYECCION_VISIBLE` where the family is `CAJA+ESPACIO`). Nothing was
+decided on it — the five refutations were made by reading code, not by that column — but a column
+that holds a different subject than its name is the same error this section is about, one floor up,
+and it is recorded in `recibo-lote21-20261127.json` instead of being quietly rewritten.
+
 ## Cost, measured before optimising anything
 
 An honest baseline first: a benchmark published *after* the fix cannot predict anything.
@@ -2023,6 +2091,9 @@ not an improvement.
 - Dict comprehensions are counted in the census but not reported as loci (they cannot be observed
   by a caller: the loss happens before the object exists).
 - Only `for` loops; `while` accumulators are out of scope today (see the tests for the enumerator).
+- The sibling witness must be *fed* with the same key inside the loop to count; a guard against a
+  fixed whitelist is not a guard and is reported as an unmeasured store. A sibling fed only after
+  the store still counts — there is no control-flow ordering.
 
 ## Version note
 
@@ -2064,14 +2135,14 @@ party could read the claim and could not check it: the equation was computed, th
 
 | package | version | scope | stores | = | pierde | guardadas | acumulacion | posicional | sin_len |
 |---|---|---|---:|---|---:|---:|---:|---:|---:|
-| `mypy` | 2.4.1 | `mypy/` | 173 | = | 4 | 25 | 7 | 12 | 125 |
+| `mypy` | 2.4.1 | `mypy/` | 173 | = | 2 | 28 | 7 | 12 | 124 |
 | `pylint` | 4.1.4 | `.` | 55 | = | 1 | 14 | 4 | 4 | 32 |
 | `astroid` | 4.3.4 | `.` | 37 | = | 0 | 10 | 0 | 1 | 26 |
-| `dill` | 0.4.1 | `.` | 16 | = | 4 | 1 | 1 | 1 | 9 |
+| `dill` | 0.4.1 | `.` | 16 | = | 4 | 2 | 1 | 1 | 8 |
 | `isort` | 9.0.2 | `.` | 21 | = | 0 | 2 | 2 | 3 | 14 |
 | `platformdirs` | 4.14.8 | `.` | 0 | = | 0 | 0 | 0 | 0 | 0 |
 | `tomlkit` | 0.15.3 | `.` | 6 | = | 0 | 2 | 1 | 0 | 3 |
-| **seven** | | | **308** | = | **9** | **54** | **15** | **21** | **209** |
+| **seven** | | | **308** | = | **7** | **58** | **15** | **21** | **207** |
 
 `bench/replay_censo.py --anotar` writes the buckets back and refuses the row if the residual is not
 zero, so the table above cannot be produced by a script that disagrees with it. Re-running it is
@@ -2134,6 +2205,65 @@ sample that was not predicted may name directions and may not name rates. What i
 without a rate is the containment `candidates ≤ sin_len`, which holds on all 18 rows of both files,
 and what it publishes without a rate is the denominator correction: `almacenes` is the pre-filter
 population, `sin_len` the post-filter one.
+
+`0.5.0` moves a locus out of the report, which no previous version had done: `pregunta_pertenencia`
+recognised a witness only when it named the accumulator itself, so a deduplicated index guarded by
+a sibling set (`if k in seen`) was published as a loss. The sibling now counts when the loop feeds
+it the same key (`seen.add(k)`, `seen[k] = v`), and a whitelist that is only read does not — that
+clause is what keeps `espacio_no_transversal.py:31` in the report. External effect: one of the six
+productive loci of batch 20 lost, the other five unchanged; internal effect on the fixture battery:
+none. The version is minor because the *output* changes on code that did not change, which is
+exactly the case where a reader of a pinned receipt needs a different number to look at.
+
+The pinned census had to move with it, and that is the largest number this file publishes for the
+version: **four of the thirteen rows** changed and **seventeen locus-movements** left the report —
+`mypy@2.4.1:mypy` 3, `mypy@2.4.1:.` 5, `dill@0.4.1:.` 1, `pydantic@2.14.4:.` 8. Seventeen
+movements are **fourteen distinct source loci**, because the two `mypy` rows share three: the wheel
+is analysed both at its root and at the package subtree. All seventeen land in `guardadas`, which is
+the point — they were never losses — and `candidates` stays at 30, `admitted` at 5, `column_loci`
+at 24. `pierde` falls 9 → 7 and `sin_len` 209 → 207 inside `totals_seven`, which is the sum of the
+seven development packages and the only place this file publishes a rate; the `pydantic` row (8) and
+the whole-wheel `mypy` row (5, three of them the same loci as `mypy/`) carry the rest and are not
+part of that sum. Nothing was silenced, because a store the loop guards is not a store anybody
+forgot.
+
+Each of the fourteen was read before it was trusted, and three shapes come out of the reading:
+
+```python
+# mypy/server/objgraph.py:83-85 - the key is tested against the set that tracks it
+if id(e) in seen:            # seen = {id(root): root}, and the loop adds to it
+    continue
+parents[id(e)] = (id(o), s)
+seen[id(e)] = e
+
+# dill/pointers.py:111-113 - the same shape with the roles of the two dicts swapped
+if id(source) not in depth:
+    depth[id(source)] = tdepth + 1
+    parent[id(source)] = target      # <- the store the census was calling unmeasured
+
+# pydantic/main.py:384-387 - the sibling records which names have already landed
+if name not in fields_set:
+    if name in values:
+        fields_values[name] = values.pop(name)
+        fields_set.add(name)
+```
+
+`mypyc/codegen/emitclass.py:192-199` is the fourth: `fields[slot]` is written under
+`if slot in generated`, and `generated[slot] = name` fills the sibling on the other branch. The five
+`pydantic` sites of `v1/` and `_internal/_fields.py` are the same idea under different names
+(`ann_name not in private_attributes`, `var_name in fields`, `k in values`). Two of the seventeen
+movements were `pierde` and both needed the code to settle: `mypy/graph_utils.py:119` writes
+`in_degree[item]` over `data.items()` — one write per key, so no earlier tenant exists — and `:131`
+writes `in_degree[dep] = 0` repeatedly, which is idempotent. Neither loses anything, and the census
+now says so.
+
+**The limit this buys and the one it does not.** The predicate does not know which container an
+inventory serves; it infers it from the key, so a sibling that merely shares the key can retire a
+store whose blind write would matter. That is the same coarseness `pregunta_pertenencia` already
+had — it accepts a membership test *anywhere* in the loop body — and the fixture battery is what
+holds it: `espacio_no_transversal.py:31` still reports its colliding store because
+`REPORTER_NAMES` is read and never grown. The census replays clean against the new pin:
+`REPLAY IDENTICO · 13 filas · instrumento 0.5.0`, RC 0.
 
 ## License
 

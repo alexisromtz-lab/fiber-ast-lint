@@ -1,0 +1,737 @@
+{
+  "schema": "fiber-ast-lint/lote21/1",
+  "acto": "el testigo hermano: el conjunto que vigila deja de ser invisible cuando el bucle lo alimenta",
+  "fecha": "2026-11-27",
+  "pre_registro": {
+    "ruta": "prediccion-batch-21.json",
+    "bytes": 9070,
+    "sha256": "8eb6268f42477fc7407736566b3e65b263b4d139201d7868715d45fd686a3350",
+    "declarado_antes": true,
+    "hipotesis": [
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "verificado_en_este_acto": "8eb6268f42477fc7407736566b3e65b263b4d139201d7868715d45fd686a3350"
+  },
+  "instrumento": {
+    "version_antes": "0.4.6",
+    "version_despues": "0.5.0",
+    "detect_py_sha256_antes": "282a5b67ccb1a9f41fc711fffc3a09dc68c8ce9186a524c00f755b489493ba19",
+    "detect_py_sha256_despues": "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6",
+    "regla": "In/NotIn cuya izquierda recompone la misma clave almacenada, cuyo contenedor es un Name distinto del acumulador, y que el cuerpo del bucle alimenta con esa clave (X.add(k), X.append(k) o X[k] = v)",
+    "piezas": [
+      "ALIMENTAN",
+      "_alimentado",
+      "testigo_hermano",
+      "una linea en _ambito"
+    ],
+    "limites_declarados": [
+      "no hay orden de flujo: alimentar despues del almacen tambien cuenta",
+      "la prueba de alimentacion es existencial: un testigo alimentado y luego descartado con discard o remove sigue contando, porque el cuerpo se recorre, no se ejecuta",
+      "el predicado infiere inventario de la clave compartida: un hermano que solo comparte la clave puede retirar el almacen, medido en tests/test_lote21_testigo.py::test_el_limite_declarado_tambien_se_mide",
+      "update queda fuera de ALIMENTAN: recibe un iterable de claves, nunca la clave sola, asi que no podia satisfacer la prueba de alimentacion"
+    ]
+  },
+  "ventana_externa": {
+    "ficheros": [
+      {
+        "repo": "obendidi/httpx-cache",
+        "sha": "c5145a95f6661e90703b535c5a9a87a1752d7bd8",
+        "ruta": "httpx_cache/policy.py",
+        "url": "https://raw.githubusercontent.com/obendidi/httpx-cache/c5145a95f6661e90703b535c5a9a87a1752d7bd8/httpx_cache/policy.py",
+        "sha256": "d8c1cb4afc90c54bec275a5c70b88fd8e2e1a20ef9462e764019fade23ff05ba",
+        "loci": [
+          "policy.py:48-50",
+          "policy.py:96-98"
+        ]
+      },
+      {
+        "repo": "travisghansen/hass-opnsense",
+        "sha": "6503ed5d88102156ea26bb72f2c8f1aa023fb075",
+        "ruta": "custom_components/opnsense/device_tracker_evidence.py",
+        "url": "https://raw.githubusercontent.com/travisghansen/hass-opnsense/6503ed5d88102156ea26bb72f2c8f1aa023fb075/custom_components/opnsense/device_tracker_evidence.py",
+        "sha256": "6b9e200805fb666513e5e48873b805ad23c07452101be1b8231f3d488ceb9782",
+        "loci": [
+          "device_tracker_evidence.py:539"
+        ]
+      },
+      {
+        "repo": "ChiefGyk3D/scrum-around-and-find-out",
+        "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+        "ruta": "src/safo/items.py",
+        "url": "https://raw.githubusercontent.com/ChiefGyk3D/scrum-around-and-find-out/9bfe6d1315d7fc703252d0a39ac597509956d59c/src/safo/items.py",
+        "sha256": "4e51297c22128eb97bf7462a80d0b811661601757f0c736dc57f8465b289db59",
+        "loci": [
+          "items.py:465"
+        ]
+      },
+      {
+        "repo": "ChiefGyk3D/scrum-around-and-find-out",
+        "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+        "ruta": "src/safo/idea_gate_routes.py",
+        "url": "https://raw.githubusercontent.com/ChiefGyk3D/scrum-around-and-find-out/9bfe6d1315d7fc703252d0a39ac597509956d59c/src/safo/idea_gate_routes.py",
+        "sha256": "dfeff36e55b93ef2c07ac79b31d5d5bfbb114b58ff65c0761b820465f18861aa",
+        "loci": [
+          "idea_gate_routes.py:194"
+        ]
+      },
+      {
+        "repo": "ChiefGyk3D/scrum-around-and-find-out",
+        "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+        "ruta": "src/safo/ratebudget.py",
+        "url": "https://raw.githubusercontent.com/ChiefGyk3D/scrum-around-and-find-out/9bfe6d1315d7fc703252d0a39ac597509956d59c/src/safo/ratebudget.py",
+        "sha256": "28b0fdc4bf6ad263d841cc2712436f096ffffb70d4b865bb83f34e2f778d0761",
+        "loci": [
+          "ratebudget.py:1239"
+        ]
+      }
+    ],
+    "sha256_recomputado_identico": true,
+    "medido_antes": {
+      "archivos": 5,
+      "almacenes": 16,
+      "pierde": 0,
+      "guardadas": 1,
+      "acumulacion": 0,
+      "posicional": 0,
+      "sin_len": 15,
+      "filas_de_candidato": 8,
+      "loci_distintos": 8
+    },
+    "medido_despues": {
+      "archivos": 5,
+      "almacenes": 16,
+      "pierde": 0,
+      "guardadas": 2,
+      "acumulacion": 0,
+      "posicional": 0,
+      "sin_len": 14,
+      "filas_de_candidato": 7,
+      "loci_distintos": 7
+    },
+    "candidatas_antes": [
+      {
+        "locus": "custom_components/opnsense/device_tracker_evidence.py:539",
+        "severidad": "CANDIDATO",
+        "familia": "COLUMNA",
+        "forma": "SELECCION_COLUMNA_BUCLE",
+        "escapa": true,
+        "poblacion": "cardinal_sin_medir",
+        "publica": "SIN_LEN",
+        "llamadas_positivas": true,
+        "llamadas_crudo": 2
+      },
+      {
+        "locus": "httpx_cache/policy.py:48",
+        "severidad": "CANDIDATO",
+        "familia": "CAJA+ESPACIO",
+        "forma": "PROYECCION_VISIBLE",
+        "escapa": true,
+        "poblacion": "cardinal_sin_medir",
+        "publica": "SIN_LEN",
+        "llamadas_positivas": true,
+        "llamadas_crudo": 4
+      },
+      {
+        "locus": "httpx_cache/policy.py:50",
+        "severidad": "CANDIDATO",
+        "familia": "CAJA",
+        "forma": "PROYECCION_VISIBLE",
+        "escapa": true,
+        "poblacion": "cardinal_sin_medir",
+        "publica": "SIN_LEN",
+        "llamadas_positivas": true,
+        "llamadas_crudo": 4
+      },
+      {
+        "locus": "httpx_cache/policy.py:96",
+        "severidad": "CANDIDATO",
+        "familia": "CAJA+ESPACIO",
+        "forma": "PROYECCION_VISIBLE",
+        "escapa": true,
+        "poblacion": "cardinal_sin_medir",
+        "publica": "SIN_LEN",
+        "llamadas_positivas": true,
+        "llamadas_crudo": 2
+      },
+      {
+        "locus": "httpx_cache/policy.py:98",
+        "severidad": "CANDIDATO",
+        "familia": "CAJA",
+        "forma": "PROYECCION_VISIBLE",
+        "escapa": true,
+        "poblacion": "cardinal_sin_medir",
+        "publica": "SIN_LEN",
+        "llamadas_positivas": true,
+        "llamadas_crudo": 2
+      },
+      {
+        "locus": "src/safo/idea_gate_routes.py:194",
+        "severidad": "CANDIDATO",
+        "familia": "CONJUNTO+ESPACIO",
+        "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+        "escapa": true,
+        "poblacion": "cardinal_sin_medir",
+        "publica": "SIN_LEN",
+        "llamadas_positivas": true,
+        "llamadas_crudo": 2
+      },
+      {
+        "locus": "src/safo/items.py:465",
+        "severidad": "LATENTE",
+        "familia": "CAJA",
+        "forma": "PROYECCION_VISIBLE",
+        "escapa": true,
+        "poblacion": "cardinal_sin_medir",
+        "publica": "SIN_LEN",
+        "llamadas_positivas": false,
+        "llamadas_crudo": 0
+      },
+      {
+        "locus": "src/safo/ratebudget.py:1239",
+        "severidad": "CANDIDATO",
+        "familia": "CAJA",
+        "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+        "escapa": true,
+        "poblacion": "cardinal_sin_medir",
+        "publica": "SIN_LEN",
+        "llamadas_positivas": true,
+        "llamadas_crudo": 1
+      }
+    ],
+    "candidatas_despues": [
+      {
+        "locus": "custom_components/opnsense/device_tracker_evidence.py:539",
+        "sujeto": "travisghansen/hass-opnsense@6503ed5d8810:custom_components/opnsense/device_tracker_evidence.py:539",
+        "repo": "travisghansen/hass-opnsense",
+        "sha": "6503ed5d88102156ea26bb72f2c8f1aa023fb075",
+        "ruta": "custom_components/opnsense/device_tracker_evidence.py",
+        "linea": 539,
+        "funcion": "_index_discovery_observations",
+        "clave": "entry.mac",
+        "severidad": "CANDIDATO",
+        "llamadas_crudo": 2,
+        "vector": {
+          "familia": "COLUMNA",
+          "forma": "SELECCION_COLUMNA_BUCLE",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      },
+      {
+        "locus": "httpx_cache/policy.py:48",
+        "sujeto": "obendidi/httpx-cache@c5145a95f666:httpx_cache/policy.py:48",
+        "repo": "obendidi/httpx-cache",
+        "sha": "c5145a95f6661e90703b535c5a9a87a1752d7bd8",
+        "ruta": "httpx_cache/policy.py",
+        "linea": 48,
+        "funcion": "parse_cache_control",
+        "clave": "name.strip().lower()",
+        "severidad": "CANDIDATO",
+        "llamadas_crudo": 4,
+        "vector": {
+          "familia": "CAJA+ESPACIO",
+          "forma": "PROYECCION_VISIBLE",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      },
+      {
+        "locus": "httpx_cache/policy.py:50",
+        "sujeto": "obendidi/httpx-cache@c5145a95f666:httpx_cache/policy.py:50",
+        "repo": "obendidi/httpx-cache",
+        "sha": "c5145a95f6661e90703b535c5a9a87a1752d7bd8",
+        "ruta": "httpx_cache/policy.py",
+        "linea": 50,
+        "funcion": "parse_cache_control",
+        "clave": "token.lower()",
+        "severidad": "CANDIDATO",
+        "llamadas_crudo": 4,
+        "vector": {
+          "familia": "CAJA",
+          "forma": "PROYECCION_VISIBLE",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      },
+      {
+        "locus": "httpx_cache/policy.py:96",
+        "sujeto": "obendidi/httpx-cache@c5145a95f666:httpx_cache/policy.py:96",
+        "repo": "obendidi/httpx-cache",
+        "sha": "c5145a95f6661e90703b535c5a9a87a1752d7bd8",
+        "ruta": "httpx_cache/policy.py",
+        "linea": 96,
+        "funcion": "_entry_cache_control",
+        "clave": "name.strip().lower()",
+        "severidad": "CANDIDATO",
+        "llamadas_crudo": 2,
+        "vector": {
+          "familia": "CAJA+ESPACIO",
+          "forma": "PROYECCION_VISIBLE",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      },
+      {
+        "locus": "httpx_cache/policy.py:98",
+        "sujeto": "obendidi/httpx-cache@c5145a95f666:httpx_cache/policy.py:98",
+        "repo": "obendidi/httpx-cache",
+        "sha": "c5145a95f6661e90703b535c5a9a87a1752d7bd8",
+        "ruta": "httpx_cache/policy.py",
+        "linea": 98,
+        "funcion": "_entry_cache_control",
+        "clave": "token.lower()",
+        "severidad": "CANDIDATO",
+        "llamadas_crudo": 2,
+        "vector": {
+          "familia": "CAJA",
+          "forma": "PROYECCION_VISIBLE",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      },
+      {
+        "locus": "src/safo/idea_gate_routes.py:194",
+        "sujeto": "ChiefGyk3D/scrum-around-and-find-out@9bfe6d1315d7:src/safo/idea_gate_routes.py:194",
+        "repo": "ChiefGyk3D/scrum-around-and-find-out",
+        "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+        "ruta": "src/safo/idea_gate_routes.py",
+        "linea": 194,
+        "funcion": "_terms",
+        "clave": "term",
+        "severidad": "CANDIDATO",
+        "llamadas_crudo": 2,
+        "vector": {
+          "familia": "CONJUNTO+ESPACIO",
+          "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      },
+      {
+        "locus": "src/safo/items.py:465",
+        "sujeto": "ChiefGyk3D/scrum-around-and-find-out@9bfe6d1315d7:src/safo/items.py:465",
+        "repo": "ChiefGyk3D/scrum-around-and-find-out",
+        "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+        "ruta": "src/safo/items.py",
+        "linea": 465,
+        "funcion": "collect_work",
+        "clave": "repo.full_name.lower()",
+        "severidad": "LATENTE",
+        "llamadas_crudo": 0,
+        "vector": {
+          "familia": "CAJA",
+          "forma": "PROYECCION_VISIBLE",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": false
+        }
+      }
+    ]
+  },
+  "banco_interno": {
+    "antes": {
+      "guardadas": 2,
+      "sin_len": 5,
+      "pierde": 0,
+      "acumulacion": 1,
+      "posicional": 1,
+      "almacenes": 9,
+      "archivos": 9,
+      "loci_candidatos": 4
+    },
+    "despues": {
+      "archivos": 9,
+      "almacenes": 9,
+      "pierde": 0,
+      "guardadas": 2,
+      "acumulacion": 1,
+      "posicional": 1,
+      "sin_len": 5,
+      "filas_de_candidato": 4,
+      "loci_distintos": 4
+    },
+    "candidatas": [
+      {
+        "locus": "columna_no_transversal.py:11",
+        "sujeto": "fiber-ast-lint@23dbf9a74e35:columna_no_transversal.py:11",
+        "repo": "fiber-ast-lint",
+        "sha": "23dbf9a74e351b488a5a332e824c7bf7fe578fa3",
+        "ruta": "columna_no_transversal.py",
+        "linea": 11,
+        "funcion": "indexar_por_codigo",
+        "clave": "fila.codigo",
+        "severidad": "CANDIDATO",
+        "llamadas_crudo": 1,
+        "vector": {
+          "familia": "COLUMNA",
+          "forma": "SELECCION_COLUMNA_BUCLE",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      },
+      {
+        "locus": "espacio_no_transversal.py:31",
+        "sujeto": "fiber-ast-lint@23dbf9a74e35:espacio_no_transversal.py:31",
+        "repo": "fiber-ast-lint",
+        "sha": "23dbf9a74e351b488a5a332e824c7bf7fe578fa3",
+        "ruta": "espacio_no_transversal.py",
+        "linea": 31,
+        "funcion": "construir_reporteros",
+        "clave": "nombre",
+        "severidad": "CANDIDATO",
+        "llamadas_crudo": 2,
+        "vector": {
+          "familia": "ESPACIO+NORMALIZA",
+          "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      },
+      {
+        "locus": "grafo_consumidores.py:5",
+        "sujeto": "fiber-ast-lint@23dbf9a74e35:grafo_consumidores.py:5",
+        "repo": "fiber-ast-lint",
+        "sha": "23dbf9a74e351b488a5a332e824c7bf7fe578fa3",
+        "ruta": "grafo_consumidores.py",
+        "linea": 5,
+        "funcion": "construir",
+        "clave": "k.strip().lower()",
+        "severidad": "CANDIDATO",
+        "llamadas_crudo": 3,
+        "vector": {
+          "familia": "CAJA+ESPACIO",
+          "forma": "PROYECCION_VISIBLE",
+          "escapa": true,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      },
+      {
+        "locus": "grafo_consumidores.py:11",
+        "sujeto": "fiber-ast-lint@23dbf9a74e35:grafo_consumidores.py:11",
+        "repo": "fiber-ast-lint",
+        "sha": "23dbf9a74e351b488a5a332e824c7bf7fe578fa3",
+        "ruta": "grafo_consumidores.py",
+        "linea": 11,
+        "funcion": "llenar",
+        "clave": "k.strip().lower()",
+        "severidad": "LATENTE",
+        "llamadas_crudo": 1,
+        "vector": {
+          "familia": "CAJA+ESPACIO",
+          "forma": "PROYECCION_VISIBLE",
+          "escapa": false,
+          "poblacion": "cardinal_sin_medir",
+          "publica": "SIN_LEN",
+          "llamadas_positivas": true
+        }
+      }
+    ]
+  },
+  "veredictos": [
+    {
+      "id": "P1",
+      "veredicto": "CONFIRMADA",
+      "evidencia": "tests/fixtures con 0.5.0: guardadas 2, sin_len 5, pierde 0, acumulacion 1, posicional 1 sobre nueve almacenes y cuatro loci candidatos. espacio_no_transversal.py:31 conserva poblacion cardinal_sin_medir. Medido: tests/test_lote20_universo.py::test_el_testigo_hermano_solo_cuenta_si_alguien_lo_alimenta y tests/test_detect.py::test_proyeccion_con_perdida_es_candidato (guardadas 0)."
+    },
+    {
+      "id": "P2",
+      "veredicto": "CONFIRMADA",
+      "evidencia": "El minimo se parte en tres: hermano alimentado (guardadas 1, sin locus), funcion sin testigo (cardinal_sin_medir) y lista blanca fija alimentada desde fuera del cuerpo (cardinal_sin_medir). Test: tests/test_lote20_universo.py::test_el_testigo_hermano_solo_cuenta_si_alguien_lo_alimenta."
+    },
+    {
+      "id": "P3",
+      "veredicto": "CONFIRMADA",
+      "evidencia": "Sobre los cinco ficheros congelados, exactamente un locus se mueve: src/safo/ratebudget.py:1239 pasa de sin_testigo a guardadas (testigo seen, alimentado con seen.add(key), consultado con key in seen). Medido: filas de candidato 8 -> 7, guardadas 1 -> 2, sin_len 15 -> 14, almacenes 16 y archivos 5 sin cambio."
+    },
+    {
+      "id": "P4",
+      "veredicto": "CONFIRMADA",
+      "evidencia": "Ver separabilidad: cero predicados de 17325 separan los dos admitidos."
+    }
+  ],
+  "reclasificados": [
+    {
+      "locus": "src/safo/ratebudget.py:1239",
+      "sujeto": "ChiefGyk3D/scrum-around-and-find-out@9bfe6d13:_parse_block",
+      "antes": "sin_testigo",
+      "despues": "guardadas",
+      "testigo": "seen (set), alimentado con seen.add(key), consultado con `key in seen`",
+      "nota": "No es un defecto del sujeto: el acumulador es headers y el conjunto que vigila la repeticion es otro objeto. El defecto era del instrumento."
+    }
+  ],
+  "separabilidad": {
+    "features": [
+      "familia",
+      "forma",
+      "escapa",
+      "poblacion",
+      "publica",
+      "llamadas_positivas"
+    ],
+    "features_informativas": [
+      "familia",
+      "forma",
+      "escapa",
+      "llamadas_positivas"
+    ],
+    "poblacion": {
+      "filas": 11,
+      "externas": 7,
+      "internas_candidatas": 4
+    },
+    "constantes_y_por_que": {
+      "poblacion": "cardinal_sin_medir",
+      "publica": "SIN_LEN",
+      "nota": "constantes sobre las once filas: no pueden separar nada; se descartan"
+    },
+    "espacio": {
+      "seis_features": 17325,
+      "cuatro_features": 1925
+    },
+    "separadores_dos_admitidos": {
+      "contra_siete_externas": 0,
+      "contra_seis_de_llamadas_positivas": 0,
+      "contra_externas_mas_internas_no_positivas": 0
+    },
+    "sensibilidad_posterior": {
+      "por_que": "P4 nombra dos admitidos; columna_no_transversal.py:11 se autodeclara candidato y nunca defecto. Se mide tambien la lectura estrecha, con un solo positivo declarado.",
+      "positiva_declarada": "espacio_no_transversal.py:31",
+      "separadores": 45,
+      "recall_sobre_las_cuatro_internas": {
+        "1": 45
+      },
+      "fijan_familia_espacio_normaliza": 36,
+      "niegan_familia_conjunto_espacio": 9,
+      "lectura": "todo separador de la lectura estrecha deja vivo uno solo de los cuatro candidatos internos: compra precision externa silenciando tres de cuatro."
+    },
+    "identidad_que_lo_vuelve_teorema": "device_tracker_evidence.py:539 (externa, refutada) y columna_no_transversal.py:11 (interna, candidata) comparten las seis features publicadas; solo difieren en el conteo crudo de llamadas (2 y 1), que la feature binaria borra.",
+    "veredicto": "no hay bandera --solo-alta-confianza construible con lo que el instrumento publica"
+  },
+  "censo_reemision": {
+    "por_que": "tests/test_censo.py::test_instrument_version_is_the_package_version exige la version del paquete: 0.5.0 obliga a re-emitir, y la re-emision se anota, no se congela editando numeros",
+    "instrument_version": [
+      "0.4.6",
+      "0.5.0"
+    ],
+    "filas_movidas": 4,
+    "celdas_de_cubeta_movidas": 11,
+    "por_fila": [
+      {
+        "fila": "mypy:2.4.1:mypy",
+        "cubetas": {
+          "pierde": [
+            4,
+            2
+          ],
+          "guardadas": [
+            25,
+            28
+          ],
+          "sin_len": [
+            125,
+            124
+          ]
+        }
+      },
+      {
+        "fila": "dill:0.4.1:.",
+        "cubetas": {
+          "guardadas": [
+            1,
+            2
+          ],
+          "sin_len": [
+            9,
+            8
+          ]
+        }
+      },
+      {
+        "fila": "mypy:2.4.1:.",
+        "cubetas": {
+          "pierde": [
+            4,
+            2
+          ],
+          "guardadas": [
+            34,
+            39
+          ],
+          "sin_len": [
+            163,
+            160
+          ]
+        }
+      },
+      {
+        "fila": "pydantic:2.14.4:.",
+        "cubetas": {
+          "guardadas": [
+            17,
+            25
+          ],
+          "acumulacion": [
+            6,
+            5
+          ],
+          "sin_len": [
+            118,
+            111
+          ]
+        }
+      }
+    ],
+    "loci_de_fuente_movidos": 17,
+    "loci_de_fuente_distintos": 14,
+    "loci_por_fila": [
+      {
+        "fila": "mypy@2.4.1:mypy",
+        "loci": [
+          "graph_utils.py:119",
+          "graph_utils.py:131",
+          "server/objgraph.py:85"
+        ]
+      },
+      {
+        "fila": "dill@0.4.1:.",
+        "loci": [
+          "dill/pointers.py:113"
+        ]
+      },
+      {
+        "fila": "mypy@2.4.1:.",
+        "loci": [
+          "mypy/graph_utils.py:119",
+          "mypy/graph_utils.py:131",
+          "mypy/server/objgraph.py:85",
+          "mypyc/codegen/emitclass.py:194",
+          "mypyc/codegen/emitclass.py:198"
+        ]
+      },
+      {
+        "fila": "pydantic@2.14.4:.",
+        "loci": [
+          "pydantic/_internal/_fields.py:539",
+          "pydantic/deprecated/decorator.py:186",
+          "pydantic/main.py:362",
+          "pydantic/main.py:386",
+          "pydantic/main.py:389",
+          "pydantic/v1/decorator.py:169",
+          "pydantic/v1/main.py:233",
+          "pydantic/v1/main.py:235"
+        ]
+      }
+    ],
+    "totals_seven": {
+      "antes": {
+        "files": 599,
+        "stores": 308,
+        "pierde": 9,
+        "candidates": 30,
+        "admitted": 5,
+        "column_loci": 24,
+        "guardadas": 54,
+        "acumulacion": 15,
+        "posicional": 21,
+        "sin_len": 209
+      },
+      "despues": {
+        "files": 599,
+        "stores": 308,
+        "pierde": 7,
+        "candidates": 30,
+        "admitted": 5,
+        "column_loci": 24,
+        "guardadas": 58,
+        "acumulacion": 15,
+        "posicional": 21,
+        "sin_len": 207
+      }
+    },
+    "invariantes": {
+      "candidates": [
+        30,
+        30
+      ],
+      "admitted": [
+        5,
+        5
+      ],
+      "column_loci": [
+        24,
+        24
+      ],
+      "stores": [
+        308,
+        308
+      ]
+    },
+    "replay": {
+      "comando": "bench/replay_censo.py --censo censo.json --desde /tmp/censo21",
+      "rc": 0,
+      "cola": "REPLAY IDENTICO · 13 filas · instrumento 0.5.0"
+    }
+  },
+  "correcciones_posteriores": [
+    {
+      "donde": "prediccion-batch-21.json:lo_ya_medido_antes_de_este_fichero",
+      "defecto": "declara que la ventana del lote 20 reproduce seis loci distintos",
+      "medido": "el instrumento 0.4.6 emite ocho filas de candidato sobre ocho loci distintos; los seis son los loci que el lote 20 leyo, no los que el instrumento emitio",
+      "efecto": "ninguno sobre P1-P4: la comparacion antes/despues usa filas y loci medidos en este acto"
+    },
+    {
+      "donde": "recibo-lote20-20261127.json:veredictos",
+      "defecto": "la columna familia lleva a veces el valor de forma",
+      "efecto": "el vector de P4 se lee del JSON del instrumento, nunca de esa columna; el recibo anterior queda como esta y no se reescribe"
+    },
+    {
+      "donde": "prediccion-batch-21.json:predicciones[P4]",
+      "defecto": "llama admitidos a espacio_no_transversal.py:31 y columna_no_transversal.py:11 cuando la segunda se autodeclara candidata y nunca defecto",
+      "efecto": "se publican las dos lecturas: cero separadores en la estricta y 45 en la estrecha, todas con recall 1 de 4"
+    },
+    {
+      "donde": "ventana externa:src/safo/items.py:465",
+      "defecto": "se conto entre los refutados",
+      "medido": "severidad LATENTE y cero llamadas a la clave, antes y despues del parche",
+      "efecto": "entra en la poblacion negativa como externa, no como refutada por lectura"
+    },
+    {
+      "donde": "README.md:cuociente de out-of-domain",
+      "defecto": "la celda historica 14.35 sobre 209 quedaba falsa con el censo re-emitido",
+      "efecto": "la celda se restaura al valor que tests/test_censo_fuera.py congela y el cuociente nuevo, 30/207 = 14.49 por ciento, se publica al lado como prosa"
+    }
+  ],
+  "no_se_hizo": {
+    "reportes_abiertos": 0,
+    "bandera_alta_confianza": "no se implementa: los numeros de separabilidad la refutan",
+    "por_que": "el unico locus externo que se movio era defecto del instrumento; los cinco restos siguen refutados al leer codigo"
+  },
+  "proximo_acto": {
+    "nombre": "lote 22, el primer locus externo citable",
+    "predicado": "una cohorte congelada de veinte repositorios Python con licencia OSI produce al menos un defecto productivo vivo en HEAD que sobrevive a la lectura de codigo con repo@sha:fichero:linea",
+    "falsador": "cero defectos no refutados en los veinte: la frecuencia del defecto en software maduro queda acotada y el esfuerzo se redirige",
+    "requisito": "el filtro de precision no se programa: se paga leyendo codigo"
+  }
+}
