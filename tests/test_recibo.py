@@ -243,6 +243,56 @@ def test_la_huella_se_reproduce_con_jq_y_shasum_sin_python():
     assert hashlib.sha256(canon.encode()).hexdigest() == _sellado()["huella"]
 
 
+# --- los sellos publicados: la prosa tiene lector ---------------------------
+#
+# El README publica trece prefijos de sello en prosa y hasta aqui ninguno tenia lector:
+# editar uno de ellos no rompia nada. El defecto no esta en el recibo —que se verifica
+# contra su propio campo— sino en el triangulo README <-> recibo <-> recomputacion, y en
+# su denominador: el censo de sellos publicados nunca se declaro.
+
+def _sellos_en_disco() -> list[Path]:
+    return sorted(RAIZ.glob("recibo-banda-*.json"))
+
+
+def _prefijos_publicados() -> set[str]:
+    """Todo prefijo de sello que el README imprime, leido de la prosa y no repetido aqui."""
+    return set(re.findall(r"`([0-9a-f]{8})…`", (RAIZ / "README.md").read_text()))
+
+
+def test_el_censo_de_sellos_publicados_es_el_censo_de_sellos_en_disco():
+    """Un recibo no esta publicado hasta que su prefijo esta en el README, y viceversa."""
+    en_disco = {r11.huella(json.loads(p.read_text()))[:8] for p in _sellos_en_disco()}
+    publicado = _prefijos_publicados()
+    assert en_disco == publicado, (sorted(en_disco - publicado), sorted(publicado - en_disco))
+
+
+def test_cada_sello_publicado_se_recomputa_y_coincide():
+    """Cada prefijo publicado es el sha256 canonico del recibo que el README dice que es."""
+    for ruta in _sellos_en_disco():
+        sellado = json.loads(ruta.read_text())
+        assert r11.huella(sellado) == sellado["huella"], ruta.name
+        assert sellado["huella"][:8] in _prefijos_publicados(), ruta.name
+
+
+def test_el_sello_del_lote_once_se_publica_entero():
+    """La receta `jq | shasum` del README imprime 64 hex; el prefijo solo no lo probaria."""
+    entero = re.search(r"`([0-9a-f]{64})`, which is the receipt's own",
+                       (RAIZ / "README.md").read_text())
+    assert entero, "el README ya no publica entero el sello del recibo de lote 11"
+    assert r11.huella(json.loads(SELLADO.read_text())) == entero.group(1)
+
+
+@pytest.mark.skipif(not JQ.exists(), reason="sin jq no hay segunda implementacion del sello")
+def test_una_segunda_implementacion_reproduce_todos_los_sellos():
+    """Sin nuestro interprete en el bucle: jq y shasum sobre el censo entero, no sobre uno."""
+    for ruta in _sellos_en_disco():
+        canon = subprocess.run(
+            [str(JQ), "-S", "-c", "del(.huella, .medicion_de_si_mismo)", str(ruta)],
+            capture_output=True, text=True, check=True,
+        ).stdout.rstrip("\n")
+        assert hashlib.sha256(canon.encode()).hexdigest() == json.loads(ruta.read_text())["huella"], ruta.name
+
+
 # --- la prosa ---------------------------------------------------------------
 
 

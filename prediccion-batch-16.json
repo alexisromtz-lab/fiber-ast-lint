@@ -1,0 +1,48 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 16,
+  "title": "un sello no esta publicado hasta que su prefijo tiene lector",
+  "declared_before_computation": true,
+  "declared_at": "2026-11-27",
+  "why": "Cada recibo verifica su propia huella, y desde el lote 12 hay un test que la recomputa. Lo que ningun test hace es leer el prefijo que el README publica en prosa: el triangulo README <-> recibo <-> recomputacion tiene dos vertices medidos y el tercero creido. Editar un caracter de un prefijo publicado no rompe nada, y esa es exactamente la clase de defecto que el lote 15 cerro un nivel mas arriba: lo que decide tiene que estar escrito, y lo escrito tiene que tener lector. Aqui lo escrito es una cifra de venta —la que un cliente comprueba con jq y shasum— y no tenia lector.",
+  "what_is_new": "Un lector que toma los prefijos de la prosa del README y los contrasta contra la recomputacion de los recibos que hay en disco, en los dos sentidos: ningun prefijo publicado sin recibo, y ningun recibo sin prefijo publicado. El censo de sellos publicados pasa a ser un numero declarado y ejecutado en vez de una lista que alguien conto a mano.",
+  "method": {
+    "sujetos": "los recibos recibo-banda-*.json de la raiz, con su contrato declarado en el propio fichero (recibo/1 y recibo/2 verificados con el lector que los firmo, recibo/3 con el interprete de predicados)",
+    "relojes_nuevos": 0,
+    "por_que_cero": "el lote no mide el entorno ni vuelve a cronometrar: recomputa sha256 sobre ficheros sellados",
+    "invariancia": "para cada recibo, el sha256 de su serializacion canonica sin huella ni medicion_de_si_mismo tiene que empezar por el prefijo que el README imprime para el",
+    "segunda_implementacion": "jq -S -c 'del(.huella, .medicion_de_si_mismo)' seguido de shasum -a 256, sin interprete propio en el bucle, sobre el censo entero y no sobre uno",
+    "verificacion": "pytest tests/test_recibo.py, con un mutante por regla: prefijo editado, literal completo editado, byte del recibo cambiado, recibo sin publicar y prefijo publicado que no existe"
+  },
+  "predictions": [
+    {
+      "id": "S1",
+      "claim": "Los siete prefijos de sello que el README publica en el parrafo de los lotes 11 a 13 se recomputan 7/7 desde la serializacion canonica del recibo correspondiente: el sha256 sin huella ni medicion_de_si_mismo empieza por ese prefijo en los siete casos.",
+      "conjetura_de_partida": "Es como se sellaron y los tests de --check ya pasan para los siete, asi que la probabilidad de discrepancia es baja. Lo que no estaba medido es el tercer vertice: que el prefijo impreso sea el que sale de recomputar.",
+      "falsador": "una sola discrepancia entre el prefijo publicado y la recomputacion: probaria que el despacho depende de un default que cambio entre lotes, cuarta aparicion del mismo patron"
+    },
+    {
+      "id": "S2",
+      "claim": "La segunda implementacion (jq y shasum) reproduce el mismo prefijo en los siete, no solo en el recibo del lote 11, que es el unico que hoy se comprueba por esa via.",
+      "conjetura_de_partida": "canonico() serializa con ensure_ascii=True y jq emite UTF-8 crudo: si algun recibo llevara un caracter no ASCII las dos implementaciones discreparian. Los valores de estos recibos son identificadores ASCII, asi que la prediccion es 7/7.",
+      "falsador": "cualquier discrepancia entre jq y la serializacion canonica, o cualquier recibo cuyo sha256 por jq no empiece por su prefijo publicado"
+    },
+    {
+      "id": "S3",
+      "claim": "El literal de 64 hex que el README publica entero para recibo-banda-11.json es la huella de ese recibo, caracter por caracter, y no solo su prefijo de ocho.",
+      "falsador": "que el literal publicado difiera de la recomputacion en cualquiera de los 64 caracteres"
+    }
+  ],
+  "correccion_posterior": {
+    "que": "Este pre-registro declaro siete sellos y el censo encontro trece. Al leer la prosa entera aparecieron los cuatro sellos del lote 14 (2bf1e78b, cfaadb30, 44190141, e800979f) y los dos del lote 15 (3876e573, 9460000e), publicados con el mismo formato y sin lector: el denominador declarado era la punta, no el universo.",
+    "por_que_se_publica_sin_corregir": "S1, S2 y S3 se cumplieron 10/10 sobre lo que declararon, pero declararon menos de lo que habia. Un pre-registro que se reescribe despues de medir no es un pre-registro, asi que el numero se queda como se escribio y esta entrada es la correccion. Es la segunda vez que el denominador falla en este instrumento despues del lote 12, que declaro trece celdas donde habia quince.",
+    "efecto_medido": "los cuatro tests del lote 16 recorren el censo de disco (13 recibos) y no una lista escrita a mano, asi que el error de denominador no puede repetirse: un recibo nuevo sin prefijo publicado rompe el test"
+  },
+  "criterio_de_falsacion_del_lote": "El lote cae si S1, S2 o S3 fallan sin retro-ajuste. Un lote que mueve su propio umbral despues de medir no midio: describio.",
+  "no_se_hace": [
+    "no se re-sella ningun recibo: los trece quedan byte a byte como se publicaron, y su huella es la prueba de que el lote 16 no los reescribio",
+    "no se mide el coste de la compuerta: coste_compuerta_s sigue fuera del recibo, y el eje de coste sigue abierto",
+    "no se internaliza el banco de mutantes: los cinco de este lote se corren fuera del arbol y su conteo se publica como acto fechado, no como invariante",
+    "no se toca bench/: el lote entero es lectura de prosa y recomputacion de ficheros sellados"
+  ]
+}

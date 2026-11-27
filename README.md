@@ -1613,6 +1613,43 @@ seal, and turning `L3`'s conjunction into a disjunction. That last one is the re
 recomputes the ninth batch's receipt instead of reading it: a stored seal is not evidence that its
 translation still says what it said.
 
+## A published seal has a reader, and the census is the population
+
+Every receipt in this repository verifies its own `huella`, and since the twelfth batch a test
+recomputes that `huella` instead of reading it. Two of the three vertices of the triangle were
+measured. The third — the eight hexadecimal characters this document prints in prose as the seal of
+each receipt — was not: no test read them, so editing one character of a published seal broke
+nothing, and the only thing standing behind the sales argument was the fact that nobody had tried.
+
+The census changes the question from *is this prefix right* to *how many prefixes are there*. The
+reader takes every `[0-9a-f]{8}…` the prose prints and every `recibo-banda-*.json` on disk, and
+asserts that the two sets are equal — so the census is 13 sealed receipts and 13 published prefixes,
+and neither side can drift without the other noticing:
+
+- a prefix edited in the prose is a prefix with no receipt;
+- a receipt edited on disk is a prefix that no longer reproduces its seal;
+- a receipt added without a paragraph is a seal the document does not sell;
+- a prefix printed without a file is a claim with nothing behind it.
+
+**The pre-registration counted seven and the census found thirteen.** `prediccion-batch-16.json`
+(`3a6a5ccf5e64189d3aa7e38e63ff1f27117ca2d8d05ce3b3ee9567090de71f03`) declared the seven seals of
+batches 11 to 13 and predicted 7/7 for the recomputation, 7/7 for the second implementation and 1/1
+for the one seal printed in full. All of it held — and all of it was the tip: reading the whole prose
+surfaced the four seals of the fourteenth batch and the two of the fifteenth, published in the same
+format with the same absence of a reader. The declared denominator was wrong, the file is not
+corrected, and the correction lives in its own `correccion_posterior` field. It is the second time
+this instrument's denominator fails after the twelfth batch said thirteen cells where there were
+fifteen, and both times the fix was the same: stop writing the population by hand and recompute it.
+
+The seal is still a number two tools agree on, and now over the whole census rather than one file:
+
+```bash jq -S -c 'del(.huella, .medicion_de_si_mismo)' recibo-banda-15-lote11.json | tr -d '\n' | shasum -a 256 ```
+
+**Five mutants, run on 27-Nov-2026, one per rule, all dead.** A prefix edited by one character, the
+64-hex literal edited by one character, one byte of a v2 receipt changed, a receipt left unpublished,
+and a prefix printed that has no file. Each kills the suite, which is the difference between a census
+and a count.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

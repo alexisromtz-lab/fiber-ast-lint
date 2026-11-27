@@ -307,3 +307,41 @@ def test_el_readme_del_lote_15_declara_el_techo_que_el_interprete_aplica() -> No
     techo = predicado.PROFUNDIDAD_MAXIMA
     assert f"PROFUNDIDAD_MAXIMA={techo}" in texto, texto[:400]
     assert f"profundidad {techo + 1} supera" in texto
+
+
+SECCION_16 = "## A published seal has a reader, and the census is the population"
+
+
+def _seccion_16() -> str:
+    dentro = False
+    salida: list[str] = []
+    for linea in README.splitlines():
+        if linea.startswith(SECCION_16):
+            dentro = True
+            continue
+        if dentro and linea.startswith("## "):
+            break
+        if dentro:
+            salida.append(linea)
+    assert salida, f"el README no publica la seccion `{SECCION_16}`"
+    return "\n".join(salida)
+
+
+def test_el_readme_del_lote_16_publica_el_censo_que_hay_en_disco() -> None:
+    """El denominador se recomputa: un recibo nuevo sin parrafo rompe este test."""
+    texto = _seccion_16()
+    n = len(list(RAIZ.glob("recibo-banda-*.json")))
+    assert n > 0, "no hay recibos en disco: el lector seria un verde vacio"
+    assert f"{n} sealed receipts and {n} published prefixes" in texto, texto[:400]
+
+
+def test_el_readme_del_lote_16_cita_su_pre_registro_por_hash() -> None:
+    """La prediccion se comprueba contra el fichero: siete declarados, trece encontrados."""
+    texto = _seccion_16()
+    pred = json.loads((RAIZ / "prediccion-batch-16.json").read_bytes())
+    huella = hashlib.sha256((RAIZ / "prediccion-batch-16.json").read_bytes()).hexdigest()
+    assert huella in texto, f"el README no publica el sha256 del pre-registro: {huella}"
+    assert pred["batch"] == 16 and pred["declared_before_computation"] is True
+    assert f"`prediccion-batch-{pred['batch']}.json`" in texto
+    correccion = pred["correccion_posterior"]
+    assert correccion["efecto_medido"] and "denominador" in correccion["que"]
