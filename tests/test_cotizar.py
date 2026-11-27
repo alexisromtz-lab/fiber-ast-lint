@@ -15,6 +15,8 @@ missing instead.
 """
 import json
 import math
+import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -160,28 +162,43 @@ def test_la_cli_devuelve_el_rc_del_precio(tmp_path):
     assert doc["sujeto"]["manifiesto_sha256"] == cotizar._manifiesto(RAIZ / "src" / "fiber_ast_lint")[0]
 
 
-def test_el_manifiesto_citado_se_recompone_desde_git_y_no_desde_el_disco(tmp_path):
-    """The quoted tree is the tree the repository ships, read from the commit.
+def test_el_manifiesto_citado_se_recompone_desde_el_commit_que_la_cita_nombra(tmp_path):
+    """The quote names the tree it measured, and the numbers are that tree's.
 
-    ``cotizacion.sujeto.manifiesto_sha256`` was verified until now by recomputing
-    the digest over the worktree -- the same object only while nobody edits
-    ``src/``. Reading it from ``git archive HEAD`` makes the commit the subject: a
-    quote whose tree moved under it fails here instead of quietly describing a
-    different tree. A future edit to ``src/fiber_ast_lint`` must therefore re-measure
-    the quote in the same act, which is the rule this test exists to enforce.
+    An earlier version read ``git archive HEAD``, which forced the quote to track
+    every later edit to ``src/``. That rule contradicts the rest of the document:
+    ``reloj``, ``tiempo`` and verdict ``P5`` are one session's clock, so re-measuring
+    to satisfy it would re-evaluate a published verdict with a clock from a different
+    session. Two rules over one key cannot both hold, so the quote stops tracking
+    ``HEAD`` and names its subject commit instead: a reader recomputes there and is
+    never shown a tree the quote did not measure.
     """
+    if shutil.which("git") is None:
+        pytest.skip("git no disponible para leer el commit")
+    arbol = json.loads((RAIZ / "fuera-de-dominio-6.json")
+                       .read_text(encoding="utf-8"))["cotizacion"]["arbol"]
+    commit = arbol["commit"]
+    assert re.fullmatch(r"[0-9a-f]{40}", commit), commit
+    es_ancestro = subprocess.run(["git", "-C", str(RAIZ), "merge-base", "--is-ancestor",
+                                  commit, "HEAD"], capture_output=True)
+    if es_ancestro.returncode != 0:
+        # Un clon superficial no tiene la historia: el commit queda fuera del alcance y
+        # no haberlo traido no es un cero de la cita.
+        superficial = subprocess.run(["git", "-C", str(RAIZ), "rev-parse",
+                                      "--is-shallow-repository"],
+                                     capture_output=True, text=True).stdout.strip() == "true"
+        if superficial:
+            pytest.skip(f"clon superficial: el commit citado queda fuera del alcance ({commit})")
+        raise AssertionError(f"el commit citado no esta en la historia: {commit}")
     tar = tmp_path / "arbol.tar"
     p = subprocess.run(["git", "-C", str(RAIZ), "archive", "--format=tar",
-                        "-o", str(tar), "HEAD", "src/fiber_ast_lint"],
+                        "-o", str(tar), commit, "src/fiber_ast_lint"],
                        capture_output=True, text=True)
-    if p.returncode != 0:
-        pytest.skip(f"git no disponible para leer el commit: {p.stderr.strip()[:200]}")
+    assert p.returncode == 0, f"el commit citado no publica el arbol: {p.stderr.strip()[:200]}"
     (tmp_path / "x").mkdir()
     with tarfile.open(tar) as tf:
         tf.extractall(tmp_path / "x")
     digest, bytes_py, ficheros = cotizar._manifiesto(tmp_path / "x" / "src" / "fiber_ast_lint")
-    arbol = json.loads((RAIZ / "fuera-de-dominio-6.json")
-                       .read_text(encoding="utf-8"))["cotizacion"]["arbol"]
     assert digest == arbol["manifiesto_sha256"]
     assert bytes_py == arbol["bytes_py"]
     assert ficheros == arbol["ficheros"]

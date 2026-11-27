@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import json
 import statistics
+import subprocess
 import zipfile
 from pathlib import Path
 
@@ -149,6 +150,22 @@ def _ruido(arbol: Path, n: int = 10, bloques: int = 9) -> dict:
             "dispersion": round(max(x["max_s"] for x in out) / min(x["min_s"] for x in out), 4)}
 
 
+def _commit_publicado() -> str | None:
+    """The commit that ships this tree, or ``None`` while ``src/`` has edits it cannot name.
+
+    A quote is a measurement of one tree, so it names the commit a reader can re-open
+    and recompute. Quoting a dirty worktree would name a tree no commit contains, and
+    the quote would then describe something nobody can check.
+    """
+    limpio = subprocess.run(["git", "-C", str(RAIZ), "diff", "--quiet", "HEAD", "--",
+                             "src/fiber_ast_lint"], capture_output=True)
+    if limpio.returncode != 0:
+        return None
+    sha = subprocess.run(["git", "-C", str(RAIZ), "rev-parse", "HEAD"],
+                         capture_output=True, text=True)
+    return sha.stdout.strip() or None
+
+
 def artefacto(filas: list[dict], cal: dict, cache: Path, out: Path) -> dict:
     retenidos = filas[15:]
     doc = {
@@ -186,7 +203,11 @@ def artefacto(filas: list[dict], cal: dict, cache: Path, out: Path) -> dict:
     }
     out.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     q = cotizar.cotizar(ARBOL_LOCAL, out, TARIFA, 3, None, "codigo")
-    doc["cotizacion"] = {"arbol": q["sujeto"], "modelo": q["modelo"], "reloj": q["reloj"],
+    arbol = dict(q["sujeto"])
+    commit = _commit_publicado()
+    if commit:
+        arbol["commit"] = commit
+    doc["cotizacion"] = {"arbol": arbol, "modelo": q["modelo"], "reloj": q["reloj"],
                         "tiempo": q["tiempo"], "precio": q["precio"],
                         "unidades_facturables": q["unidades_facturables"], "medido_en": q["medido_en"]}
     t = q["tiempo"]

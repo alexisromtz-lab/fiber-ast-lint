@@ -467,7 +467,8 @@
    "arbol": "/Users/marlene/fiber-ast-lint/src/fiber_ast_lint",
    "manifiesto_sha256": "8093a1f2558cf42f5fc52f111c485a677c4ad3271e0dc89daf82c42a383ba702",
    "bytes_py": 55596,
-   "ficheros": 7
+   "ficheros": 7,
+   "commit": "fb341e7c79669a09778fcc18ad5211bf9776ed34"
   },
   "modelo": {
    "clave": "bytes_py",
