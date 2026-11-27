@@ -1,0 +1,93 @@
+{
+ "schema": "fiber-ast-lint/recibo/1",
+ "lote": 8,
+ "sujeto": {
+  "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+  "bytes_py_pin": 296870,
+  "actos": 2,
+  "relojes": 180
+ },
+ "fuente_artefacto": {
+  "ruta": "fuera-de-dominio-8.json",
+  "sha256": "82b5d00ad5a3356bba9836228e78525df68528fdbce1a0321adbae0c2b69f60b"
+ },
+ "actos": [
+  {
+   "k": 0.6054,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.3036,
+   "margen_relativo": -1.006,
+   "zona": "fuera_de_cota",
+   "nombre": "A",
+   "sesion": 7,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.2498,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.052,
+   "margen_relativo": 0.1723,
+   "zona": "banda_de_riesgo",
+   "nombre": "B",
+   "sesion": 8,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null
+  }
+ ],
+ "resumen": {
+  "actos": 2,
+  "publicables_como_booleano": 1,
+  "publicables": [
+   "B"
+  ],
+  "en_banda_de_riesgo": [
+   "B"
+  ],
+  "en_banda_de_riesgo_n": 1,
+  "por_zona": {
+   "margen_sano": [],
+   "banda_de_riesgo": [
+    "B"
+   ],
+   "fuera_de_cota": [
+    "A"
+   ]
+  },
+  "margen_relativo_min": -1.006,
+  "margen_relativo_max": 0.1723,
+  "dispersiones_por_sesion": {
+   "7": {
+    "n": 1,
+    "k_min": 0.6054,
+    "k_max": 0.6054,
+    "dispersion": null
+   },
+   "8": {
+    "n": 1,
+    "k_min": 0.2498,
+    "k_max": 0.2498,
+    "dispersion": null
+   }
+  }
+ },
+ "veredictos": [],
+ "huella": "eb542aa9be8796b2bd794d91f17c29b42d68788e69a52b9c3e5fb3fc41eb4660",
+ "medicion_de_si_mismo": {
+  "coste_verificacion_s": 0.001573,
+  "coste_compuerta_total_s": 0.0,
+  "ratio_sobre_compuerta": null,
+  "P2_sobrevive": false,
+  "reproducible": true
+ }
+}

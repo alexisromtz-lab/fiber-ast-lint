@@ -1,0 +1,48 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 12,
+  "title": "la banda es funcion del acto, no del artefacto que lo contiene",
+  "declared_before_computation": true,
+  "declared_at": "2026-11-26",
+  "why": "El lote 11 emitio un recibo desde un solo artefacto, fuera-de-dominio-10.json, y esa unica fuente deja abierta la objecion que hunde cualquier instrumento de medida: si el recibo solo se probo contra el lote del que salio, la banda puede estar ajustada a esa muestra. El propio bench/recibo.py lo delataba: la clave lote llevaba el literal 11 escrito dentro de recibo(), de modo que el instrumento publicado no podia emitir un recibo de ningun otro lote. Una funcion de tres artefactos y un solo dominio no es una funcion: es una tabla. Este lote la convierte en funcion probandola sobre los tres artefactos sellados que comparten actos, y mide cuantos de los cuatro grados de libertad que el recibo publica por acto estan realmente medidos.",
+  "what_is_new": "El recibo se emite desde fuera-de-dominio-8.json, fuera-de-dominio-9.json y fuera-de-dominio-10.json con el mismo codigo y sin ninguna rama por lote, y se publica la tabla de atestacion cruzada: cinco actos (A, B, C, D, E) aparecen en mas de un artefacto, y su banda tiene que ser identica en todos los que lo contienen. Ademas el recibo declara sus propios grados de libertad: de las cuatro magnitudes que publica por acto (k, dispersion_dentro, coste_compuerta_s, cotizacion), cuantas son NO_MEDIDO y por que.",
+  "method": {
+    "sujetos": "fuera-de-dominio-8.json (2 actos, 180 relojes), fuera-de-dominio-9.json (5 actos, 450 relojes) y fuera-de-dominio-10.json (8 actos, 720 relojes), los tres sobre el mismo pin (296870 B, sha256 b2e05e6b)",
+    "relojes_nuevos": 0,
+    "por_que_cero": "el lote no mide el entorno: mide si su propio instrumento es una funcion. Las lecturas ya estan tomadas y selladas; lo que falta es recomputar la banda desde otros dos artefactos y comprobar que no se mueve",
+    "generalizacion": "la sesion de un acto se deriva de lo que el artefacto declara, en orden de precedencia: la fuente citada (fuente), el sello de un lote anterior (sellado_lote_N) y, si el acto es propio, el lote del artefacto que lo publica. Ninguna de las tres reglas nombra un lote concreto",
+    "invariancia": "para cada acto que aparece en mas de un artefacto, la tupla (k, umbral, margen, margen_relativo, zona) tiene que coincidir celda a celda; el numero de celdas repetidas es el numero de restricciones que la ley impone al instrumento",
+    "grados_de_libertad": "por acto el recibo publica cuatro magnitudes; dispersion_dentro solo existe si la sesion que produjo el acto tiene n > 1, y el recibo escribe null (NO_MEDIDO) cuando n = 1, nunca 1,0, porque un acto solo no tiene dispersion",
+    "verificacion": "bench/recibo.py --artefacto A --check R recomputa desde A y compara la huella con R; RC 0 si coinciden, RC 4 si no, RC 2 si el artefacto no se puede leer"
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "La banda es funcion del acto y no del artefacto: los cinco actos que aparecen en mas de un artefacto sellado (A y B en los tres, C, D y E en dos) tienen la misma zona, el mismo k, el mismo umbral y el mismo margen en todas sus atestaciones. Trece celdas, cero discrepancias.",
+      "conjetura_de_partida": "El lote 9 y el lote 10 copian A y B del lote 8 sin volver a cronometrar, asi que la invariancia deberia salir por construccion. Predecirla no es el hallazgo: el hallazgo es que el instrumento la demuestre sin creerse la prosa que dice reutilizado, recomputando la banda desde cada artefacto por separado.",
+      "falsador": "cualquier celda de zona distinta para el mismo acto, o cualquier k, umbral o margen que cambie entre artefactos: el recibo estaria midiendo el contenedor y no el sujeto"
+    },
+    {
+      "id": "P2",
+      "claim": "El instrumento generalizado no contiene ninguna comparacion contra un numero de lote: su arbol sintactico no tiene un if, un match ni un ternario que compare un nombre que contenga lote con una constante entera. Emitir tres recibos desde tres artefactos usa una sola rama.",
+      "falsador": "cualquier comparacion de ese tipo en el AST de bench/recibo.py: el instrumento vuelve a ser una tabla de un solo dominio"
+    },
+    {
+      "id": "P3",
+      "claim": "Generalizar no mueve lo publicado: recibo-banda-11.json sigue verificando su huella 507303a9787c0405bb308df03907fa70d9d7b56cc73bdb1cdef6c6c49ce37bcb con el instrumento nuevo, y la receta de tercero (jq -S -c 'del(.huella, .medicion_de_si_mismo)' seguido de shasum -a 256) devuelve el mismo valor.",
+      "falsador": "cualquier cambio en esa huella: la generalizacion habria reescrito el recibo que ya estaba publicado, y un recibo que cambia deja de ser un recibo"
+    },
+    {
+      "id": "P4",
+      "claim": "El recibo declara sus grados de libertad en vez de rellenarlos: dispersion_dentro es null exactamente en los actos cuya sesion tiene n = 1, y nunca vale 1,0. En los tres artefactos las sesiones 7 y 8 tienen n = 1 y las sesiones 9 y 10 tienen n = 3.",
+      "falsador": "un dispersion_dentro igual a 1,0 donde sesion_n vale 1, un n mal contado, o cualquier sesion con dispersion publicada que no tenga al menos dos actos"
+    }
+  ],
+  "criterio_de_falsacion_del_lote": "El lote cae si P1, P2, P3 o P4 fallan sin retro-ajuste de sus umbrales. Un lote que mueve su propio umbral despues de medir no midio: describio.",
+  "no_se_hace": [
+    "no se vuelve a cronometrar: los 1350 relojes de los tres artefactos son la unica fuente",
+    "no se toca fuera-de-dominio-8.json, fuera-de-dominio-9.json ni fuera-de-dominio-10.json: se leen y se citan, y el test ata cada celda de la tabla al acto del que sale",
+    "no se re-sella recibo-banda-11.json: el recibo del lote 11 queda byte a byte como se publico, y su huella es la prueba de que la generalizacion no lo reescribio",
+    "no se mide la caducidad de sesion: la sonda de nueve relojes solo tiene dispersion intra-sesion medida (n = 3 en la sesion 10, 1,0507x) y ninguna medicion inter-sesion, asi que el tiempo de vida de una sesion calibrada queda NO_MEDIDO para el lote 13"
+  ]
+}

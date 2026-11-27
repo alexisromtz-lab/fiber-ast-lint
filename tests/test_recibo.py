@@ -12,6 +12,7 @@ escribe la constante que deberia derivar no prueba nada.
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import re
@@ -150,11 +151,11 @@ def test_los_veredictos_se_derivan_de_las_zonas_y_no_se_escriben():
 
 
 def test_el_recibo_sellado_es_lo_que_recomputa_el_artefacto():
+    sellado = _sellado()
     rec = r11._reanclar_veredictos(
-        r11.recibo(_arte(), str(ARTE)),
+        r11.recibo(_arte(), str(ARTE), sellado["lote"]),
         r11._leer_prediccion(PRED),
     )
-    sellado = _sellado()
     assert rec["huella"] == sellado["huella"]
     assert sellado["huella"] == r11.huella(sellado)
 
@@ -169,7 +170,8 @@ def test_el_pre_registro_del_lote_11_conserva_sus_cuatro_predicciones():
 
 def test_verificar_el_recibo_cuesta_menos_de_una_centesima_parte_de_medir_la_compuerta():
     t0 = time.perf_counter()
-    rec = r11._reanclar_veredictos(r11.recibo(_arte(), str(ARTE)), r11._leer_prediccion(PRED))
+    rec = r11._reanclar_veredictos(r11.recibo(_arte(), str(ARTE), _sellado()["lote"]),
+                                  r11._leer_prediccion(PRED))
     coste = time.perf_counter() - t0
     total = sum(a.get("coste_compuerta_s") or 0.0 for a in _arte()["actos"])
     assert total > 400.0
@@ -244,20 +246,29 @@ def test_la_huella_se_reproduce_con_jq_y_shasum_sin_python():
 # --- la prosa ---------------------------------------------------------------
 
 
-def _seccion_11() -> str:
+ZONAS_EN = {"margen_sano": "healthy margin", "banda_de_riesgo": "risk band",
+            "fuera_de_cota": "out of bounds"}
+
+
+def _seccion(titulo: str) -> str:
+    """El cuerpo bajo un encabezado, hasta el siguiente: una seccion nueva no alarga la anterior."""
     texto = (RAIZ / "README.md").read_text()
-    ini = texto.index("### The boolean lied at the frontier")
-    fin = texto.index("## Fixtures census", ini)
-    return texto[ini:fin]
+    ini = texto.index(titulo)
+    cortes = [i for i in (texto.find("\n### ", ini + 1), texto.find("\n## ", ini + 1)) if i > 0]
+    return texto[ini:min(cortes) if cortes else len(texto)]
+
+
+def _seccion_11() -> str:
+    return _seccion("### The boolean lied at the frontier")
 
 
 def _prosa_11() -> str:
     return " ".join(_seccion_11().split())
 
 
-def _tabla_11() -> dict[str, list[str]]:
+def _tabla_de(seccion: str) -> dict[str, list[str]]:
     filas = {}
-    for linea in _seccion_11().split("\n"):
+    for linea in seccion.split("\n"):
         if not linea.startswith("|"):
             continue
         celdas = [c.strip() for c in linea.strip().strip("|").split("|")]
@@ -267,11 +278,14 @@ def _tabla_11() -> dict[str, list[str]]:
     return filas
 
 
+def _tabla_11() -> dict[str, list[str]]:
+    return _tabla_de(_seccion_11())
+
+
 def test_la_tabla_del_lote_11_es_el_recibo_y_no_una_copia():
     """Celda a celda contra el recibo: una cifra editada a mano en la tabla no sobrevive."""
     rec, tabla = _sellado(), _tabla_11()
-    zonas = {"margen_sano": "healthy margin", "banda_de_riesgo": "risk band",
-             "fuera_de_cota": "out of bounds"}
+    zonas = ZONAS_EN
     assert set(tabla) == {a["nombre"] for a in rec["actos"]}
     for a in rec["actos"]:
         c = tabla[a["nombre"]]
@@ -370,3 +384,152 @@ def test_el_veredicto_p4_cotiza_el_mismo_acto_que_el_recibo():
     assert p4["medido"]["acto_mas_caro"] == caro["nombre"]
     assert p4["medido"]["usos_sin_arnes"] == caro["cotizacion"]["usos_sin_arnes"]
     assert p4["medido"]["usos_para_amortizar"] == caro["cotizacion"]["usos_para_amortizar"]
+
+
+# --- lote 12: la banda es funcion del acto, no del artefacto ----------------
+
+
+def _recibo_de(lote: int) -> dict:
+    return json.loads((RAIZ / f"recibo-banda-12-lote{lote}.json").read_text())
+
+
+def _crudo_de(lote: int) -> dict:
+    return json.loads((RAIZ / f"fuera-de-dominio-{lote}.json").read_text())
+
+
+def test_el_instrumento_no_compara_contra_ningun_numero_de_lote():
+    """Si el codigo compara contra un lote concreto, el instrumento es una tabla de un dominio."""
+    arbol = ast.parse((RAIZ / "bench" / "recibo.py").read_text())
+    sospechosas = []
+    for nodo in ast.walk(arbol):
+        if not isinstance(nodo, ast.Compare):
+            continue
+        operandos = [nodo.left, *nodo.comparators]
+        nombra_lote = any("lote" in ast.unparse(o) for o in operandos)
+        contra_entero = any(isinstance(o, ast.Constant) and isinstance(o.value, int) for o in operandos)
+        if nombra_lote and contra_entero:
+            sospechosas.append(ast.unparse(nodo))
+    assert sospechosas == [], sospechosas
+
+
+def test_la_banda_de_un_acto_no_depende_del_artefacto_que_lo_contiene():
+    """A y B estan en los tres artefactos, C, D y E en dos: doce atestaciones, una sola banda."""
+    por_acto: dict[str, list[dict]] = {}
+    for rec in (_recibo_de(8), _recibo_de(9), _sellado()):
+        for fila in rec["actos"]:
+            por_acto.setdefault(fila["nombre"], []).append(fila)
+    repetidos = {n: f for n, f in por_acto.items() if len(f) > 1}
+    assert set(repetidos) == {"A", "B", "C", "D", "E"}
+    assert sum(len(f) for f in repetidos.values()) == 12
+    for nombre, filas in repetidos.items():
+        for clave in ("k", "umbral", "margen", "margen_relativo", "zona"):
+            valores = {f[clave] for f in filas}
+            assert len(valores) == 1, f"{nombre} cambia {clave} entre artefactos: {valores}"
+
+
+def test_el_acto_sellado_de_un_lote_anterior_hereda_esa_sesion():
+    """El lote 8 no escribe `fuente`: su acto A trae el sellado del lote 7 y ahi se midio."""
+    arte = _crudo_de(8)
+    assert "fuente" not in arte["acto_a"] and "sellado_lote_7" in arte["acto_a"]
+    assert r11._sesion_de(arte["acto_a"], 8) == 7
+    assert r11._sesion_de(arte["acto_b"], 8) == 8
+    assert r11._sesion_de({"reutilizado": True}, 8) is None
+
+
+def test_el_recibo_del_lote_8_sale_del_par_acto_a_acto_b():
+    arte = _crudo_de(8)
+    assert "actos" not in arte
+    rec = r11.recibo(arte, str(RAIZ / "fuera-de-dominio-8.json"))
+    assert [f["nombre"] for f in rec["actos"]] == ["A", "B"]
+    assert rec["sujeto"]["relojes"] == 180
+    assert rec["sujeto"]["actos"] == 2
+
+
+def test_el_lote_de_emision_por_defecto_es_el_del_artefacto():
+    for lote in (8, 9, 10):
+        fuente = str(RAIZ / f"fuera-de-dominio-{lote}.json")
+        assert r11.recibo(_crudo_de(lote), fuente)["lote"] == lote
+    # el recibo del lote 11 declara 11 sobre el artefacto del 10: la emision no es la fuente
+    assert _sellado()["lote"] == 11 and _arte()["lote"] == 10
+
+
+def test_dispersion_es_nulo_exactamente_donde_la_sesion_tiene_un_solo_acto():
+    """Un acto solo no tiene dispersion: es NO_MEDIDO, nunca 1,0."""
+    vistas = set()
+    for rec in (_recibo_de(8), _recibo_de(9), _sellado()):
+        for fila in rec["actos"]:
+            assert (fila["dispersion_dentro"] is None) is (fila["sesion_n"] == 1), fila["nombre"]
+            if fila["sesion_n"] > 1:
+                assert fila["dispersion_dentro"] > 1.0
+        for d in rec["resumen"]["dispersiones_por_sesion"].values():
+            assert (d["dispersion"] is None) is (d["n"] == 1)
+            vistas.add((d["n"], d["k_min"], d["k_max"]))
+    assert {n for n, _, _ in vistas} == {1, 3}
+
+
+def test_el_recibo_de_un_lote_sin_pre_registro_no_inventa_veredictos():
+    assert _recibo_de(8)["veredictos"] == []
+    assert _recibo_de(9)["veredictos"] == []
+    assert [v["id"] for v in _sellado()["veredictos"]] == ["P1", "P4"]
+
+
+def test_un_veredicto_sin_pre_registro_declarado_no_existe():
+    resumen = {"actos": 2, "publicables_como_booleano": 1, "en_banda_de_riesgo_n": 1,
+               "en_banda_de_riesgo": ["B"], "por_zona": {}}
+    assert r11._veredictos(resumen, [], None) == []
+    assert r11._veredictos(resumen, [], {}) == []
+    assert [v["id"] for v in r11._veredictos(resumen, [], {"P1": "x"})] == ["P1"]
+
+
+def test_los_dos_recibos_del_lote_12_verifican_su_huella():
+    for n in (8, 9):
+        r = subprocess.run(
+            [sys.executable, str(RAIZ / "bench" / "recibo.py"),
+             "--artefacto", str(RAIZ / f"fuera-de-dominio-{n}.json"),
+             "--check", str(RAIZ / f"recibo-banda-12-lote{n}.json")],
+            capture_output=True, text=True, cwd=RAIZ,
+        )
+        assert r.returncode == 0, r.stderr
+
+
+def test_el_pre_registro_del_lote_12_declara_cuatro_predicciones_y_cero_relojes():
+    pred = json.loads((RAIZ / "prediccion-batch-12.json").read_text())
+    assert pred["declared_before_computation"] is True
+    assert [p["id"] for p in pred["predictions"]] == ["P1", "P2", "P3", "P4"]
+    assert pred["method"]["relojes_nuevos"] == 0
+    assert all("falsador" in p for p in pred["predictions"])
+
+
+def test_la_tabla_del_lote_12_es_la_union_de_los_tres_recibos():
+    """La tabla de atestacion se recomputa: agrupar los recibos por acto y celda a celda."""
+    recibos = {"8": _recibo_de(8), "9": _recibo_de(9), "10": _sellado()}
+    por_acto: dict[str, dict[str, float | str]] = {}
+    lotes: dict[str, list[str]] = {}
+    for lote, rec in recibos.items():
+        for fila in rec["actos"]:
+            por_acto[fila["nombre"]] = fila
+            lotes.setdefault(fila["nombre"], []).append(lote)
+    tabla = _tabla_de(_seccion("### The band is a function of the act"))
+    assert set(tabla) == set(por_acto) == set("ABCDEFGH")
+    for nombre, fila in por_acto.items():
+        c = tabla[nombre]
+        cuantos = "lotes" if len(lotes[nombre]) > 1 else "lote"
+        assert c[1] == f"{cuantos} {', '.join(lotes[nombre])}"
+        assert c[2] == f"{fila['k']:.4f}".replace(".", ",")
+        assert c[3] == ZONAS_EN[fila["zona"]]
+        assert c[4] == str(len(lotes[nombre]))
+    assert sum(len(v) for v in lotes.values()) == 15
+    assert sum(1 for v in lotes.values() if len(v) > 1) == 5
+
+
+def test_la_prosa_del_lote_12_nombra_sus_cifras_y_su_error_de_cuenta():
+    """Doce atestaciones, quince celdas, y el trece del pre-registro publicado sin corregir."""
+    prosa = " ".join(_seccion("### The band is a function of the act").split())
+    for lote in (8, 9):
+        assert _recibo_de(lote)["huella"] in prosa
+    assert _sellado()["huella"][:8] in prosa
+    assert "zero discrepancies" in prosa
+    assert "twelve attestations" in prosa and "fifteen cells" in prosa
+    assert "said \"thirteen cells\"" in prosa or 'said "thirteen cells"' in prosa
+    assert "thirty-two band-and-session magnitudes" in prosa
+    assert "the arithmetic of the prediction did not" in prosa

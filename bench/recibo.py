@@ -12,10 +12,17 @@ dentro de su sesion, el coste de la compuerta y cuantos usos la amortizan. El re
 firma con la huella de su serializacion canonica: verificarlo es recomputarlo y comparar
 dos numeros, sin ejecutar el escaner ni creer una prosa.
 
+El instrumento no sabe de lotes: recibe un artefacto, deriva de lo que ese artefacto declara
+en que sesion se tomo cada lectura, y emite la banda. Ninguna de sus reglas nombra un lote
+concreto, de modo que los tres artefactos sellados que comparten actos (lotes 8, 9 y 10)
+producen la misma banda para el mismo acto. La ley que se comprueba en el lote 12 es esa:
+la banda es funcion del acto, no del artefacto que lo contiene.
+
 Uso::
 
-    python bench/recibo.py --artefacto fuera-de-dominio-10.json --salida recibo-banda-11.json
-    python bench/recibo.py --artefacto fuera-de-dominio-10.json --check recibo-banda-11.json
+    python bench/recibo.py --artefacto fuera-de-dominio-10.json --salida R --prediccion P
+    python bench/recibo.py --artefacto fuera-de-dominio-10.json --check R
+    python bench/recibo.py --artefacto fuera-de-dominio-8.json --salida R
 
 Codigos de salida: 0 recibo escrito o verificado, 2 artefacto ilegible, 4 huella distinta,
 20 argumentos.
@@ -73,11 +80,35 @@ def _sesion(fuente: str) -> int | None:
     return int(m.group(1)) if m else None
 
 
-def _dispersiones(actos: list[dict]) -> dict[int, dict]:
+def _sesion_de(acto: dict, lote_artefacto: int | None) -> int | None:
+    """Donde se tomaron las lecturas, segun lo que el artefacto declare.
+
+    Tres declaraciones y ninguna rama por lote: la fuente citada, el sello de un lote
+    anterior y -- si el acto es propio -- el lote del artefacto que lo publica.
+    """
+    s = _sesion(acto.get("fuente"))
+    if s is not None:
+        return s
+    for clave in acto:
+        m = re.fullmatch(r"sellado_lote_(\d+)", clave)
+        if m:
+            return int(m.group(1))
+    return None if acto.get("reutilizado") else lote_artefacto
+
+
+def _actos(arte: dict) -> list[dict]:
+    """Los actos del artefacto: la lista ``actos`` o el par ``acto_a``/``acto_b`` del lote 8."""
+    actos = arte.get("actos")
+    if actos is None:
+        actos = [arte[k] for k in ("acto_a", "acto_b") if k in arte]
+    return [dict(a, nombre=a.get("nombre") or chr(ord("A") + i)) for i, a in enumerate(actos)]
+
+
+def _dispersiones(actos: list[dict], lote: int | None = None) -> dict[int, dict]:
     """Dispersion de k por sesion; con un solo acto no hay dispersion, hay NO_MEDIDO."""
     por_sesion: dict[int, list[float]] = {}
     for a in actos:
-        s = _sesion(a.get("fuente", ""))
+        s = _sesion_de(a, lote)
         if s is not None:
             por_sesion.setdefault(s, []).append(a["jitter_relativo"])
     out = {}
@@ -121,28 +152,36 @@ def _sujeto(actos: list[dict]) -> dict:
 
 
 def _veredictos(resumen: dict, por_acto: list[dict], pred: dict | None) -> list[dict]:
-    """Evalua P1 y P4 del pre-registro; P2 y P3 se miden fuera de la huella."""
+    """Evalua P1 y P4 del pre-registro; P2 y P3 se miden fuera de la huella.
+
+    Un veredicto solo existe si un pre-registro lo declara: los lotes 8 y 9 no conocian
+    P1 ni P4, y emitir su juicio desde aqui seria inventarle un pre-registro al sujeto.
+    """
+    if pred is None:
+        return []
     out = []
-    pub = resumen["publicables_como_booleano"]
-    riesgo = resumen["en_banda_de_riesgo_n"]
-    out.append({
-        "id": "P1",
-        "prediccion": (pred or {}).get("P1"),
-        "medido": {"publicables": pub, "en_banda_de_riesgo": riesgo, "actos": resumen["actos"]},
-        "sobrevive": 1 <= riesgo and riesgo * 2 <= pub if pub else False,
-        "evalua": "el booleano dice si con el margen ya consumido en al menos un acto y en no mas de la mitad",
-    })
-    cotizados = [a for a in por_acto if a["cotizacion"]]
-    caro = max(cotizados, key=lambda a: a["coste_compuerta_s"]) if cotizados else None
-    usos = caro["cotizacion"]["usos_para_amortizar"] if caro else None
-    out.append({
-        "id": "P4",
-        "prediccion": (pred or {}).get("P4"),
-        "medido": {"acto_mas_caro": caro["nombre"] if caro else None, "usos_para_amortizar": usos,
-                   "usos_sin_arnes": caro["cotizacion"]["usos_sin_arnes"] if caro else None},
-        "sobrevive": bool(usos is not None and 20 <= usos <= 40),
-        "evalua": "la compuerta de noventa relojes solo se amortiza con volumen, entre veinte y cuarenta usos",
-    })
+    if "P1" in pred:
+        pub = resumen["publicables_como_booleano"]
+        riesgo = resumen["en_banda_de_riesgo_n"]
+        out.append({
+            "id": "P1",
+            "prediccion": pred.get("P1"),
+            "medido": {"publicables": pub, "en_banda_de_riesgo": riesgo, "actos": resumen["actos"]},
+            "sobrevive": 1 <= riesgo and riesgo * 2 <= pub if pub else False,
+            "evalua": "el booleano dice si con el margen ya consumido en al menos un acto y en no mas de la mitad",
+        })
+    if "P4" in pred:
+        cotizados = [a for a in por_acto if a["cotizacion"]]
+        caro = max(cotizados, key=lambda a: a["coste_compuerta_s"]) if cotizados else None
+        usos = caro["cotizacion"]["usos_para_amortizar"] if caro else None
+        out.append({
+            "id": "P4",
+            "prediccion": pred.get("P4"),
+            "medido": {"acto_mas_caro": caro["nombre"] if caro else None, "usos_para_amortizar": usos,
+                       "usos_sin_arnes": caro["cotizacion"]["usos_sin_arnes"] if caro else None},
+            "sobrevive": bool(usos is not None and 20 <= usos <= 40),
+            "evalua": "la compuerta de noventa relojes solo se amortiza con volumen, entre veinte y cuarenta usos",
+        })
     return out
 
 
@@ -153,13 +192,15 @@ def _leer_prediccion(ruta: Path | None) -> dict | None:
     return {p["id"]: p["claim"] for p in pred.get("predictions", [])}
 
 
-def recibo(arte: dict, fuente: str) -> dict:
+def recibo(arte: dict, fuente: str, lote: int | None = None) -> dict:
     """El recibo completo, con huella. Medir su coste es cosa de quien lo llama."""
-    actos = arte["actos"]
-    disp = _dispersiones(actos)
+    actos = _actos(arte)
+    if lote is None:
+        lote = arte.get("lote")
+    disp = _dispersiones(actos, lote)
     por_acto = []
     for a in actos:
-        s = _sesion(a.get("fuente", ""))
+        s = _sesion_de(a, lote)
         b = _banda(a["jitter_relativo"], a["q"])
         b.update({
             "nombre": a["nombre"],
@@ -188,7 +229,7 @@ def recibo(arte: dict, fuente: str) -> dict:
     }
     out = {
         "schema": "fiber-ast-lint/recibo/1",
-        "lote": 11,
+        "lote": lote,
         "sujeto": _sujeto(actos),
         # el nombre, no la ruta: la huella no puede depender de donde se invoco el instrumento
         "fuente_artefacto": {"ruta": Path(fuente).name,
@@ -213,8 +254,8 @@ def _reanclar_veredictos(rec: dict, pred: dict | None) -> dict:
 def _resumen_legible(rec: dict) -> str:
     r = rec["resumen"]
     lineas = [
-        f"sujeto {rec['sujeto']['sha256'][:8]} · {rec['sujeto']['bytes_py_pin']} B · {r['actos']} actos"
-        f" · {rec['sujeto']['relojes']} relojes",
+        f"sujeto {(rec['sujeto']['sha256'] or 'NO_MEDIDO')[:8]} · {rec['sujeto']['bytes_py_pin']} B"
+        f" · {r['actos']} actos · {rec['sujeto']['relojes']} relojes",
         f"huella {rec['huella']}",
         "",
         f"{'acto':<5}{'ses':>5}{'k':>9}{'q/2':>9}{'umbral':>9}{'margen':>10}{'margen%':>9}"
@@ -241,12 +282,21 @@ def _resumen_legible(rec: dict) -> str:
     return "\n".join(lineas)
 
 
+def _prediccion_del_lote(lote: int | None, junto_a: Path) -> dict | None:
+    """El pre-registro del lote que el recibo declara, si vive junto al recibo."""
+    if lote is None:
+        return None
+    return _leer_prediccion(junto_a / f"prediccion-batch-{lote}.json")
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Recibo con banda sobre un artefacto sellado.")
     ap.add_argument("--artefacto", required=True, type=Path)
     ap.add_argument("--salida", type=Path)
     ap.add_argument("--check", type=Path, help="recomputa y compara la huella con este recibo")
-    ap.add_argument("--prediccion", type=Path, default=Path("prediccion-batch-11.json"))
+    ap.add_argument("--lote", type=int, help="lote de la emision; por defecto, el del artefacto")
+    ap.add_argument("--prediccion", type=Path,
+                    help="pre-registro que declara P1 y P4; sin el, el recibo no emite veredictos")
     args = ap.parse_args(argv)
     if not args.salida and not args.check:
         ap.error("hace falta --salida o --check")
@@ -257,12 +307,29 @@ def main(argv: list[str] | None = None) -> int:
         print(f"artefacto ilegible: {args.artefacto} ({e})", file=sys.stderr)
         return 2
 
+    sellado = None
+    if args.check:
+        try:
+            sellado = json.loads(args.check.read_text())
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"recibo ilegible: {args.check} ({e})", file=sys.stderr)
+            return 2
+
+    # El lote de emision es lo unico que el recibo sellado declara y no se puede recomputar
+    # desde el artefacto: se honra su declaracion, y la huella cubre todo lo demas.
+    lote = args.lote if args.lote is not None else (sellado.get("lote") if sellado else None)
+    if args.prediccion:
+        pred = _leer_prediccion(args.prediccion)
+    elif sellado and sellado.get("veredictos"):
+        pred = _prediccion_del_lote(lote, args.check.parent)
+    else:
+        pred = None
+
     t0 = time.perf_counter()
-    rec = recibo(arte, str(args.artefacto))
-    pred = _leer_prediccion(args.prediccion)
+    rec = recibo(arte, str(args.artefacto), lote)
     rec = _reanclar_veredictos(rec, pred)
     coste = round(time.perf_counter() - t0, 6)
-    total = sum(a.get("coste_compuerta_s") or 0.0 for a in arte["actos"])
+    total = sum(a.get("coste_compuerta_s") or 0.0 for a in _actos(arte))
     rec["medicion_de_si_mismo"] = {
         "coste_verificacion_s": coste,
         "coste_compuerta_total_s": round(total, 4),
@@ -274,11 +341,6 @@ def main(argv: list[str] | None = None) -> int:
     rec["medicion_de_si_mismo"]["reproducible"] = True
 
     if args.check:
-        try:
-            sellado = json.loads(args.check.read_text())
-        except (OSError, json.JSONDecodeError) as e:
-            print(f"recibo ilegible: {args.check} ({e})", file=sys.stderr)
-            return 2
         if sellado.get("huella") == rec["huella"]:
             print(f"RECIBO VERIFICADO: {rec['huella']} · {args.check}")
             return 0

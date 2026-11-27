@@ -1301,6 +1301,70 @@ microsecond more to emit, and it does not need our interpreter either: `jq -S -c
 `507303a9787c0405bb308df03907fa70d9d7b56cc73bdb1cdef6c6c49ce37bcb`, which is the receipt's own
 `huella`. That is the whole sales argument: the verdict is a number two tools agree on.
 
+### The band is a function of the act, not of the artefact that contains it
+
+The receipt above has a defect that only shows when you ask it for a second lote. `recibo()` had
+`"lote": 11` written inside it, so the instrument that generalises over three sealed artefacts
+could only ever emit the receipt of one of them. A function of three inputs and one output domain
+is not a function: it is a table with a formula glued to it. Batch 12 removes the literal and asks
+what was actually being claimed.
+
+What was being claimed is not a property of the receipts, it is a property of the subject. Acts A
+and B are attested by all three artefacts, C, D and E by two of them, and the band does not move:
+
+| act | attested by | k | zone | attestations |
+|---|---|--:|---|--:|
+| A | lotes 8, 9, 10 | 0,6054 | out of bounds | 3 |
+| B | lotes 8, 9, 10 | 0,2498 | risk band | 3 |
+| C | lotes 9, 10 | 0,1280 | healthy margin | 2 |
+| D | lotes 9, 10 | 0,1332 | healthy margin | 2 |
+| E | lotes 9, 10 | 0,1155 | healthy margin | 2 |
+| F | lote 10 | 0,3290 | out of bounds | 1 |
+| G | lote 10 | 0,3381 | out of bounds | 1 |
+| H | lote 10 | 0,3759 | out of bounds | 1 |
+
+Eight acts, fifteen cells, twelve attestations of a repeated act, and **zero discrepancies** across
+`k`, `umbral`, `margen`, `margen_relativo` and `zona`. Three artefacts were sealed in three
+different batches by three different runs of the gate; the same act comes back the same, because it
+was measured once and then cited, never re-measured. That is what makes the receipt citable: a
+second artefact cannot disagree with the first about a subject it did not touch.
+
+**The pre-registration counted wrong and is published that way.** P1 said "thirteen cells"; two
+acts repeated three times plus three repeated twice is twelve, plus the three unique acts is
+fifteen. The law survives 12/12 attestations; the arithmetic of the prediction did not. A
+pre-registration that gets retro-corrected after the measurement is not a pre-registration, so the
+number stays as written and this paragraph is the correction.
+
+The instrument also stops knowing what a lote is. A session is derived from what the artefact
+declares — the cited `fuente`, then a `sellado_lote_N` key for an act inherited from an earlier
+batch, then the artefact's own lote if the act is its own — and no rule names a batch:
+
+- the lote-8 artefact has no `actos` list, only `acto_a`/`acto_b`, and its act A carries the seal
+  of lote 7 because that is where it was measured: session 7, not 8;
+- acts A and B sit in sessions with a single act, so their dispersion is `null`, not 1,0. Eight
+  acts offer thirty-two band-and-session magnitudes, and the four that are `NO_MEDIDO` are exactly
+  the two dispersions of the single-act sessions and the two costs that lote 8 never recorded. A
+  zero would have claimed we had measured them;
+- the sealed receipt of lote 11 was emitted with `--lote 11` from the lote-10 artefact, so the
+  emission lote is the one field a third party cannot recompute from the artefact. `--check` reads
+  it from the receipt and covers everything else; the `jq` recipe covers it too. This is a real
+  limit of the seal and it is documented rather than hidden.
+
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-8.json --salida recibo-banda-12-lote8.json ```
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-9.json --salida recibo-banda-12-lote9.json ```
+
+The two new seals verify the same way as the first, without our interpreter or our code:
+
+```bash jq -S -c 'del(.huella, .medicion_de_si_mismo)' recibo-banda-12-lote8.json | tr -d '\n' | shasum -a 256 ```
+```bash jq -S -c 'del(.huella, .medicion_de_si_mismo)' recibo-banda-12-lote9.json | tr -d '\n' | shasum -a 256 ```
+
+They print `eb542aa9be8796b2bd794d91f17c29b42d68788e69a52b9c3e5fb3fc41eb4660` (180 clocks, 2 acts)
+and `043ffa3e558d5cacf154efed739c736e2e3fc8a92e994fb7977641b9b5b91051` (450 clocks, 5 acts). The
+lote-11 receipt still prints `507303a9…`, which is the point: generalising the instrument did not
+rewrite a byte of what it had already published. `tests/test_recibo.py` asserts all three, walks
+the AST of `bench/recibo.py` to refuse any comparison of a lote against an integer, and fails if a
+session with one act ever reports a dispersion of 1,0 instead of `null`.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the
