@@ -15,7 +15,8 @@ then answers the question that decides whether the loss can ever be caught at ru
 anyone measure the cardinal that would betray it?**
 
 ```console
-$ uvx fiber-ast-lint tests/fixtures/espacio_no_transversal.py
+$ curl -fsSLO https://raw.githubusercontent.com/alexisromtz-lab/fiber-ast-lint/main/tests/fixtures/espacio_no_transversal.py
+$ uvx --from git+https://github.com/alexisromtz-lab/fiber-ast-lint fiber-ast-lint espacio_no_transversal.py
 CANDIDATO espacio_no_transversal.py:31  op=pierde      fam=ESPACIO+NORMALIZA      forma=PROYECCION_ARRIBA_CON_PERDIDA fn=construir_reporteros  nombre [nombre_de_reporter() linea 28 proyecta]
 CENSO archivos=1 fallas=0 for_medidos=1
 CONSERVACION almacenes=1 == pierde=0 + guardadas=0 + acumulacion=0 + posicional=0 + cardinal_sin_medir=1
@@ -24,7 +25,9 @@ INTERPROC con_consumidor=1 de 1 · productores_con_sitio=1 · sitios_por_identid
   consumidor espacio_no_transversal::construir_reporteros() espacio_no_transversal.py:41 -> len en :41 [DIRECTO/EXACTO]
 ```
 
-Paths are files or directories; several of them are allowed (`fiber-ast-lint src tests`).
+Paths are files or directories; several of them are allowed (`fiber-ast-lint src tests`), and a
+bare `.` scans the whole tree — measured from an empty directory in the same run: one line, RC 0,
+no flags. The run above exits `1`: a candidate to review, not a defect (see the contract below).
 
 ## The law
 
@@ -55,9 +58,20 @@ Two consequences this tool implements instead of mentioning:
 
 ## Install
 
+`uvx` builds from `main` and runs it in one step: no install, no PyPI, nothing to activate.
+
 ```console
-uvx fiber-ast-lint [ruta]        # no install
-pip install fiber-ast-lint       # or: pipx install fiber-ast-lint
+uvx --from git+https://github.com/alexisromtz-lab/fiber-ast-lint fiber-ast-lint [ruta]
+```
+
+Measured 2026-11-26: **11.2 s cold**, **5.5 s warm** — the first run pays the build.
+
+`pip install fiber-ast-lint` is the short form and it works **once that name is published on
+PyPI**; today the name does not resolve, so the line above is the one that runs. To install from
+the tree instead, pin a release tag:
+
+```console
+pip install git+https://github.com/alexisromtz-lab/fiber-ast-lint@v0.4.6
 ```
 
 Python ≥ 3.11, zero runtime dependencies (stdlib `ast` only).
