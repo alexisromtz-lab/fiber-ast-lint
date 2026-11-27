@@ -1,0 +1,210 @@
+{
+  "schema": "fiber-ast-lint/censo-22/1",
+  "medido_utc": "2026-11-27T22:33Z",
+  "origen": "tres busquedas de search/repositories leidas por gh api, en orden de actualizacion descendente, cincuenta filas por busqueda",
+  "comando": "language:python license:<spdx> pushed:>2026-09-01 stars:>10 size:<20480 archived:false fork:false, con <spdx> en mit, apache-2.0 y bsd-3-clause; una sola consulta GraphQL con un alias por repositorio para defaultBranchRef.target.oid",
+  "regla_de_seleccion": "siete de mit, siete de apache-2.0 y seis de bsd-3-clause, tomadas en el orden devuelto saltando sin mirar los que estan en la lista de gastados",
+  "lista_de_gastados": {
+    "__nota__": "deny-list construida antes de la busqueda: todo nombre owner/repo que aparece en cualquiera de los cincuenta y siete json del repositorio",
+    "json_leidos": 57,
+    "nombres": 129,
+    "saltados_en_esta_busqueda": {
+      "mit": 0,
+      "apache-2.0": 1,
+      "bsd-3-clause": 3
+    }
+  },
+  "total_filas": 20,
+  "filtro": {
+    "tope_kib": 20480,
+    "kib_max_medido": 17202,
+    "kib_min_medido": 385,
+    "por_spdx": {
+      "MIT": 7,
+      "Apache-2.0": 7,
+      "BSD-3-Clause": 6
+    }
+  },
+  "filas": [
+    {
+      "repo": "teh-hippo/ha-govee-led-ble",
+      "spdx": "MIT",
+      "rama": "master",
+      "sha": "01b92e9347d01fb92278027ecefba8b0a817fd50",
+      "kib": 16931,
+      "stars": 19,
+      "pushed": "2026-11-27T22:31:45Z"
+    },
+    {
+      "repo": "zayphir/spp-to-pawpaint",
+      "spdx": "MIT",
+      "rama": "main",
+      "sha": "5c53449eee21c0b52099f4b41d3beb1f93675dfa",
+      "kib": 395,
+      "stars": 15,
+      "pushed": "2026-11-27T22:30:20Z"
+    },
+    {
+      "repo": "0xRadikal/Free-Telegram-Proxy",
+      "spdx": "MIT",
+      "rama": "main",
+      "sha": "c06ee667c4419c6619e6ab29fe30ec83955cea0d",
+      "kib": 4619,
+      "stars": 273,
+      "pushed": "2026-11-27T22:26:35Z"
+    },
+    {
+      "repo": "tempus2016/z2m-device-tracker",
+      "spdx": "MIT",
+      "rama": "main",
+      "sha": "c5f13b8d158f7e2e753cac9b2af55594cb13e03d",
+      "kib": 7568,
+      "stars": 46,
+      "pushed": "2026-11-27T22:25:04Z"
+    },
+    {
+      "repo": "TabooHarmony/roblox-brain",
+      "spdx": "MIT",
+      "rama": "main",
+      "sha": "52f03ef747f09db5171933c099e63c66d1cb33f2",
+      "kib": 9746,
+      "stars": 223,
+      "pushed": "2026-11-27T22:31:24Z"
+    },
+    {
+      "repo": "YossiKon/geely-connect",
+      "spdx": "MIT",
+      "rama": "main",
+      "sha": "0ea3bd5d2125219e898c6bf190a981aa18714e06",
+      "kib": 13023,
+      "stars": 61,
+      "pushed": "2026-11-27T22:17:43Z"
+    },
+    {
+      "repo": "pete-builds/mcp-unifi",
+      "spdx": "MIT",
+      "rama": "main",
+      "sha": "c0be753a33f3f0fc1e353c8b756226d474df2ff6",
+      "kib": 11361,
+      "stars": 34,
+      "pushed": "2026-11-27T22:16:33Z"
+    },
+    {
+      "repo": "rooktwo/rectg",
+      "spdx": "Apache-2.0",
+      "rama": "main",
+      "sha": "d4f31ef7e906d84a34460346017a20d7f22a5846",
+      "kib": 2319,
+      "stars": 9437,
+      "pushed": "2026-11-27T22:30:42Z"
+    },
+    {
+      "repo": "plasma-ai/wiki",
+      "spdx": "Apache-2.0",
+      "rama": "main",
+      "sha": "f6a7ba5d9de90c5d59165eee15600de916e88829",
+      "kib": 2540,
+      "stars": 108,
+      "pushed": "2026-11-27T22:29:51Z"
+    },
+    {
+      "repo": "huggingface/speech-to-speech",
+      "spdx": "Apache-2.0",
+      "rama": "main",
+      "sha": "d52090a5346bccbf2f6b64b2b99bd46447f62ab3",
+      "kib": 8438,
+      "stars": 13806,
+      "pushed": "2026-11-27T22:28:40Z"
+    },
+    {
+      "repo": "PriorLabs/relarena",
+      "spdx": "Apache-2.0",
+      "rama": "main",
+      "sha": "acb8cae5d73f756468a7ef2fbefb536719c839f4",
+      "kib": 6565,
+      "stars": 80,
+      "pushed": "2026-11-27T22:25:56Z"
+    },
+    {
+      "repo": "google/skills",
+      "spdx": "Apache-2.0",
+      "rama": "main",
+      "sha": "10c799ee69bcdb10b82836403d1531bfcc3d9d24",
+      "kib": 7661,
+      "stars": 24767,
+      "pushed": "2026-11-27T22:22:41Z"
+    },
+    {
+      "repo": "TheFab21/ha-samsungtv-smart",
+      "spdx": "Apache-2.0",
+      "rama": "master",
+      "sha": "5fe0af1f014ad7c83a7c89940dd859af314f0964",
+      "kib": 6069,
+      "stars": 157,
+      "pushed": "2026-11-27T22:30:59Z"
+    },
+    {
+      "repo": "bjcoombs/ai-native-toolkit",
+      "spdx": "Apache-2.0",
+      "rama": "main",
+      "sha": "5c6dbb1af8fe6b36ab50b3a449515031569e3943",
+      "kib": 14856,
+      "stars": 36,
+      "pushed": "2026-11-27T22:29:49Z"
+    },
+    {
+      "repo": "madrury/py-glm",
+      "spdx": "BSD-3-Clause",
+      "rama": "main",
+      "sha": "5d3b3968adafbfde5d81fcb7c469194ddff1a204",
+      "kib": 3734,
+      "stars": 132,
+      "pushed": "2026-11-27T22:27:17Z"
+    },
+    {
+      "repo": "SheffieldML/PyDeepGP",
+      "spdx": "BSD-3-Clause",
+      "rama": "main",
+      "sha": "76f8fdf1154ff689e592a552edfbea942da42fa0",
+      "kib": 385,
+      "stars": 232,
+      "pushed": "2026-11-27T22:06:54Z"
+    },
+    {
+      "repo": "chapmanjacobd/library",
+      "spdx": "BSD-3-Clause",
+      "rama": "main",
+      "sha": "8f3949059a535ceb6d4312f78fe60fab1ea2781a",
+      "kib": 17202,
+      "stars": 487,
+      "pushed": "2026-11-27T21:54:49Z"
+    },
+    {
+      "repo": "tinyerp/odooly",
+      "spdx": "BSD-3-Clause",
+      "rama": "master",
+      "sha": "317c929d08a51678c3c5a2ed28bbf8dd166ebb6f",
+      "kib": 1088,
+      "stars": 70,
+      "pushed": "2026-11-27T21:38:17Z"
+    },
+    {
+      "repo": "Python-Markdown/markdown",
+      "spdx": "BSD-3-Clause",
+      "rama": "master",
+      "sha": "6c359afebabad18c6c4cc54b92f3c9787f2b19cc",
+      "kib": 4109,
+      "stars": 4259,
+      "pushed": "2026-11-27T21:30:09Z"
+    },
+    {
+      "repo": "openwisp/docker-openwisp",
+      "spdx": "BSD-3-Clause",
+      "rama": "master",
+      "sha": "2cd5710567a57d3171175cad949c0aa00f7618ec",
+      "kib": 2648,
+      "stars": 207,
+      "pushed": "2026-11-27T22:22:53Z"
+    }
+  ]
+}

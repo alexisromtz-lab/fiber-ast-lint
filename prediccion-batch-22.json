@@ -1,0 +1,73 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 22,
+  "title": "el primer locus externo citable: veinte sujetos con licencia, y la lectura se paga",
+  "declared_before_computation": true,
+  "que_es": "El lote 21 cerro el predicado del testigo y dejo su proximo acto escrito en recibo-lote21-20261127.json: una cohorte congelada de veinte repositorios Python con licencia OSI y un falsador de cero defectos confirmados. Este fichero ejecuta ese acto y no toca el instrumento: detect.py queda congelado en 0.5.0 con el mismo sha256 que midio el lote 21, de modo que la serie externa sigue siendo comparable. Lo que se predice aqui no es un numero de candidatos --el instrumento ya se sabe que emite filas que la lectura refuta-- sino tres propiedades de naturaleza distinta: que el defecto existe en software maduro y sobrevive a la lectura, que el veredicto humano no refuta casi todo, y que la ceguera de alcance medida en el lote 19 sobre cinco sujetos se replica sobre veinte. Se fija ademas, antes de leer, que ningun locus sin leer cuenta como refutado: el tercer veredicto es NO_MEDIDO y tiene columna propia.",
+  "lo_ya_medido_antes_de_este_fichero": {
+    "el_acto_lo_declaro_el_lote_21": "recibo-lote21-20261127.json, proximo_acto: nombre `lote 22, el primer locus externo citable`, predicado `una cohorte congelada de veinte repositorios Python con licencia OSI produce al menos un defecto productivo vivo en HEAD que sobrevive a la lectura de codigo con repo@sha:fichero:linea`, falsador `cero defectos no refutados en los veinte`, requisito `el filtro de precision no se programa: se paga leyendo codigo`.",
+    "el_instrumento_esta_congelado_y_coincide": "src/fiber_ast_lint/detect.py mide sha256 b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6 sobre el arbol 753a951, que es exactamente el detect_py_sha256_despues que recibo-lote21-20261127.json publico. La comparacion con la serie previa es valida porque el instrumento no se movio; se midio la unidad correcta (sha256 de bytes, no el objeto git, que es una unidad distinta).",
+    "el_alcance_medido_en_el_lote_19": "recibo-externo-20261127.json: de cinco almacenes del sujeto, cuatro quedan en cardinal_sin_medir y cero candidatos admitidos. Un cero sobre codigo ajeno es la interseccion entre los almacenes del sujeto y los almacenes que el sujeto mide.",
+    "la_precision_medida_en_el_lote_20": "recibo-lote20-20261127.json: seis loci productivos leidos, cinco refutados como defecto del sujeto y uno archivado como defecto del instrumento. Sobre seis loci, la precision externa es cero confirmados y uno de los seis no era ni sujeto ni nada: era el instrumento.",
+    "la_ley_de_licencia_no_es_un_filtro_de_calidad": "tests/test_giro_externo.py::test_el_sujeto_sin_licencia_no_publica_loci: publicar una ruta interna de un sujeto sin licencia es redistribuir su codigo. La licencia OSI no hace al sujeto mejor; hace que citar repo@sha:fichero:linea sea legal.",
+    "los_repositorios_ya_gastados": "cincuenta y tres: cuarenta y ocho del censo del lote 20 (censo-20-20261127.json) mas los cinco que aparecen en los recibos y pre-registros previos. La cohorte de este lote se declara disjunta de esos cincuenta y tres antes de buscarla."
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "La cohorte congelada de veinte repositorios Python con licencia OSI produce al menos un locus productivo confirmado que sobrevive a la lectura del codigo ajeno y se cita como repo@sha:fichero:linea. Un locus productivo es un par (archivo, linea) distinto entre las filas de candidato del instrumento; confirmado significa que el diccionario se construye dentro de un bucle con una clave proyectada no inyectiva, que la perdida no se mide en ningun punto del sujeto, y que el diccionario no se usa como conjunto ni como agregacion. Si no hay ninguno, la frecuencia del defecto en software maduro queda acotada por este tamano de muestra y el esfuerzo se redirige, que es el falsador que el lote 21 dejo escrito.",
+      "falsifier": "cero loci confirmados sobre los veinte sujetos con la lectura del cien por cien de los loci productivos y cero sin leer, medido en recibo-lote22-20261127.json",
+      "locus": "recibo-lote22-20261127.json",
+      "declared_before": "la busqueda de la cohorte y cualquier ejecucion del instrumento sobre un sujeto externo"
+    },
+    {
+      "id": "P2",
+      "claim": "El veredicto humano no refuta casi todo: los loci confirmados son mas de una sexta parte de los loci productivos leidos, es decir confirmados/loci > 1/6. La prediccion es sobre la precision del instrumento en codigo ajeno, no sobre el sujeto: el lote 20 refuto cinco de seis loci que ya habian pasado su propio filtro, y uno de los seis no era defecto del sujeto sino del instrumento. Si el umbral no se alcanza, el instrumento no esta listo para vender lectura y el siguiente acto es suyo, no del mercado.",
+      "falsifier": "confirmados/loci <= 1/6 sobre los loci productivos leidos en los veinte sujetos, medido en recibo-lote22-20261127.json",
+      "locus": "recibo-lote22-20261127.json",
+      "declared_before": "la lectura de cualquier locus externo"
+    },
+    {
+      "id": "P3",
+      "claim": "La ceguera de alcance medida en el lote 19 sobre cinco sujetos se replica sobre veinte disjuntos: sin_len/almacenes > 0.6 en la cohorte agregada. Un almacen sin llamada a len en su ambito no es un almacen sin perdida, es una perdida invisible incluso para el programa, y por eso el instrumento calla. La prediccion es de direccion con umbral bajo y no de valor: sobre cinco almacenes la fraccion 4/5 tiene un intervalo que no distingue 0,6 de 0,9, y publicar 4/5 como si fuera una tasa seria una cifra sin denominador suficiente.",
+      "falsifier": "sin_len/almacenes <= 0.6 sobre el agregado de los veinte sujetos medido en recibo-lote22-20261127.json",
+      "locus": "recibo-lote22-20261127.json",
+      "declared_before": "la ejecucion del instrumento sobre la cohorte"
+    }
+  ],
+  "universo": {
+    "cohorte": {
+      "poblacion": "veinte repositorios Python con licencia OSI, disjuntos de los cincuenta y tres ya gastados",
+      "regla": "tres busquedas de repositorios en orden de actualizacion descendente, `language:python license:<spdx> pushed:>2026-09-01 stars:>10 size:<20480`, con <spdx> en mit, apache-2.0 y bsd-3-clause; se leen hasta cien filas por busqueda en ese orden y se toman siete de mit, siete de apache-2.0 y seis de bsd-3-clause, saltando sin mirar los que ya estan en la lista de gastados",
+      "tope_kib": 20480,
+      "congelado_en": "censo-22-20261127.json, con el sha40 del commit de la rama por defecto de cada sujeto",
+      "por_que_el_tope": "el coste de clonar lo paga el acto: veinte sujetos de hasta veinte mebibytes son como mucho cuatrocientos mebibytes de disco temporal, purgados uno a uno. El tope se declara antes de mirar y no filtra por ninguna propiedad del defecto, que seria escoger el resultado."
+    },
+    "lectura": {
+      "poblacion": "el cien por cien de los loci productivos distintos de los veinte sujetos",
+      "definicion": "locus productivo es un par (archivo, linea) distinto entre las filas de candidato del instrumento; un almacen que el instrumento no puede adjudicar no es un locus, porque no tiene fila que leer",
+      "veredictos": {
+        "CONFIRMADO": "el diccionario se construye en un bucle con clave proyectada no inyectiva, la perdida no se mide en ningun punto del sujeto, y el diccionario no se usa como conjunto ni como agregacion",
+        "REFUTADO": "falla alguna de las tres condiciones, con la causa nombrada: agregacion intencionada, clave inyectiva por construccion, perdida medida en otro punto, uso como conjunto, o indexacion por columna",
+        "NO_MEDIDO": "el fragmento no se puede adjudicar con el contexto que el sujeto publica; se declara y no se cuenta como refutado"
+      },
+      "invariante": "confirmados + refutados + no_medidos = loci, y ningun locus sin leer entra en ninguna columna"
+    },
+    "limite": "se congela el sha40 del commit leido, no el clon entero: un tercero lo recomputa con git clone y git checkout a ese sha. Un fichero suelto por sha256 no basta para esta acto porque la lectura necesita el ambito completo de la funcion, no la linea."
+  },
+  "instrumento_antes": {
+    "version": "0.5.0",
+    "arbol": "753a95148997e99ff972fb9ac9a4bcbad85086b6",
+    "detect_py_sha256": "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6",
+    "dependencias": [],
+    "regla": "la misma del lote 21: In/NotIn cuya izquierda recompone la misma clave almacenada, cuyo contenedor es un Name distinto del acumulador, y que el cuerpo del bucle alimenta con esa clave"
+  },
+  "cost": {
+    "relojes_nuevos": 0,
+    "clones": 20,
+    "bytes_temporales_tope": "400 MiB",
+    "purga": "un sujeto borrado antes de clonar el siguiente",
+    "persistido_fuera_de_tmp": "cero",
+    "justificacion": "no se escribe ningun byte del sujeto en el repositorio: lo que se guarda es el recibo con sus cifras y los loci citables, no el codigo"
+  }
+}
