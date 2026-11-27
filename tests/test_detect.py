@@ -16,6 +16,9 @@ def test_proyeccion_con_perdida_es_candidato(copia):
     loc = cands[0]
     assert loc.linea == 31
     assert loc.op == "pierde"
+    # `if nombre not in REPORTER_NAMES` no es un testigo: la lista blanca nunca
+    # recibe la clave dentro del bucle, asi que no impide la colision.
+    assert a.guardadas == 0
     assert loc.familia == "ESPACIO+NORMALIZA"
     assert loc.forma == "PROYECCION_ARRIBA_CON_PERDIDA"
     assert loc.fn == "construir_reporteros"

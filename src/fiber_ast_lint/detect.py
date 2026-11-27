@@ -88,6 +88,11 @@ NACEN_SECUENCIA = {
 }
 NACEN_DICCIONARIO = {"dict", "defaultdict", "Counter", "OrderedDict"}
 TIPOS_SECUENCIA = {"list", "List", "Sequence", "MutableSequence", "tuple", "Tuple"}
+# Methods that make a sibling container remember a key. ``discard``/``remove``
+# are absent on purpose: a witness that forgets cannot guard the next iteration.
+# ``update`` is absent too: it takes an iterable of keys, never the key alone,
+# so it can never satisfy the "fed with this same key" test below.
+ALIMENTAN = {"add", "append"}
 
 
 # --------------------------------------------------------------------------- #
@@ -283,6 +288,56 @@ def pregunta_pertenencia(cuerpo: list[ast.stmt], acc: str) -> bool:
                     if isinstance(op, (ast.In, ast.NotIn)) \
                             and isinstance(comp, ast.Name) and comp.id == acc:
                         return True
+    return False
+
+
+def _alimentado(cuerpo: list[ast.stmt], testigo: str, clave: str) -> bool:
+    """Does ``testigo`` receive ``clave`` inside the loop?"""
+    for raiz in cuerpo:
+        for x in ast.walk(raiz):
+            if isinstance(x, ast.Call) and isinstance(x.func, ast.Attribute) \
+                    and isinstance(x.func.value, ast.Name) \
+                    and x.func.value.id == testigo and x.func.attr in ALIMENTAN \
+                    and any(ast.unparse(y) == clave for y in x.args):
+                return True
+            if isinstance(x, (ast.Assign, ast.AnnAssign)):
+                objetivos = x.targets if isinstance(x, ast.Assign) else [x.target]
+                for t in objetivos:
+                    if isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) \
+                            and t.value.id == testigo and ast.unparse(t.slice) == clave:
+                        return True
+    return False
+
+
+def testigo_hermano(cuerpo: list[ast.stmt], acc: str, clave: ast.AST) -> bool:
+    """Does the loop ask ``clave in X`` for an X that is fed with that same key?
+
+    ``pregunta_pertenencia`` only sees the accumulator guarding itself. A
+    deduplicated or last-write-wins index is guarded by a *sibling* container:
+    ``if k in seen: continue`` with ``seen`` distinct from ``acc``. Requiring the
+    sibling to be fed inside the loop is what tells a guard from a whitelist —
+    ``if nombre not in REPORTER_NAMES`` compares against a fixed list the loop
+    never grows, so the store still collides with the previous tenant.
+
+    Limits: no control-flow order (a sibling fed *after* the store still counts),
+    and the feed test is existential — a witness that is fed and later
+    ``discard``/``remove``d still counts, because the body is searched, not run.
+    """
+    texto = ast.unparse(clave)
+    for raiz in cuerpo:
+        for x in ast.walk(raiz):
+            if not isinstance(x, ast.Compare):
+                continue
+            for i, (op, comp) in enumerate(zip(x.ops, x.comparators)):
+                if not isinstance(op, (ast.In, ast.NotIn)):
+                    continue
+                if not isinstance(comp, ast.Name) or comp.id == acc:
+                    continue
+                izquierda = x.left if i == 0 else x.comparators[i - 1]
+                if ast.unparse(izquierda) != texto:
+                    continue
+                if _alimentado(cuerpo, comp.id, texto):
+                    return True
     return False
 
 
@@ -585,7 +640,8 @@ def _ambito(cuerpo: list[ast.stmt], rel: str, locales: dict[str, ast.AST],
                 if acc in secuencias:
                     a.posicional += 1
                     continue
-                if pregunta_pertenencia(n.body, acc):
+                if pregunta_pertenencia(n.body, acc) \
+                        or testigo_hermano(n.body, acc, clave):
                     a.guardadas += 1
                     continue
                 poblacion = "pierde" if acc in medido else "cardinal_sin_medir"

@@ -1,0 +1,106 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 21,
+  "title": "el testigo hermano: quien vigila no es quien acumula, pero solo si alguien lo alimenta",
+  "declared_before_computation": true,
+  "que_es": "El lote 20 dejo un defecto del instrumento y cinco refutaciones del sujeto. Este lote completa el predicado del testigo: reconoce la pertenencia sobre un contenedor distinto del acumulador cuando ese contenedor recibe la misma clave dentro del bucle. El borde que separa vigilar de no mirar no es el nombre del testigo, es la escritura que lo alimenta: una lista blanca fija pasa la pertenencia sin impedir la colision. Antes de escribir codigo se fija aqui que el arreglo no puede mover la cubeta sin_testigo del banco interno, y que el filtro de alta confianza no se construye si el banco interno lo refuta.",
+  "lo_ya_medido_antes_de_este_fichero": {
+    "el_sujeto_del_lote_20": "recibo-lote20-20261127.json: seis loci productivos leidos, cinco refutados como defecto del sujeto y uno (scrum-around-and-find-out/src/safo/ratebudget.py:1239) archivado como defecto del instrumento. Cero reportes abiertos.",
+    "el_instrumento_reproduce_su_oraculo": "los cinco ficheros del lote 20 descargados en su sha fijo reproducen los seis loci con 0.4.6: ocho filas de candidato, seis loci distintos, dieciseis almacenes, una cubeta guardadas (src/safo/items.py:506, by_id) y quince loci sin_testigo.",
+    "el_banco_interno_ya_tiene_el_discriminador": "tests/fixtures/espacio_no_transversal.py:31 consulta la pertenencia de la misma clave contra REPORTER_NAMES, un nombre distinto del acumulador que nunca se alimenta dentro del bucle. Es el defecto real de mypy (seis claves, cuatro nombres) y hoy es CANDIDATO. Un predicado que acepte cualquier nombre convertido en testigo lo manda a guardadas y mata el defecto conocido: la lectura floja del lote 20 ya esta refutada por el banco interno antes de escribir una linea.",
+    "el_banco_interno_hoy": "nueve ficheros, nueve almacenes, pierde 0, guardadas 2, acumulacion 1, posicional 1, sin_len 5, cuatro loci candidatos.",
+    "la_ventana_externa_no_esta_congelada_en_codigo": "censo-20-20261127.json guarda repo y sha, no el fuente: re-evaluar los veintisiete candidatos exige red o un clon. Este lote congela los cinco ficheros por sha256 de bytes, que es lo que un tercero puede recomputar con curl a la URL del sha; el clon entero sigue sin congelarse y se declara como limite."
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "El testigo hermano, definido como pertenencia sobre un nombre distinto del acumulador con la misma expresion de clave y alimentado con esa clave dentro del bucle, no mueve ninguna cubeta del banco interno: guardadas sigue en 2, sin_len sigue en 5, y espacio_no_transversal.py:31 conserva op=pierde y poblacion=cardinal_sin_medir. Si se mueve, el predicado confundio vigilar con acumular.",
+      "falsifier": "guardadas distinto de 2 o sin_len distinto de 5 sobre tests/fixtures, o espacio_no_transversal.py:31 con poblacion guardadas, medido en tests/test_detect.py y tests/test_lote20_universo.py",
+      "locus": "tests/test_detect.py",
+      "declared_before": "la implementacion del testigo hermano y su primera corrida"
+    },
+    {
+      "id": "P2",
+      "claim": "El minimo reproducible se parte en tres: la funcion que vigila con un conjunto hermano alimentado pasa a guardadas y deja de emitir locus, la funcion sin testigo sigue en cardinal_sin_medir, y la funcion que consulta una lista blanca fija sigue en cardinal_sin_medir. Las tres tienen la misma clave normalizada y el mismo almacen; solo cambia quien recibe la clave.",
+      "falsifier": "hermano y sin_testigo reciben la misma cubeta, o lista_blanca cuenta en guardadas, medido en tests/test_lote20_universo.py",
+      "locus": "tests/test_lote20_universo.py",
+      "declared_before": "la implementacion del testigo hermano y su primera corrida"
+    },
+    {
+      "id": "P3",
+      "claim": "Sobre los cinco ficheros externos congelados por sha256, exactamente uno de los seis loci productivos cambia de cubeta: ratebudget.py:1239 pasa de sin_testigo a guardadas. Los otros cinco conservan familia, forma y cubeta, porque ninguno consulta la pertenencia: dos escriben la clave normalizada sin mirar, uno hace max-merge con previous, uno usa el dict como conjunto ordenado y devuelve tuple(seen), y el ultimo indexa por una columna. Si cambian dos o mas, el predicado alcanzo codigo que no vigila.",
+      "falsifier": "cero o dos o mas loci movidos sobre la ventana externa congelada, medido en recibo-lote21-20261127.json",
+      "locus": "recibo-lote21-20261127.json",
+      "declared_before": "la re-medicion de los cinco ficheros con el instrumento parcheado"
+    },
+    {
+      "id": "P4",
+      "claim": "No existe una bandera de alta confianza construible con las features que este instrumento publica. Cualquier filtro que descarte familias con normalizacion o acumuladores que devuelven el dict se lleva por delante espacio_no_transversal.py:31, que es un defecto real admitido y tiene familia ESPACIO+NORMALIZA. La precision externa que separa los cinco refutados de un defecto real no vive en el AST: vive en la intencion, y se compra leyendo seis loci, no programando un umbral.",
+      "falsifier": "un predicado sobre familia, forma u operadores que deje en candidatos a los dos admitidos internos (espacio_no_transversal.py:31 y columna_no_transversal.py:11) y saque de candidatos a los cinco refutados externos, medido en tests/test_lote21_testigo.py",
+      "locus": "tests/test_lote21_testigo.py",
+      "declared_before": "la busqueda del predicado separador; las features familia y forma ya se habian leido, la busqueda no"
+    }
+  ],
+  "universo": {
+    "banco_interno": {
+      "poblacion": "tests/fixtures, nueve ficheros, nueve almacenes",
+      "comando": "python -m fiber_ast_lint tests/fixtures --json",
+      "invariante": "guardadas = 2 y sin_len = 5 antes y despues"
+    },
+    "ventana_externa": {
+      "poblacion": "los cinco ficheros que contienen los seis loci productivos del lote 20, descargados a su sha fijo",
+      "limite": "es el fichero en ese sha, no el clon; el clon entero no esta congelado y no se necesito",
+      "ficheros": [
+        {
+          "repo": "obendidi/httpx-cache",
+          "sha": "c5145a95f6661e90703b535c5a9a87a1752d7bd8",
+          "ruta": "httpx_cache/policy.py",
+          "url": "https://raw.githubusercontent.com/obendidi/httpx-cache/c5145a95f6661e90703b535c5a9a87a1752d7bd8/httpx_cache/policy.py",
+          "sha256": "d8c1cb4afc90c54bec275a5c70b88fd8e2e1a20ef9462e764019fade23ff05ba",
+          "loci": ["policy.py:48-50", "policy.py:96-98"]
+        },
+        {
+          "repo": "travisghansen/hass-opnsense",
+          "sha": "6503ed5d88102156ea26bb72f2c8f1aa023fb075",
+          "ruta": "custom_components/opnsense/device_tracker_evidence.py",
+          "url": "https://raw.githubusercontent.com/travisghansen/hass-opnsense/6503ed5d88102156ea26bb72f2c8f1aa023fb075/custom_components/opnsense/device_tracker_evidence.py",
+          "sha256": "6b9e200805fb666513e5e48873b805ad23c07452101be1b8231f3d488ceb9782",
+          "loci": ["device_tracker_evidence.py:539"]
+        },
+        {
+          "repo": "ChiefGyk3D/scrum-around-and-find-out",
+          "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+          "ruta": "src/safo/items.py",
+          "url": "https://raw.githubusercontent.com/ChiefGyk3D/scrum-around-and-find-out/9bfe6d1315d7fc703252d0a39ac597509956d59c/src/safo/items.py",
+          "sha256": "4e51297c22128eb97bf7462a80d0b811661601757f0c736dc57f8465b289db59",
+          "loci": ["items.py:465"]
+        },
+        {
+          "repo": "ChiefGyk3D/scrum-around-and-find-out",
+          "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+          "ruta": "src/safo/idea_gate_routes.py",
+          "url": "https://raw.githubusercontent.com/ChiefGyk3D/scrum-around-and-find-out/9bfe6d1315d7fc703252d0a39ac597509956d59c/src/safo/idea_gate_routes.py",
+          "sha256": "dfeff36e55b93ef2c07ac79b31d5d5bfbb114b58ff65c0761b820465f18861aa",
+          "loci": ["idea_gate_routes.py:194"]
+        },
+        {
+          "repo": "ChiefGyk3D/scrum-around-and-find-out",
+          "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+          "ruta": "src/safo/ratebudget.py",
+          "url": "https://raw.githubusercontent.com/ChiefGyk3D/scrum-around-and-find-out/9bfe6d1315d7fc703252d0a39ac597509956d59c/src/safo/ratebudget.py",
+          "sha256": "28b0fdc4bf6ad263d841cc2712436f096ffffb70d4b865bb83f34e2f778d0761",
+          "loci": ["ratebudget.py:1239"]
+        }
+      ]
+    }
+  },
+  "instrumento_antes": {
+    "version": "0.4.6",
+    "arbol": "23dbf9a",
+    "detect_py_sha256": "282a5b67ccb1a9f41fc711fffc3a09dc68c8ce9186a524c00f755b489493ba19"
+  },
+  "cost": {
+    "relojes_nuevos": 0,
+    "justificacion": "no se clona ningun repositorio y no se abre ningun reloj de disco: cinco descargas de fichero suelto por sha fijo, cero bytes persistidos fuera de /tmp, purgadas al cerrar el acto."
+  }
+}

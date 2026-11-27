@@ -6,9 +6,9 @@ de clonar nada y publica la respuesta cruda, porque un filtro corrido contra la 
 congelado deja un denominador que ningun tercero puede recomputar.
 
 Estas pruebas leen el censo congelado y recomputan el filtro. Cinco cierran el triangulo
-pre-registro, censo y recibo. La ultima fija una deuda: el instrumento reconoce el testigo
+pre-registro, censo y recibo. La ultima era una deuda —el instrumento reconoce el testigo
 por pertenencia solo cuando nombra al propio acumulador, y el codigo real vigila con un
-conjunto hermano. Esa prueba cambia de signo en el lote 21 o no cambia nada.
+conjunto hermano— y el lote 21 la paga: la prueba cambio de signo sin cambiar de sujeto.
 """
 
 from __future__ import annotations
@@ -128,16 +128,19 @@ def test_ningun_locus_se_publica_sin_haberse_leido() -> None:
     assert _cargar(RECIBO)["no_se_hizo"]["reportes_abiertos"] == 0
 
 
-def test_el_testigo_hermano_hoy_no_se_ve(tmp_path: Path) -> None:
-    """Deuda del lote 20, con su falsador escrito.
+def test_el_testigo_hermano_solo_cuenta_si_alguien_lo_alimenta(tmp_path: Path) -> None:
+    """Deuda del lote 20, pagada: el testigo hermano se ve, la lista blanca no.
 
-    El instrumento sabe ver `if key in acc`, pero solo sobre el propio acumulador. El codigo
-    real vigila la colision con un conjunto hermano del mismo espacio de claves. Hoy los dos
-    casos reciben el mismo veredicto. Cuando el lote 21 extienda el testigo, `hermano` tiene
-    que pasar a guardadas y `sin_testigo` tiene que quedarse donde esta: si se mueven los
-    dos, el arreglo confundio vigilar con acumular.
+    El instrumento sabia ver `if key in acc`, solo sobre el propio acumulador. El codigo real
+    vigila la colision con un conjunto hermano del mismo espacio de claves, y una escritura
+    flota sobre el mismo `out[k]`. Lo que separa vigilar de no mirar no es el nombre del
+    testigo sino la escritura que lo alimenta: `lista_blanca` consulta un conjunto fijo que el
+    bucle nunca crece, asi que la clave sigue pisando al inquilino anterior.
     """
     (tmp_path / "dos.py").write_text(
+        "PERMITIDOS = {'a', 'b'}\n"
+        "\n"
+        "\n"
         "def hermano(rows):\n"
         "    out = {}\n"
         "    seen = set()\n"
@@ -146,6 +149,16 @@ def test_el_testigo_hermano_hoy_no_se_ve(tmp_path: Path) -> None:
         "        if k in seen:\n"
         "            continue\n"
         "        seen.add(k)\n"
+        "        out[k] = r\n"
+        "    return out\n"
+        "\n"
+        "\n"
+        "def lista_blanca(rows):\n"
+        "    out = {}\n"
+        "    for r in rows:\n"
+        "        k = r.name.lower()\n"
+        "        if k not in PERMITIDOS:\n"
+        "            continue\n"
         "        out[k] = r\n"
         "    return out\n"
         "\n"
@@ -170,9 +183,11 @@ def test_el_testigo_hermano_hoy_no_se_ve(tmp_path: Path) -> None:
     poblacion = {loc.fn: loc.poblacion for loc in r["analisis"].loci}
     assert poblacion["len_propio"] == "pierde"
     assert poblacion["sin_testigo"] == "cardinal_sin_medir"
-    # Esta linea es la deuda: el lote 21 la mueve a la poblacion medida.
-    assert poblacion["hermano"] == "cardinal_sin_medir"
-    assert r["analisis"].guardadas == 0
+    # Lo que se movio en el lote 21: el hermano deja de emitir locus y pasa a la
+    # poblacion medida. El que consulta una lista fija se queda donde estaba.
+    assert "hermano" not in poblacion
+    assert poblacion["lista_blanca"] == "cardinal_sin_medir"
+    assert r["analisis"].guardadas == 1
 
 
 def test_el_readme_narra_el_acto_y_no_solo_lo_anuncia() -> None:
