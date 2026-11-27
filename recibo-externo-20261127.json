@@ -1,0 +1,95 @@
+{
+  "schema": "fiber-ast-lint/giro-externo/1",
+  "title": "el primer acto hacia afuera: el instrumento cruza la frontera y mide su propio alcance",
+  "fecha": "2026-11-27",
+  "declared_before_computation": "prediccion-batch-19.json",
+  "instrumento": {
+    "repo": "alexisromtz-lab/fiber-ast-lint",
+    "sha": "e0887a5672cf39fbccca9c692e74b3caf2341e01",
+    "version": "0.4.6",
+    "comando_de_instalacion": "pip install git+https://github.com/alexisromtz-lab/fiber-ast-lint@e0887a5672cf39fbccca9c692e74b3caf2341e01",
+    "comando_de_medida": "fiber-ast-lint <raiz>",
+    "dependencias": []
+  },
+  "denominador": {
+    "filas_del_censo": 48,
+    "filas_con_papel_declarado": 4,
+    "repos_con_senal_social_revisados_por_lenguaje": 8,
+    "de_esos_con_python": 1,
+    "por_que_no_diez": "el censo no declara lenguaje. Medido por gh api repos/<r>/languages sobre los ocho repos con actividad reciente, uno solo declara Python. Los otros siete habrian devuelto RC 2 por universo vacio, que es un cero por lenguaje y no por defecto."
+  },
+  "sujeto": {
+    "repo": "upskiill201/upskiill",
+    "sha": "de0f03259df1b5c2794d70dc237168aeef3aadb8",
+    "commit_fecha": "2026-11-03T13:44:45+01:00",
+    "lenguaje_declarado": "TypeScript",
+    "licencia": null,
+    "tamano_kb": 279794,
+    "ficheros_python": 7
+  },
+  "medicion": {
+    "archivos": 7,
+    "fallas": 0,
+    "for_medidos": 37,
+    "almacenes": 5,
+    "pierde": 0,
+    "guardadas": 0,
+    "acumulacion": 0,
+    "posicional": 1,
+    "cardinal_sin_medir": 4,
+    "candidatos_admitidos": 0,
+    "candidatos_latentes": 0,
+    "rc": 0
+  },
+  "veredictos": {
+    "P1": {
+      "veredicto": "SOBREVIVE",
+      "por_que": "siete ficheros parseados, cero fallas, RC 0 y no RC 2 ni RC 4: el acto tiene denominador."
+    },
+    "P2": {
+      "veredicto": "CAE",
+      "por_que": "cero candidatos admitidos. No hay ninguno en produccion porque no hay ninguno en ninguna parte."
+    },
+    "P3": {
+      "veredicto": "CAE",
+      "por_que": "sin candidato no hay contraejemplo que construir. Cae por arrastre de P2, y se publica caida: un arrastre no es una victoria."
+    },
+    "P4": {
+      "veredicto": "SOBREVIVE",
+      "por_que": "este recibo declara los dos shas completos y tests/test_giro_externo.py verifica la mitad que se puede verificar sin red: que el sha del instrumento existe en este repositorio como commit, de modo que el recibo no puede citar una version que nunca existio. La otra mitad —que el sha del sujeto siga siendo el de su rama— necesita red y se declara NO_MEDIDO en el propio test, no se da por buena."
+    }
+  },
+  "el_hallazgo": {
+    "enunciado": "La regla fuerte solo ve una perdida cuando el sujeto ya la vigila. De cinco almacenes del sujeto, cuatro tienen cardinal_sin_medir, y el contrato del instrumento dice de esa clase: nadie llama len(acc) en el ambito, la perdida es invisible incluso para el programa. El instrumento no calla porque el codigo este limpio: calla porque nadie mira.",
+    "por_que_importa": "Un cero sobre codigo ajeno no es una absolucion. Es la interseccion entre los almacenes del sujeto y los almacenes que el sujeto mide. Publicar el cero sin esa interseccion es exactamente el falso verde en la direccion peligrosa que el lote 18 nombro.",
+    "el_par_que_lo_fija": {
+      "con_testigo": {
+        "universo": "tests/fixtures del propio instrumento",
+        "almacenes": 9,
+        "cardinal_sin_medir": 5,
+        "admitidos": 3,
+        "rc": 1
+      },
+      "sin_testigo": {
+        "universo": "un fichero de cinco lineas: dict indexado en bucle, sin len en el ambito",
+        "almacenes": 1,
+        "cardinal_sin_medir": 1,
+        "admitidos": 0,
+        "rc": 0
+      }
+    },
+    "locus_del_par": "tests/test_giro_externo.py"
+  },
+  "permiso": {
+    "estado": "NO_MEDIDO_POR_FALTA_DE_LICENCIA",
+    "por_que": "el sujeto declara licencia nula en la API, que por defecto significa todos los derechos reservados. La ley del lote 17 exige que todo hallazgo viaje con locus repo@sha:archivo:linea. Sobre un sujeto sin licencia, publicar ese locus no es auditar: es redistribuir su codigo en forma de cita.",
+    "que_se_publica": "la medida agregada, que no reproduce ninguna linea del sujeto, y el nombre del repositorio ya publico en el censo.",
+    "que_no_se_publica": "ninguna ruta interna, ningun nombre de funcion, ningun fragmento, ningun locus del sujeto.",
+    "consecuencia": "el primer acto hacia afuera del corpus produce un hallazgo que el propio corpus prohibe publicar en la forma que el corpus exige. Esa tension no se resuelve aqui: se declara."
+  },
+  "lo_que_este_acto_no_hace": [
+    "No afirma que el sujeto este limpio. Afirma que el instrumento no tiene nada que decir sobre el, y nombra por que.",
+    "No entrega un hallazgo a un mantenedor. Sin licencia no hay entrega, y sin entrega el acto externo es una medicion de alcance, no una contribucion.",
+    "No generaliza a los cuarenta y ocho repos del censo. Mide uno, con denominador cerrado, y declara la poblacion que dejo fuera."
+  ]
+}

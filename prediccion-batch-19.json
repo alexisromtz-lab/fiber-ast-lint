@@ -1,0 +1,49 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 19,
+  "title": "el instrumento cruzando la frontera: primera aplicacion a codigo ajeno con recibo",
+  "declared_before_computation": true,
+  "que_es": "El lote 18 cerro la auditoria interna y dejo el instrumento instalable y firmado. Este lote gasta el primer acto hacia afuera, y lo gasta sobre un solo sujeto con el denominador cerrado, no sobre los diez que sugeria el plan.",
+  "lo_ya_medido_antes_de_este_fichero": {
+    "el_instrumento_se_instala_en_un_comando": "pip install git+https://github.com/alexisromtz-lab/fiber-ast-lint@e0887a5 en un venv vacio, RC 0, sin dependencias. La reproducibilidad por un tercero no es una promesa: es un comando que ya corrio.",
+    "autoaplicacion_con_verdad_conocida": "sobre src/ el instrumento emite 4 candidatos admitidos y 1 latente, todos en tests/fixtures salvo uno en tests/test_readme.py:211. Cero en src/. Cuatro de los cinco son fixtures escritos para ser candidatos.",
+    "el_censo_externo_no_es_un_universo": "censo_canal_activo_20261126.tsv tiene 48 filas y solo 4 declaran papel. De los 8 repos con senal social revisados por gh api repos/<r>/languages, 1 declara Python. El barrido de diez repos que el plan proponia habria dado nueve veces RC 2 (universo vacio) por lenguaje, no por defecto.",
+    "el_contrato_del_cli_ya_lo_decia": "el CLI no promete defectos: promete candidatos, y su RC 1 significa candidatos que revisar. Un barrido externo que cuente candidatos mide ruido; lo que un mantenedor puede aceptar es un contraejemplo."
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "El sujeto externo tiene al menos un fichero Python parseable, asi que el instrumento no devuelve universo vacio y el acto tiene denominador. Cualquier otro desenlace convierte el giro hacia afuera en NO_MEDIDO por lenguaje y hay que decirlo con ese nombre.",
+      "falsifier": "fiber-ast-lint sobre el clon de upskiill201/upskiill devuelve RC 2 o RC 4 en tests/test_giro_externo.py",
+      "locus": "tests/test_giro_externo.py"
+    },
+    {
+      "id": "P2",
+      "claim": "Al menos un candidato admitido cae en codigo de produccion del sujeto y no en sus tests ni en sus fixtures. Un instrumento que solo encuentra candidatos donde ya hay un test mirando no ha cruzado ninguna frontera.",
+      "falsifier": "todos los candidatos admitidos del sujeto estan bajo una ruta de test o de fixture, medido en tests/test_giro_externo.py",
+      "locus": "tests/test_giro_externo.py"
+    },
+    {
+      "id": "P3",
+      "claim": "Al menos un candidato del sujeto admite un contraejemplo de dos entradas construido con el codigo del sujeto, reproducible sin instalar nada y en menos de veinte lineas. Es la unica forma en que el hallazgo es entregable a un mantenedor humano.",
+      "falsifier": "ningun candidato del sujeto permite construir dos entradas que colisionen sobre su propio codigo, medido en tests/test_giro_externo.py",
+      "locus": "tests/test_giro_externo.py"
+    },
+    {
+      "id": "P4",
+      "claim": "El recibo del acto externo viaja con el sha del sujeto y el sha del instrumento, y caduca cuando cualquiera de los dos se mueve, igual que el sello del lote 18.",
+      "falsifier": "el recibo externo no declara los dos shas o no falla al mover el sha del sujeto en tests/test_giro_externo.py",
+      "locus": "tests/test_giro_externo.py"
+    }
+  ],
+  "denominador": {
+    "repos_con_senal_social_revisados": 8,
+    "de_esos_con_python": 1,
+    "sujetos_del_acto": 1,
+    "por_que_uno_y_no_diez": "un sujeto con el estandar completo —candidato, contraejemplo, recibo— dice si el instrumento transfiere. Diez sujetos a medias dicen diez veces lo mismo y cuestan diez clones."
+  },
+  "cost": {
+    "relojes_nuevos": 1,
+    "justificacion": "el unico reloj nuevo es el clon --depth 1 del sujeto, borrado en el mismo acto. La autoaplicacion y la instalacion desde git ya corrieron antes de este fichero y no gastan reloj."
+  }
+}

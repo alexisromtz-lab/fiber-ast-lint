@@ -1765,6 +1765,43 @@ Then two mutations against the artifacts themselves: flipping R1 to `SOBREVIVE` 
 untouched killed the law and the recomputation, and appending a comment to `bench/recibo.py` killed
 the seal with a message naming the command that reissues it.
 
+## The instrument measures its own reach before it measures anyone else
+
+Batch 18 closed the internal audit and left the tool installable and signed. This batch spends the
+first move outward, and it spends it on one subject with the denominator closed rather than on the
+ten the plan proposed.
+
+The denominator first, because it is not ten. The external census holds forty-eight rows and four
+declare a role. Asking the GitHub API for the languages of the eight repositories with recent
+activity returns exactly one that contains Python. The other seven are TypeScript and JavaScript,
+which this instrument cannot read at all: a sweep over ten would have returned `RC 2` — empty
+universe — nine times, and an empty universe by language is a zero about the sweep, not a zero
+about the code. The Python population of that census is one.
+
+On that one subject, seven Python files, the instrument parses everything, closes its conservation
+identity and returns `RC 0` with zero candidates. The interesting number is not the zero: of `5`
+accumulators, `4` are `cardinal_sin_medir`. The contract says what that class means — nobody calls
+`len(acc)` in the scope, the loss is invisible even to the program — so the instrument did measure,
+and what it measured is that the subject does not watch. A zero on someone else's code is the
+intersection between their accumulators and the accumulators they measure. Publishing the zero
+without that intersection is the false green in the dangerous direction that batch 18 named, one
+level up.
+
+The pair that fixes the reading is exercised without network, and it is what
+`tests/test_giro_externo.py` pins. Same instrument, two universes. A five-line file with a dict
+indexed in a loop and no `len` in scope yields one accumulator, one `cardinal_sin_medir`, zero
+candidates and `RC 0`. The fixtures of this very repository, written with a witness and a caller,
+yield three admitted candidates and `RC 1`. The difference between silence and a finding is not the
+code. It is whether anybody was looking.
+
+There is a second limit, and it is legal rather than technical. The subject declares no licence,
+which by default reserves all rights. The law of batch 17 requires every finding to carry
+`repo@sha:file:line`; publishing that locus for a subject with no licence is not auditing, it is
+redistributing their code in the form of a citation. So the act publishes the aggregate, which
+reproduces no line, and declares `NO_MEDIDO_POR_FALTA_DE_LICENCIA` for the rest. The first move
+outward produced a finding that this corpus forbids publishing in the form this corpus demands. The
+tension is recorded, not resolved.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the
