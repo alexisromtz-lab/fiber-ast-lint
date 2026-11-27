@@ -32,6 +32,7 @@ import subprocess
 import sys
 import tempfile
 import urllib.error
+import urllib.parse
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -76,10 +77,23 @@ def _get(url: str) -> bytes:
         return r.read()
 
 
-def _traer(package: str, artifact: str, destino: Path) -> tuple[Path | None, str, int]:
-    """Return (path, digest declared by PyPI, rc). rc is 0, 2 or 4."""
+def _traer(package: str, artifact: str, destino: Path,
+           version: str = "") -> tuple[Path | None, str, int]:
+    """Return (path, digest declared by PyPI, rc). rc is 0, 2 or 4.
+
+    The question is asked to the release the row names, not to the project: `/pypi/<pkg>/json`
+    publishes in `urls` the files of the *latest* release only, so one upstream release after the
+    pin makes the pinned wheel vanish from that key while it stays published, byte-identical, at
+    `/pypi/<pkg>/<version>/json`. Asking the project turned an upstream release into PIN ROTO on
+    a tree nobody had touched (measured 2026-11-27: platformdirs 4.14.9 superseded 4.14.8 and the
+    CI said the artifact was no longer published, which was false). `bench/reloj.py` already
+    asked it this way.
+    """
+    cola = f"https://pypi.org/pypi/{urllib.parse.quote(package)}"
+    if version:
+        cola += f"/{urllib.parse.quote(version)}"
     try:
-        meta = json.loads(_get(f"https://pypi.org/pypi/{package}/json"))
+        meta = json.loads(_get(f"{cola}/json"))
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         print(f"  NO_MEDIDO: PyPI sin respuesta para {package}: {exc}")
         return None, "", NO_MEDIDO
@@ -89,7 +103,7 @@ def _traer(package: str, artifact: str, destino: Path) -> tuple[Path | None, str
         datos = _get(entrada["url"])
         destino.write_bytes(datos)
         return destino, entrada.get("digests", {}).get("sha256", ""), OK
-    print(f"  RUPTURA: {package} ya no publica {artifact}")
+    print(f"  RUPTURA: {package} {version or 'ultima'} no publica {artifact}")
     return None, "", RUPTURA
 
 
@@ -168,7 +182,8 @@ def main(argv: list[str] | None = None) -> int:
                 else:
                     print("  identico: " + " ".join(f"{k}={real[k]}" for k in CAMPOS + FIRMA))
                 continue
-            rueda, dig_pypi, rc = _traer(r["package"], r["artifact"], base / r["artifact"])
+            rueda, dig_pypi, rc = _traer(r["package"], r["artifact"], base / r["artifact"],
+                                         r.get("version", ""))
             if rc:
                 peor = combinar_rc(peor, rc)
                 continue

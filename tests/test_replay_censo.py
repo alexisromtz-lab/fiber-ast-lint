@@ -9,6 +9,7 @@ ladder is a supremum, not a first-error-wins.
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
@@ -104,3 +105,56 @@ def test_an_unmeasured_corpus_does_not_mask_a_divergence(tmp_path: Path) -> None
     rc, salida = _correr(desde, censo)
     assert "DIVERGE" in salida and "NO_MEDIDO" in salida, salida
     assert rc == 1, salida
+
+
+def _modulo():
+    spec = importlib.util.spec_from_file_location("replay_censo", SCRIPT)
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    return modulo
+
+
+def _meta(ficheros: dict[str, str]) -> dict:
+    return {"info": {"version": "9.9.9"},
+            "urls": [{"filename": n, "url": f"https://files.example/{n}",
+                      "digests": {"sha256": d}} for n, d in ficheros.items()]}
+
+
+def test_el_pin_se_pregunta_a_su_release_y_no_al_ultimo(monkeypatch, tmp_path, capsys):
+    """Un release de mas aguas arriba no puede romper un pin que sigue publicado.
+
+    PyPI publica en `urls` del proyecto solo los ficheros de la ultima version. Preguntando
+    al proyecto, `platformdirs 4.14.8` desaparecio el 2026-11-27 porque salio 4.14.9, y la
+    corrida imprimio PIN ROTO sobre un arbol que nadie habia tocado. Aqui se simula ese
+    estado exacto: el proyecto solo ofrece 9.9.9 y la version fijada sigue teniendo su rueda.
+    """
+    modulo = _modulo()
+    pedidas: list[str] = []
+
+    def falso_get(url: str) -> bytes:
+        pedidas.append(url)
+        if url == "https://pypi.org/pypi/pkg/1.2.3/json":
+            return json.dumps(_meta({"pkg-1.2.3-py3-none-any.whl": "a" * 64})).encode()
+        if url == "https://pypi.org/pypi/pkg/json":
+            return json.dumps(_meta({"pkg-9.9.9-py3-none-any.whl": "b" * 64})).encode()
+        return b"rueda"
+
+    monkeypatch.setattr(modulo, "_get", falso_get)
+    ruta, dig, rc = modulo._traer("pkg", "pkg-1.2.3-py3-none-any.whl",
+                                  tmp_path / "pkg.whl", "1.2.3")
+    assert rc == modulo.OK, capsys.readouterr().out
+    assert dig == "a" * 64
+    assert pedidas == ["https://pypi.org/pypi/pkg/1.2.3/json",
+                       "https://files.example/pkg-1.2.3-py3-none-any.whl"]
+
+
+def test_un_artefacto_que_su_release_no_publica_sigue_siendo_ruptura(monkeypatch, tmp_path, capsys):
+    """El arreglo de arriba no puede volver blando el codigo 4: sin rueda, premisa rota."""
+    modulo = _modulo()
+    monkeypatch.setattr(modulo, "_get",
+                        lambda url: json.dumps(_meta({"pkg-1.2.4-py3-none-any.whl": "c" * 64})).encode())
+    ruta, dig, rc = modulo._traer("pkg", "pkg-1.2.3-py3-none-any.whl",
+                                  tmp_path / "pkg.whl", "1.2.3")
+    assert rc == modulo.RUPTURA
+    assert ruta is None and dig == ""
+    assert "pkg 1.2.3 no publica pkg-1.2.3-py3-none-any.whl" in capsys.readouterr().out
