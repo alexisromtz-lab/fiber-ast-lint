@@ -1379,6 +1379,75 @@ rewrite a byte of what it had already published. `tests/test_recibo.py` asserts 
 the AST of `bench/recibo.py` to refuse any comparison of a lote against an integer, and fails if a
 session with one act ever reports a dispersion of 1,0 instead of `null`.
 
+### A verdict that is missing is not a verdict that was never declared
+
+Batch 12 generalised the receipt over three artefacts and left a defect that its own table hides.
+`_veredictos` had one branch per identifier — `if "P1" in pred`, `if "P4" in pred` — and returned
+`[]` for anything else. So `recibo-banda-12-lote8.json` and `recibo-banda-12-lote9.json` were
+published with `"veredictos": []` over pre-registrations that declared three predictions each
+(`K1`–`K3` and `L1`–`L3`). An empty list is indistinguishable from having predicted nothing, which
+is why nothing noticed: the receipt that drains a declaration and the receipt of an artefact that
+was never pre-registered sign the same bytes.
+
+Measured on the three published receipts: **ten predictions declared, two judged, six drained to an
+empty list** — sixty percent of what was declared. The other two of the eight unjudged (`P2`, `P3`)
+were dropped from a list that was not empty, which is quieter still because the list looked alive.
+
+The law batch 13 imposes is one line: **the judged population equals the declared population.** A
+prediction the instrument cannot measure is published `NO_MEDIDO` with a closed cause — never
+omitted, never `false`:
+
+| cause | meaning |
+|---|---|
+| `sin_evaluador` | the instrument has no evaluator for that identifier |
+| `metrica_ausente` | the evaluator exists, the magnitude it needs is not in the artefact |
+| `fuera_de_la_huella` | the prediction is measured, in the test suite, and the record names it |
+
+With that, the four receipts of this batch close with no silence left:
+
+| artefact | pre-registration | acts | clocks | declared | judged | `NO_MEDIDO` | causes |
+|---|---|--:|--:|--:|--:|--:|---|
+| `fuera-de-dominio-8.json` | `prediccion-batch-8.json` | 2 | 180 | 3 | 0 | 3 | `sin_evaluador` ×3 |
+| `fuera-de-dominio-9.json` | `prediccion-batch-9.json` | 5 | 450 | 3 | 0 | 3 | `sin_evaluador` ×3 |
+| `fuera-de-dominio-10.json` | `prediccion-batch-10.json` | 8 | 720 | 3 | 0 | 3 | `sin_evaluador` ×3 |
+| `fuera-de-dominio-10.json` | `prediccion-batch-11.json` | 8 | 720 | 4 | 2 | 2 | `fuera_de_la_huella` ×2 |
+| **total** | | | | **13** | **2** | **11** | 9 + 2 |
+
+Thirteen declarations, thirteen verdicts. What the table does not say, and batch 13 states instead
+of hiding: **eleven of thirteen still cannot be judged by the machine.** The pre-registrations of
+batches 8, 9 and 10 carry a machine-readable `umbral`, but nothing says which metric that threshold
+applies to — `ratio_orientation` is prose. Binding them today to the metric that survived would be
+retro-fitting a prediction to its data, so they stay `NO_MEDIDO · sin_evaluador`. The first
+predicate written before the measurement is batch 14's, and it is listed in this batch's
+`no_se_hace`.
+
+**The old reader also published a fall where nothing had been measured.** With no act declaring
+`coste_compuerta_s`, the cost evaluator produced `caro = None`, `usos = None` and therefore
+`sobrevive: false`: a refutation of a prediction whose magnitude was absent. The new reader returns
+`NO_MEDIDO · metrica_ausente` in exactly that case, and `tests/test_recibo.py` runs both readers on
+the lote-8 artefact, which declares no cost, to pin the difference. That is the reason the old
+reader is frozen rather than edited: **a published receipt is verified against the contract it
+declares, not against today's code.**
+
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-8.json --salida recibo-banda-13-lote8.json --prediccion prediccion-batch-8.json ```
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-10.json --salida recibo-banda-13-lote10.json --prediccion prediccion-batch-10.json ```
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-10.json --lote 11 --salida recibo-banda-13-lote11.json --prediccion prediccion-batch-11.json ```
+
+Each receipt now cites the pre-registration it judges, with its `sha256` and its prediction count,
+so a third party can check that the prediction was declared before the measurement without
+trusting our prose. The seal is still recomputable without our interpreter, and the four print
+`1b53515d…` (2 acts), `689daf41…` (5 acts), `a337a963…` (8 acts) and `80ae5dee…` (8 acts,
+`--lote 11`):
+
+```bash jq -S -c 'del(.huella, .medicion_de_si_mismo)' recibo-banda-13-lote11.json | tr -d '\n' | shasum -a 256 ```
+
+The three receipts of batches 11 and 12 still verify with the reader they were signed with, byte
+for byte — `507303a9…`, `eb542aa9…`, `043ffa3e…` — because the dispatch reads the schema out of the
+sealed file. A contract that only the newest code can read is not a seal, it is a draft.
+`tests/test_recibo.py` recomputes every cell of the table above from the pre-registration files on
+disk, refuses a `NO_MEDIDO` without a cause from the closed list, refuses a `fuera_de_la_huella`
+without the test that reads it, and re-runs the three old seals through `--check`.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

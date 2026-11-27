@@ -1,0 +1,265 @@
+{
+ "schema": "fiber-ast-lint/recibo/2",
+ "lote": 10,
+ "sujeto": {
+  "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+  "bytes_py_pin": 296870,
+  "actos": 8,
+  "relojes": 720
+ },
+ "fuente_artefacto": {
+  "ruta": "fuera-de-dominio-10.json",
+  "sha256": "1b0bc7633a777834ffc55a39007d4522c7bc82959d42003d014f414a9aa12db2"
+ },
+ "actos": [
+  {
+   "k": 0.6054,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.3036,
+   "margen_relativo": -1.006,
+   "zona": "fuera_de_cota",
+   "nombre": "A",
+   "sesion": 7,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.2498,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.052,
+   "margen_relativo": 0.1723,
+   "zona": "banda_de_riesgo",
+   "nombre": "B",
+   "sesion": 8,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.128,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.1738,
+   "margen_relativo": 0.5759,
+   "zona": "margen_sano",
+   "nombre": "C",
+   "sesion": 9,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1532,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": 209.5298,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.1332,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.1686,
+   "margen_relativo": 0.5586,
+   "zona": "margen_sano",
+   "nombre": "D",
+   "sesion": 9,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1532,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": 132.1214,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.1155,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.1863,
+   "margen_relativo": 0.6173,
+   "zona": "margen_sano",
+   "nombre": "E",
+   "sesion": 9,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1532,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": 109.6219,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.329,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.0272,
+   "margen_relativo": -0.0901,
+   "zona": "fuera_de_cota",
+   "nombre": "F",
+   "sesion": 10,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1426,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": 139.5794,
+   "trabajo_s": 36.261,
+   "cotizacion": {
+    "relojes_sonda": 9,
+    "sonda_s": 3.6261,
+    "coste_uso_s": 106.9445,
+    "usos_para_amortizar": 2,
+    "usos_sin_arnes": 39
+   }
+  },
+  {
+   "k": 0.3381,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.0363,
+   "margen_relativo": -0.1203,
+   "zona": "fuera_de_cota",
+   "nombre": "G",
+   "sesion": 10,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1426,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": 196.187,
+   "trabajo_s": 47.799,
+   "cotizacion": {
+    "relojes_sonda": 9,
+    "sonda_s": 4.7799,
+    "coste_uso_s": 153.1679,
+    "usos_para_amortizar": 2,
+    "usos_sin_arnes": 42
+   }
+  },
+  {
+   "k": 0.3759,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.0741,
+   "margen_relativo": -0.2455,
+   "zona": "fuera_de_cota",
+   "nombre": "H",
+   "sesion": 10,
+   "sesion_n": 3,
+   "dispersion_dentro": 1.1426,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": 132.3507,
+   "trabajo_s": 38.097,
+   "cotizacion": {
+    "relojes_sonda": 9,
+    "sonda_s": 3.8097,
+    "coste_uso_s": 98.0634,
+    "usos_para_amortizar": 2,
+    "usos_sin_arnes": 35
+   }
+  }
+ ],
+ "resumen": {
+  "actos": 8,
+  "publicables_como_booleano": 4,
+  "publicables": [
+   "B",
+   "C",
+   "D",
+   "E"
+  ],
+  "en_banda_de_riesgo": [
+   "B"
+  ],
+  "en_banda_de_riesgo_n": 1,
+  "por_zona": {
+   "margen_sano": [
+    "C",
+    "D",
+    "E"
+   ],
+   "banda_de_riesgo": [
+    "B"
+   ],
+   "fuera_de_cota": [
+    "A",
+    "F",
+    "G",
+    "H"
+   ]
+  },
+  "margen_relativo_min": -1.006,
+  "margen_relativo_max": 0.6173,
+  "dispersiones_por_sesion": {
+   "7": {
+    "n": 1,
+    "k_min": 0.6054,
+    "k_max": 0.6054,
+    "dispersion": null
+   },
+   "8": {
+    "n": 1,
+    "k_min": 0.2498,
+    "k_max": 0.2498,
+    "dispersion": null
+   },
+   "9": {
+    "n": 3,
+    "k_min": 0.1155,
+    "k_max": 0.1332,
+    "dispersion": 1.1532
+   },
+   "10": {
+    "n": 3,
+    "k_min": 0.329,
+    "k_max": 0.3759,
+    "dispersion": 1.1426
+   }
+  },
+  "veredictos": {
+   "declaradas": 3,
+   "emitidas": 3,
+   "evaluadas": 0,
+   "no_medidas": 3,
+   "causas": {
+    "sin_evaluador": 3,
+    "metrica_ausente": 0,
+    "fuera_de_la_huella": 0
+   }
+  }
+ },
+ "veredictos": [
+  {
+   "id": "M1",
+   "prediccion": "La dispersion de k dentro de una sesion es menor que entre sesiones. Concreto: en la sesion nueva dispersion(k) <= 1,30 y dispersion(k) entre las medianas de las dos sesiones >= 3,00. Lo que viaja es el regimen, y el acto aislado no lo captura.",
+   "estado": "no_medido",
+   "causa": "sin_evaluador"
+  },
+  {
+   "id": "M2",
+   "prediccion": "Una compuerta de nueve relojes repartidos por el acto cuesta un decimo y sobrestima el minimo de noventa en un margen acotado: sonda_min / min <= 1,15 en los tres actos nuevos, y sonda_jitter >= 0,50 x el jitter del acto. Si sobrevive, la compuerta se puede pagar en produccion.",
+   "estado": "no_medido",
+   "causa": "sin_evaluador"
+  },
+  {
+   "id": "M3",
+   "prediccion": "El coste de la compuerta se cotiza desde el acto y no solo se mide despues: coste_compuerta_s / (relojes x p50) cae en [3,0; 6,5] en los tres actos nuevos. Cada reloj son tres escaneos, asi que el cociente es el recargo de la compuerta sobre su propio trabajo.",
+   "estado": "no_medido",
+   "causa": "sin_evaluador"
+  }
+ ],
+ "huella": "a337a963f724eeb37c3a101885cf317ec9305de344261047c021847208a701ea",
+ "pre_registro": {
+  "ruta": "prediccion-batch-10.json",
+  "sha256": "787edb5c48c5b0c0f06430e59846d0bbf9ece6739518e847a5ac6cf6c075a752",
+  "predictions": 3,
+  "declared_before_computation": true
+ },
+ "medicion_de_si_mismo": {
+  "coste_verificacion_s": 0.002303,
+  "coste_compuerta_total_s": 919.3902,
+  "ratio_sobre_compuerta": 2.505e-06,
+  "P2_sobrevive": true,
+  "reproducible": true
+ }
+}

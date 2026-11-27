@@ -1,0 +1,54 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 13,
+  "title": "la poblacion juzgada iguala la poblacion declarada, o el veredicto que falta se publica NO_MEDIDO",
+  "declared_before_computation": true,
+  "declared_at": "2026-11-27",
+  "why": "El lote 12 dejo el instrumento generalizado y con un punto ciego que el propio lote destapo: _veredictos tenia una rama por identificador (P1 y P4) y devolvia lista vacia en cualquier otro caso. Eso hace que recibo-banda-12-lote8.json y recibo-banda-12-lote9.json publiquen veredictos: [] sobre predicciones que si existian: prediccion-batch-8.json declara K1, K2 y K3, y prediccion-batch-9.json declara L1, L2 y L3. Una lista vacia es indistinguible de no haber predicho nada, de modo que seis declaraciones congeladas se drenaron sin dejar rastro. Es la misma patologia que el lote 9 midio en test_11 (cero disparos de veintiseis, silencio indistinguible de cumplimiento), aplicada ahora al juicio del recibo.",
+  "what_is_new": "El recibo pasa al contrato recibo/2: emite exactamente un registro por prediccion declarada en el pre-registro que cita, y lo que el instrumento no sabe medir se publica NO_MEDIDO con causa (sin_evaluador, metrica_ausente o fuera_de_la_huella) en vez de omitirse. El recibo cita ademas su pre-registro con nombre, sha256 y numero de predicciones, de modo que un tercero puede comprobar que la prediccion se declaro antes de medir. El contrato recibo/1 queda congelado como lector de lo ya publicado: la verificacion de un recibo usa el contrato que el recibo declara, no el que el codigo prefiere.",
+  "method": {
+    "sujetos": "los tres artefactos sellados fuera-de-dominio-8.json (2 actos, 180 relojes), fuera-de-dominio-9.json (5 actos, 450 relojes) y fuera-de-dominio-10.json (8 actos, 720 relojes), todos sobre el mismo pin (296870 B, sha256 b2e05e6b), puestos contra los cuatro pre-registros que viven junto a ellos: prediccion-batch-8.json, -9.json, -10.json y -11.json",
+    "relojes_nuevos": 0,
+    "por_que_cero": "el lote no mide el entorno: mide si el instrumento drena declaraciones. Las lecturas ya estan tomadas y selladas; lo que falta es contar cuantas predicciones declara cada pre-registro congelado y cuantas de ellas llegaron a veredicto en el recibo v1 ya publicado, y volver a emitir con el contrato v2 para comprobar que la cuenta cierra",
+    "conservacion": "la identidad que el lote impone al instrumento es emitidas == declaradas, medida con dos fuentes independientes: el numero de predicciones del fichero del pre-registro en disco y la longitud de la lista veredictos del recibo. Si el evaluador omite una, las dos fuentes discrepan",
+    "causas": "un registro no_medido lleva siempre una de tres causas cerradas: sin_evaluador (el instrumento no tiene evaluador para ese identificador), metrica_ausente (el evaluador existe pero la magnitud que necesita no esta en el artefacto) o fuera_de_la_huella (la prediccion se mide en la suite, y el registro nombra el test que la lee)",
+    "verificacion": "bench/recibo.py --artefacto A --check R despacha por el schema que R declara: recibo/1 reconstruye con el lector congelado y recibo/2 con el lector nuevo. RC 0 si la huella coincide, RC 4 si no, RC 2 si el artefacto no se puede leer"
+  },
+  "predictions": [
+    {
+      "id": "Q1",
+      "claim": "El drenaje de la poblacion v1 tiene numero: los tres recibos publicados citan pre-registros que declaran diez predicciones en total (tres en el lote 8, tres en el lote 9 y cuatro en el lote 11), y solo dos llegaron a veredicto. Seis se drenaron a lista vacia, el sesenta por ciento de lo declarado. El lote 10 no llego a emitir recibo de su propio pre-registro, de modo que trece declaraciones congeladas existen en el corpus y dos tienen juicio.",
+      "conjetura_de_partida": "No hace falta herramienta nueva: se cuenta restando, y lo que se espera encontrar es que el instrumento no fallo al medir sino al publicar lo que no sabia medir.",
+      "ventana": "los conteos de v1 se tomaron en esta misma sesion, leyendo los tres recibos publicados contra sus pre-registros, antes de escribir este archivo. Q1 es por tanto un recuento declarado y no una prediccion ciega: su valor esta en que el numero queda escrito y auditable, no en que se haya inferido. Las predicciones ciegas del lote son Q3 y Q4",
+      "falsador": "cualquier reconteo de los tres recibos publicados contra sus pre-registros que no de diez declaradas, dos juzgadas y seis drenadas"
+    },
+    {
+      "id": "Q2",
+      "claim": "El contrato recibo/2 no omite: en los cuatro recibos del lote 13 la lista veredictos tiene exactamente tantos registros como predicciones declara el pre-registro que cada recibo cita (tres, tres, tres y cuatro), ninguno es la lista vacia, y la suma de evaluadas mas no_medidas iguala las emitidas.",
+      "falsador": "cualquier recibo v2 con emitidas distinta de declaradas, con lista vacia, o con evaluadas mas no_medidas distinto de emitidas"
+    },
+    {
+      "id": "Q3",
+      "claim": "NO_MEDIDO no se lee como caida: el evaluador que depende del coste de la compuerta devuelve no_medido cuando ningun acto del artefacto declara coste_compuerta_s, y el lector v1 devolvia sobrevive: false en ese mismo caso. Los dos actos de fuera-de-dominio-8.json no declaran coste, de modo que ahi v1 publico una caida donde no habia medida y v2 publica una causa.",
+      "cota_error": "la lectura v1 se hace sobre una copia del lector congelado en el test, no sobre un recibo publicado, porque el lote 8 nunca se emitio contra prediccion-batch-11.json",
+      "falsador": "que el lector v1 devuelva algo distinto de sobrevive: false sobre actos sin coste, o que el lector v2 devuelva un veredicto evaluado sobre los mismos actos"
+    },
+    {
+      "id": "Q4",
+      "claim": "La verificacion usa el contrato que el recibo declara: anadir recibo/2 no mueve ninguna huella publicada, y los tres recibos v1 (507303a9, eb542aa9, 043ffa3e) siguen verificando con --check en RC 0 porque el despacho es por el schema sellado y no por la preferencia del codigo.",
+      "falsador": "cualquier huella distinta, o un --check que reconstruya un recibo v1 con el lector nuevo"
+    },
+    {
+      "id": "Q5",
+      "claim": "El recibo cita su pre-registro: en v2 pre_registro.sha256 es el sha256 del fichero del pre-registro y pre_registro.predictions su numero de predicciones, de modo que el juicio viaja con la prueba de que la prediccion se declaro antes de medir. En v1 el campo no existe y su huella no se mueve.",
+      "falsador": "un recibo v2 sin pre_registro, con un sha256 que no coincida con shasum -a 256 del fichero, o con un conteo distinto del que declara el fichero"
+    }
+  ],
+  "criterio_de_falsacion_del_lote": "El lote cae si Q1, Q2, Q3, Q4 o Q5 fallan sin retro-ajuste. En particular cae si un recibo v2 emite veredictos: [] sobre un pre-registro que declara predicciones: eso devolveria el lote 13 al punto de partida del lote 12.",
+  "no_se_hace": [
+    "no se vuelve a cronometrar: los 1350 relojes de los tres artefactos son la unica fuente",
+    "no se re-sella ningun recibo v1: recibo-banda-11.json, recibo-banda-12-lote8.json y recibo-banda-12-lote9.json quedan byte a byte como se publicaron, y sus huellas son la prueba de que anadir recibo/2 no reescribio lo publicado",
+    "no se anade el campo predicado a ningun pre-registro congelado: enlazar hoy una prediccion en prosa con la metrica que sobrevivio es retro-ajustar la prediccion a los datos, y destruye lo unico que el pre-registro certifica. El primer predicado evaluable por maquina se escribe en el lote 14, antes de medir, y hasta entonces el mecanismo queda NO_MEDIDO",
+    "no se mide la caducidad de sesion: la sonda de nueve relojes sigue con una sola sesion medida (1,0507x) y ninguna medicion inter-sesion, asi que el tiempo de vida de una sesion calibrada queda NO_MEDIDO para el lote 14"
+  ]
+}

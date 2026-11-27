@@ -43,6 +43,13 @@ RELOJES_SONDA = 9
 ZONAS = ("margen_sano", "banda_de_riesgo", "fuera_de_cota")
 VOLATILES = ("huella", "medicion_de_si_mismo")
 
+CONTRATO_V1 = "fiber-ast-lint/recibo/1"
+CONTRATO_V2 = "fiber-ast-lint/recibo/2"
+
+# Causas cerradas de un veredicto NO_MEDIDO. Una causa fuera de este conjunto es un
+# defecto del instrumento, no una medida: ausencia declarada, nunca ausencia omitida.
+CAUSAS = ("sin_evaluador", "metrica_ausente", "fuera_de_la_huella")
+
 
 def canonico(obj: dict) -> bytes:
     """Serializacion sin la que dos dicts iguales pueden dar bytes distintos."""
@@ -192,6 +199,112 @@ def _leer_prediccion(ruta: Path | None) -> dict | None:
     return {p["id"]: p["claim"] for p in pred.get("predictions", [])}
 
 
+def _leer_predicciones(ruta: Path | None) -> list[dict] | None:
+    """Las predicciones completas: el juicio necesita la declaracion, no solo su prosa.
+
+    Devuelve None cuando no hay pre-registro, que no es lo mismo que una lista vacia: el
+    recibo tiene que poder distinguir "no se declaro nada" de "se declaro y no se midio".
+    """
+    if ruta is None or not ruta.exists():
+        return None
+    return list(json.loads(ruta.read_text()).get("predictions", []))
+
+
+def _ruta_prediccion(lote: int | None, junto_a: Path) -> Path | None:
+    """El pre-registro del lote que el recibo cita, si vive junto al recibo."""
+    if lote is None:
+        return None
+    ruta = junto_a / f"prediccion-batch-{lote}.json"
+    return ruta if ruta.exists() else None
+
+
+def _cita_prediccion(ruta: Path | None) -> dict | None:
+    """El pre-registro citado con su huella: el juicio viaja con la prueba de que fue previo."""
+    if ruta is None or not ruta.exists():
+        return None
+    crudo = ruta.read_bytes()
+    pred = json.loads(crudo)
+    return {
+        "ruta": ruta.name,
+        "sha256": hashlib.sha256(crudo).hexdigest(),
+        "predictions": len(pred.get("predictions", [])),
+        "declared_before_computation": bool(pred.get("declared_before_computation")),
+    }
+
+
+def _ev_p1(resumen: dict, por_acto: list[dict]) -> tuple[dict, bool] | None:
+    pub = resumen["publicables_como_booleano"]
+    riesgo = resumen["en_banda_de_riesgo_n"]
+    if not resumen["actos"]:
+        return None
+    return (
+        {"publicables": pub, "en_banda_de_riesgo": riesgo, "actos": resumen["actos"]},
+        bool(pub) and 1 <= riesgo and riesgo * 2 <= pub,
+    )
+
+
+def _ev_p4(resumen: dict, por_acto: list[dict]) -> tuple[dict, bool] | None:
+    """Sin coste medido no hay veredicto: la ausencia de la metrica no es una caida."""
+    cotizados = [a for a in por_acto if a["cotizacion"]]
+    if not cotizados:
+        return None
+    caro = max(cotizados, key=lambda a: a["coste_compuerta_s"])
+    usos = caro["cotizacion"]["usos_para_amortizar"]
+    return (
+        {"acto_mas_caro": caro["nombre"], "usos_para_amortizar": usos,
+         "usos_sin_arnes": caro["cotizacion"]["usos_sin_arnes"]},
+        bool(20 <= usos <= 40),
+    )
+
+
+EVALUADORES = {"P1": _ev_p1, "P4": _ev_p4}
+EVALUA = {
+    "P1": "el booleano dice si con el margen ya consumido en al menos un acto y en no mas de la mitad",
+    "P4": "la compuerta de noventa relojes solo se amortiza con volumen, entre veinte y cuarenta usos",
+}
+# Predicciones cuya magnitud se mide, pero fuera de la huella: un veredicto sobre la
+# verificacion o sobre la propia huella no puede viajar dentro de la huella que firma.
+FUERA_DE_LA_HUELLA = {
+    "P2": "tests/test_recibo.py::test_verificar_el_recibo_cuesta_menos_de_una_centesima_parte_de_medir_la_compuerta",
+    "P3": "tests/test_recibo.py::test_la_huella_se_reproduce_con_jq_y_shasum_sin_python",
+}
+
+
+def _evaluar(pid: str, resumen: dict, por_acto: list[dict]) -> tuple[dict, bool] | None:
+    ev = EVALUADORES.get(pid)
+    return None if ev is None else ev(resumen, por_acto)
+
+
+def _veredictos_v2(resumen: dict, por_acto: list[dict], preds: list[dict] | None) -> list[dict]:
+    """Un registro por prediccion declarada, y ninguno mas.
+
+    El lector v1 devolvia lista vacia cuando no conocia el identificador, de modo que un
+    pre-registro con predicciones y un pre-registro sin ellas producian el mismo recibo.
+    Aqui lo que el instrumento no sabe medir se publica NO_MEDIDO con su causa: la
+    poblacion juzgada tiene que igualar la poblacion declarada, o el silencio miente.
+    """
+    out = []
+    for p in preds or []:
+        pid = p["id"]
+        base = {"id": pid, "prediccion": p.get("claim")}
+        if pid in FUERA_DE_LA_HUELLA:
+            out.append({**base, "estado": "no_medido", "causa": "fuera_de_la_huella",
+                        "locus": FUERA_DE_LA_HUELLA[pid]})
+            continue
+        if pid not in EVALUADORES:
+            out.append({**base, "estado": "no_medido", "causa": "sin_evaluador"})
+            continue
+        r = _evaluar(pid, resumen, por_acto)
+        if r is None:
+            out.append({**base, "estado": "no_medido", "causa": "metrica_ausente",
+                        "evalua": EVALUA[pid]})
+            continue
+        medido, sobrevive = r
+        out.append({**base, "estado": "evaluado", "medido": medido,
+                    "sobrevive": sobrevive, "evalua": EVALUA[pid]})
+    return out
+
+
 def recibo(arte: dict, fuente: str, lote: int | None = None) -> dict:
     """El recibo completo, con huella. Medir su coste es cosa de quien lo llama."""
     actos = _actos(arte)
@@ -243,6 +356,30 @@ def recibo(arte: dict, fuente: str, lote: int | None = None) -> dict:
     return out
 
 
+def recibo_v2(arte: dict, fuente: str, lote: int | None = None,
+              pred_ruta: Path | None = None) -> dict:
+    """El recibo del contrato recibo/2: la poblacion juzgada iguala la declarada.
+
+    No reescribe nada del cuerpo: parte del mismo recibo y le cambia el juicio. El contrato
+    v1 sigue vivo al lado, congelado, porque verificar un recibo publicado exige el lector
+    del contrato que ese recibo declara y no el que este codigo prefiera.
+    """
+    rec = recibo(arte, fuente, lote)
+    preds = _leer_predicciones(pred_ruta)
+    rec["schema"] = CONTRATO_V2
+    rec["pre_registro"] = _cita_prediccion(pred_ruta)
+    rec["veredictos"] = _veredictos_v2(rec["resumen"], rec["actos"], preds)
+    rec["resumen"]["veredictos"] = {
+        "declaradas": None if preds is None else len(preds),
+        "emitidas": len(rec["veredictos"]),
+        "evaluadas": sum(1 for v in rec["veredictos"] if v["estado"] == "evaluado"),
+        "no_medidas": sum(1 for v in rec["veredictos"] if v["estado"] == "no_medido"),
+        "causas": {c: sum(1 for v in rec["veredictos"] if v.get("causa") == c) for c in CAUSAS},
+    }
+    rec["huella"] = huella(rec)
+    return rec
+
+
 def _reanclar_veredictos(rec: dict, pred: dict | None) -> dict:
     """Re-evalua los veredictos con el pre-registro dentro y re-firma sin mover el juicio."""
     rec = dict(rec)
@@ -278,15 +415,13 @@ def _resumen_legible(rec: dict) -> str:
         f" {r['en_banda_de_riesgo_n']} estan en banda de riesgo",
     ]
     for v in rec["veredictos"]:
-        lineas.append(f"{v['id']}: {'sobrevive' if v['sobrevive'] else 'CAE'} · {v['medido']}")
+        if v.get("estado") == "evaluado":
+            lineas.append(f"{v['id']}: {'sobrevive' if v['sobrevive'] else 'CAE'} · {v['medido']}")
+        elif v.get("estado") == "no_medido":
+            lineas.append(f"{v['id']}: NO_MEDIDO · {v['causa']}")
+        else:
+            lineas.append(f"{v['id']}: {'sobrevive' if v['sobrevive'] else 'CAE'} · {v['medido']}")
     return "\n".join(lineas)
-
-
-def _prediccion_del_lote(lote: int | None, junto_a: Path) -> dict | None:
-    """El pre-registro del lote que el recibo declara, si vive junto al recibo."""
-    if lote is None:
-        return None
-    return _leer_prediccion(junto_a / f"prediccion-batch-{lote}.json")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -296,7 +431,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--check", type=Path, help="recomputa y compara la huella con este recibo")
     ap.add_argument("--lote", type=int, help="lote de la emision; por defecto, el del artefacto")
     ap.add_argument("--prediccion", type=Path,
-                    help="pre-registro que declara P1 y P4; sin el, el recibo no emite veredictos")
+                    help="pre-registro que el recibo cita; sin el, el recibo no emite veredictos")
+    ap.add_argument("--contrato", choices=(CONTRATO_V1, CONTRATO_V2), default=CONTRATO_V2,
+                    help="contrato que se emite; al verificar manda el que el fichero declara")
     args = ap.parse_args(argv)
     if not args.salida and not args.check:
         ap.error("hace falta --salida o --check")
@@ -317,17 +454,23 @@ def main(argv: list[str] | None = None) -> int:
 
     # El lote de emision es lo unico que el recibo sellado declara y no se puede recomputar
     # desde el artefacto: se honra su declaracion, y la huella cubre todo lo demas.
+    # El contrato tambien: verificar un recibo publicado usa el lector del contrato que el
+    # recibo declara, no el que este codigo prefiera, o la evolucion reescribe lo firmado.
+    contrato = (sellado or {}).get("schema") or args.contrato
     lote = args.lote if args.lote is not None else (sellado.get("lote") if sellado else None)
     if args.prediccion:
-        pred = _leer_prediccion(args.prediccion)
-    elif sellado and sellado.get("veredictos"):
-        pred = _prediccion_del_lote(lote, args.check.parent)
+        pred_ruta = args.prediccion
+    elif sellado and (sellado.get("veredictos") or sellado.get("pre_registro")):
+        pred_ruta = _ruta_prediccion(lote, args.check.parent)
     else:
-        pred = None
+        pred_ruta = None
 
     t0 = time.perf_counter()
-    rec = recibo(arte, str(args.artefacto), lote)
-    rec = _reanclar_veredictos(rec, pred)
+    if contrato == CONTRATO_V1:
+        rec = _reanclar_veredictos(recibo(arte, str(args.artefacto), lote),
+                                   _leer_prediccion(pred_ruta))
+    else:
+        rec = recibo_v2(arte, str(args.artefacto), lote, pred_ruta)
     coste = round(time.perf_counter() - t0, 6)
     total = sum(a.get("coste_compuerta_s") or 0.0 for a in _actos(arte))
     rec["medicion_de_si_mismo"] = {

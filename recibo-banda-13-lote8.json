@@ -1,0 +1,129 @@
+{
+ "schema": "fiber-ast-lint/recibo/2",
+ "lote": 8,
+ "sujeto": {
+  "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+  "bytes_py_pin": 296870,
+  "actos": 2,
+  "relojes": 180
+ },
+ "fuente_artefacto": {
+  "ruta": "fuera-de-dominio-8.json",
+  "sha256": "82b5d00ad5a3356bba9836228e78525df68528fdbce1a0321adbae0c2b69f60b"
+ },
+ "actos": [
+  {
+   "k": 0.6054,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.3036,
+   "margen_relativo": -1.006,
+   "zona": "fuera_de_cota",
+   "nombre": "A",
+   "sesion": 7,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null
+  },
+  {
+   "k": 0.2498,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.052,
+   "margen_relativo": 0.1723,
+   "zona": "banda_de_riesgo",
+   "nombre": "B",
+   "sesion": 8,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null
+  }
+ ],
+ "resumen": {
+  "actos": 2,
+  "publicables_como_booleano": 1,
+  "publicables": [
+   "B"
+  ],
+  "en_banda_de_riesgo": [
+   "B"
+  ],
+  "en_banda_de_riesgo_n": 1,
+  "por_zona": {
+   "margen_sano": [],
+   "banda_de_riesgo": [
+    "B"
+   ],
+   "fuera_de_cota": [
+    "A"
+   ]
+  },
+  "margen_relativo_min": -1.006,
+  "margen_relativo_max": 0.1723,
+  "dispersiones_por_sesion": {
+   "7": {
+    "n": 1,
+    "k_min": 0.6054,
+    "k_max": 0.6054,
+    "dispersion": null
+   },
+   "8": {
+    "n": 1,
+    "k_min": 0.2498,
+    "k_max": 0.2498,
+    "dispersion": null
+   }
+  },
+  "veredictos": {
+   "declaradas": 3,
+   "emitidas": 3,
+   "evaluadas": 0,
+   "no_medidas": 3,
+   "causas": {
+    "sin_evaluador": 3,
+    "metrica_ausente": 0,
+    "fuera_de_la_huella": 0
+   }
+  }
+ },
+ "veredictos": [
+  {
+   "id": "K1",
+   "prediccion": "En el acto B el sujeto es publicable: k_B = jitter_B / predicho es menor que q/2 = 0,1509, contra k_A = 0,6054 en el acto A. El piso es una lectura del acto y no una propiedad del sujeto.",
+   "estado": "no_medido",
+   "causa": "sin_evaluador"
+  },
+  {
+   "id": "K2",
+   "prediccion": "Dentro del acto B el piso es estacionario: |k_primera_mitad - k_ultima_mitad| < 0,1509, de modo que el piso medido al principio del acto sigue valiendo al final y una sola ventana basta para decidir.",
+   "estado": "no_medido",
+   "causa": "sin_evaluador"
+  },
+  {
+   "id": "K3",
+   "prediccion": "El minimo es la unica cantidad que viaja entre actos: min_B / min_A cae en [0,90, 1,10] aunque el jitter no se parezca. Es lo que hace que una cotizacion pueda denominarse en el minimo y no en la banda.",
+   "estado": "no_medido",
+   "causa": "sin_evaluador"
+  }
+ ],
+ "huella": "1b53515db6191251e4d6836ed0bbb2bd19d3adeff331d15144cccaffa0747d82",
+ "pre_registro": {
+  "ruta": "prediccion-batch-8.json",
+  "sha256": "04181a19b9c01f108c03a4496f3c4656f7d7fbed8d6aa5424fd8d4d8fbb25d3e",
+  "predictions": 3,
+  "declared_before_computation": true
+ },
+ "medicion_de_si_mismo": {
+  "coste_verificacion_s": 0.001424,
+  "coste_compuerta_total_s": 0.0,
+  "ratio_sobre_compuerta": null,
+  "P2_sobrevive": false,
+  "reproducible": true
+ }
+}

@@ -533,3 +533,152 @@ def test_la_prosa_del_lote_12_nombra_sus_cifras_y_su_error_de_cuenta():
     assert "said \"thirteen cells\"" in prosa or 'said "thirteen cells"' in prosa
     assert "thirty-two band-and-session magnitudes" in prosa
     assert "the arithmetic of the prediction did not" in prosa
+
+
+# --- lote 13: la poblacion juzgada iguala la poblacion declarada -------------
+
+FUENTES_13 = {8: RAIZ / "fuera-de-dominio-8.json",
+              9: RAIZ / "fuera-de-dominio-9.json",
+              10: RAIZ / "fuera-de-dominio-10.json",
+              11: RAIZ / "fuera-de-dominio-10.json"}
+
+
+def _v2(lote: int) -> dict:
+    return json.loads((RAIZ / f"recibo-banda-13-lote{lote}.json").read_text())
+
+
+def test_el_recibo_v2_juzga_exactamente_lo_que_declara_su_pre_registro():
+    """Dos fuentes que no se miran: el fichero del pre-registro en disco y la lista emitida."""
+    declaradas = emitidas = evaluadas = 0
+    for lote in (8, 9, 10, 11):
+        rec = _v2(lote)
+        pred = json.loads((RAIZ / rec["pre_registro"]["ruta"]).read_text())
+        assert rec["schema"] == r11.CONTRATO_V2
+        assert [v["id"] for v in rec["veredictos"]] == [p["id"] for p in pred["predictions"]]
+        assert rec["resumen"]["veredictos"]["declaradas"] == len(pred["predictions"])
+        assert rec["resumen"]["veredictos"]["emitidas"] == len(rec["veredictos"])
+        declaradas += len(pred["predictions"])
+        emitidas += len(rec["veredictos"])
+        evaluadas += rec["resumen"]["veredictos"]["evaluadas"]
+    assert (declaradas, emitidas, evaluadas) == (13, 13, 2)
+    # Donde los dos lectores juzgan, tienen que coincidir: el nuevo no reinterpreta lo juzgado.
+    viejo = {v["id"]: v for v in json.loads((RAIZ / "recibo-banda-11.json").read_text())["veredictos"]}
+    nuevo = {v["id"]: v for v in _v2(11)["veredictos"]}
+    assert set(viejo) < set(nuevo)
+    for pid, v in viejo.items():
+        assert nuevo[pid]["estado"] == "evaluado", pid
+        assert nuevo[pid]["sobrevive"] == v["sobrevive"], pid
+        assert nuevo[pid]["medido"] == v["medido"], pid
+
+
+def test_un_veredicto_declarado_o_se_mide_o_dice_por_que_no_se_midio():
+    """El juicio se recomputa con el codigo: si el lector miente, la ley no lo tapa el sello."""
+    for lote in (8, 9, 10, 11):
+        rec = r11.recibo_v2(json.loads(FUENTES_13[lote].read_text()), str(FUENTES_13[lote]), None,
+                            RAIZ / f"prediccion-batch-{lote}.json")
+        assert rec["veredictos"] == _v2(lote)["veredictos"], lote
+        for v in rec["veredictos"]:
+            assert v["prediccion"], v
+            if v["estado"] == "evaluado":
+                assert isinstance(v["sobrevive"], bool) and v["medido"] is not None, v
+                assert "causa" not in v, v
+                continue
+            assert v["estado"] == "no_medido", v
+            assert v["causa"] in r11.CAUSAS, v
+            assert "sobrevive" not in v, v
+            if v["causa"] == "fuera_de_la_huella":
+                assert "::" in v["locus"], v
+            elif v["causa"] == "metrica_ausente":
+                assert v["evalua"], v
+
+
+def test_v1_publica_una_caida_donde_no_hay_medida_y_v2_dice_metrica_ausente():
+    """Q3: ningun acto de fuera-de-dominio-8.json declara coste_compuerta_s."""
+    arte = _crudo_de(8)
+    assert not [a for a in r11._actos(arte) if a.get("coste_compuerta_s")]
+    fuente = str(FUENTES_13[8])
+    v1 = r11._reanclar_veredictos(r11.recibo(arte, fuente), r11._leer_prediccion(PRED))
+    p4_v1 = next(v for v in v1["veredictos"] if v["id"] == "P4")
+    assert p4_v1["sobrevive"] is False
+    assert p4_v1["medido"]["acto_mas_caro"] is None
+    p4 = next(v for v in r11.recibo_v2(arte, fuente, None, PRED)["veredictos"] if v["id"] == "P4")
+    assert p4["estado"] == "no_medido"
+    assert p4["causa"] == "metrica_ausente"
+    assert "sobrevive" not in p4
+
+
+def test_un_recibo_se_verifica_con_el_contrato_que_el_declara_y_no_con_el_de_hoy():
+    """Q4: los tres recibos v1 siguen verificando despues de nacer el contrato recibo/2."""
+    pares = {11: "recibo-banda-11.json",
+             8: "recibo-banda-12-lote8.json",
+             9: "recibo-banda-12-lote9.json"}
+    for lote, nombre in pares.items():
+        sellado = json.loads((RAIZ / nombre).read_text())
+        assert sellado["schema"] == r11.CONTRATO_V1
+        r = subprocess.run(
+            [sys.executable, str(RAIZ / "bench" / "recibo.py"),
+             "--artefacto", str(FUENTES_13[lote]), "--check", str(RAIZ / nombre)],
+            capture_output=True, text=True, cwd=RAIZ,
+        )
+        assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_el_recibo_cita_su_pre_registro_por_hash_y_no_por_promesa():
+    """Q5: la cita se comprueba con shasum, sin ejecutar el escaner ni creer la prosa."""
+    for lote in (8, 9, 10, 11):
+        cita = _v2(lote)["pre_registro"]
+        crudo = (RAIZ / cita["ruta"]).read_bytes()
+        assert cita["sha256"] == hashlib.sha256(crudo).hexdigest()
+        assert cita["predictions"] == len(json.loads(crudo)["predictions"])
+        assert cita["declared_before_computation"] is True
+        assert "/" not in cita["ruta"]
+    for viejo in ("recibo-banda-11.json", "recibo-banda-12-lote8.json",
+                  "recibo-banda-12-lote9.json"):
+        assert "pre_registro" not in json.loads((RAIZ / viejo).read_text())
+
+
+def test_un_pre_registro_ausente_no_es_un_pre_registro_vacio():
+    arte = _crudo_de(8)
+    fuente = str(FUENTES_13[8])
+    sin = r11.recibo_v2(arte, fuente)
+    assert sin["veredictos"] == [] and sin["pre_registro"] is None
+    assert sin["resumen"]["veredictos"]["declaradas"] is None
+    con = r11.recibo_v2(arte, fuente, None, RAIZ / "prediccion-batch-8.json")
+    assert len(con["veredictos"]) == 3
+    assert {v["estado"] for v in con["veredictos"]} == {"no_medido"}
+
+
+def test_un_identificador_sin_evaluador_se_publica_sin_evaluador_y_no_se_omite():
+    resumen = {"actos": 2, "publicables_como_booleano": 1, "en_banda_de_riesgo_n": 1}
+    v = r11._veredictos_v2(resumen, [], [{"id": "Z9", "claim": "una prediccion futura"}])
+    assert len(v) == 1
+    assert v[0]["estado"] == "no_medido" and v[0]["causa"] == "sin_evaluador"
+    assert v[0]["id"] == "Z9"
+
+
+def test_el_drenaje_del_contrato_v1_tiene_numero():
+    """Q1: diez declaradas y dos juzgadas; seis drenadas a lista vacia y ocho sin juicio."""
+    declaradas = juzgadas = a_vacia = 0
+    for lote, nombre in ((8, "recibo-banda-12-lote8.json"),
+                         (9, "recibo-banda-12-lote9.json"),
+                         (11, "recibo-banda-11.json")):
+        pred = json.loads((RAIZ / f"prediccion-batch-{lote}.json").read_text())
+        rec = json.loads((RAIZ / nombre).read_text())
+        declaradas += len(pred["predictions"])
+        juzgadas += len(rec["veredictos"])
+        if not rec["veredictos"]:
+            a_vacia += len(pred["predictions"])
+    assert (declaradas, juzgadas, a_vacia) == (10, 2, 6)
+    assert declaradas - juzgadas == 8
+    assert a_vacia * 2 > declaradas
+
+
+def test_los_cuatro_recibos_del_lote_13_verifican_su_huella():
+    for lote in (8, 9, 10, 11):
+        r = subprocess.run(
+            [sys.executable, str(RAIZ / "bench" / "recibo.py"),
+             "--artefacto", str(FUENTES_13[lote]),
+             "--check", str(RAIZ / f"recibo-banda-13-lote{lote}.json")],
+            capture_output=True, text=True, cwd=RAIZ,
+        )
+        assert r.returncode == 0, r.stdout + r.stderr
