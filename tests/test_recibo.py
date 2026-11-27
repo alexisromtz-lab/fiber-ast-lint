@@ -748,10 +748,16 @@ def test_r1_el_juicio_no_depende_del_identificador_sino_de_la_forma():
                                                                      "claim": "la misma forma"}],
                                                 mapa)}
     assert v["P1"]["sobrevive"] == v["ZZ"]["sobrevive"] is True
-    # Y el codigo no puede consultar el identificador para decidir.
+    # Y el codigo no puede consultar el identificador para decidir. La guarda nombra el
+    # parametro real: buscar la palabra 'id' no ve 'pid', y una guarda que no puede fallar
+    # sobre lo que prohibe no es una guarda, es una promesa.
     fuente = (RAIZ / "bench" / "recibo.py").read_text()
     cuerpo = fuente.split("def _veredictos_v3", 1)[1].split("\ndef ", 1)[0]
-    assert re.search(r'\bid\b\s*(==|!=|in\s*[\(\[])', cuerpo) is None, cuerpo
+    rama_por_nombre = re.compile(r"\b(pid|id)\b\s*(==|!=|in\b|not\s+in\b)")
+    assert rama_por_nombre.search(cuerpo) is None, cuerpo
+    # Y la guarda tiene que ser capaz de ver la rama que si existe: la tabla de la ausencia.
+    ausencia = fuente.split("def _ausencia", 1)[1].split("\ndef ", 1)[0]
+    assert rama_por_nombre.search(ausencia) is not None, ausencia
 
 
 def test_r4_una_poblacion_vacia_no_es_una_poblacion_que_cumple():
@@ -822,7 +828,7 @@ def test_el_predicado_cita_su_pre_registro_por_hash_y_si_el_texto_cambia_no_vale
         p = json.loads(PREDICADOS_14[lote].read_text())
         real = hashlib.sha256((RAIZ / f"prediccion-batch-{lote}.json").read_bytes()).hexdigest()
         assert p["cita_pre_registro"]["sha256"] == real, lote
-    _, cita = r11.predicado.leer(PREDICADOS_14[8])
+    _, cita, _ = r11.predicado.leer(PREDICADOS_14[8])
     assert cita["cita_pre_registro"]["sha256"] == hashlib.sha256(
         (RAIZ / "prediccion-batch-8.json").read_bytes()).hexdigest()
 
@@ -903,3 +909,134 @@ def test_un_pre_registro_alterado_invalida_la_traduccion_que_lo_cita(tmp_path: P
     )
     assert r.returncode == 5, r.stdout + r.stderr
     assert not (tmp_path / "r.json").exists()
+
+
+# --- el lote 15: un grado de composicion y la ausencia declarada ------------
+
+PREDICADO_15 = RAIZ / "predicado-batch-15.json"
+PREDICADO_15_LOTE11 = RAIZ / "predicado-batch-15-lote11.json"
+
+
+def test_la_profundidad_dos_juzga_lo_que_el_lote_nueve_declaro_no_expresable():
+    """L3 era el unico hueco expresivo medido: se cierra con un grado, no con un lenguaje."""
+    viejo = json.loads((RAIZ / "predicado-batch-9.json").read_text())
+    assert [a for a in viejo["no_se_traduce"] if str(a).startswith("L3")]
+    nuevo = json.loads(PREDICADO_15.read_text())
+    assert nuevo["no_se_traduce"] == []
+    l3 = nuevo["predicados"][0]
+    assert l3["id"] == "L3"
+    assert r11.predicado.validar(l3["evalua"]) == []
+    assert r11.predicado.clasificar(l3["evalua"]) == "expresable"
+    resumen = json.loads((RAIZ / "recibo-banda-15-lote9.json").read_text())["resumen"]
+    assert (resumen["veredictos"]["evaluadas"], resumen["veredictos"]["no_medidas"]) == (1, 0)
+
+
+def test_un_texto_congelado_ambiguo_publica_las_dos_lecturas_y_no_elige():
+    """La banda 0,80-1,25 es reciproca de si misma: no hay lectura comoda que escoger."""
+    l3 = json.loads((RAIZ / "recibo-banda-15-lote9.json").read_text())["veredictos"][0]
+    cifras = [c["expr"] for c in l3["medido"]["y"]]
+    assert len(set(cifras)) == 2, cifras
+    dentro = [c for c in cifras if 0.8 <= c <= 1.25]
+    assert len(dentro) == 1, cifras
+    assert l3["sobrevive"] is False
+    regla = json.loads(PREDICADO_15.read_text())["regla_de_lectura"]
+    assert len(regla["lecturas"]) == 2 and regla["falsifier"]
+
+
+def test_la_gramatica_se_decide_sin_documento_y_vence_a_la_ausencia_de_dato():
+    """Sin el validador estatico, un predicado hondo sobre un hueco diria 'falta el dato'."""
+    hondo = {"expr": {"de": "/actos/*",
+                      "despliega": {"de": "/b/*",
+                                    "despliega": {"de": "/c", "agrega": "valor"},
+                                    "agrega": "media"},
+                      "agrega": "media"},
+             "rel": "lt", "valor": 1}
+    defectos = r11.predicado.validar(hondo)
+    assert defectos and "profundidad" in defectos[0], defectos
+    assert r11.predicado.clasificar(hondo) == "inexpresable"
+    # El documento no trae el puntero: sin validacion previa la causa seria metrica_ausente.
+    v = r11._veredictos_v3({"actos": []}, [{"id": "X", "claim": "profundidad 3"}],
+                           {"X": {"evalua": hondo}})
+    assert (v[0]["estado"], v[0]["causa"]) == ("no_medido", "predicado_ilegible"), v[0]
+
+
+def test_una_cadena_no_declara_motivo_y_la_tabla_responde_por_ella():
+    """P2 y P3 viajan como prosa en el lote 11; prosa no es una causa declarada."""
+    mapa, _, ausencias = r11.predicado.leer(RAIZ / "predicado-batch-11.json")
+    assert set(mapa) == {"P1", "P4"}
+    assert ausencias["P2"].get("motivo") is None
+    assert r11._ausencia("P2", ausencias) == {"estado": "no_medido",
+                                              "causa": "fuera_de_la_huella",
+                                              "locus": r11.FUERA_DE_LA_HUELLA["P2"]}
+    decl = {"P2": {"id": "P2", "motivo": "metrica_ausente", "locus": "x:1"}}
+    assert r11._ausencia("P2", decl) == {"estado": "no_medido",
+                                         "causa": "metrica_ausente", "locus": "x:1"}
+
+
+def test_los_veredictos_del_lote_quince_son_los_del_catorce_byte_a_byte():
+    """Abrir un grado de composicion no puede mover lo que ya estaba juzgado."""
+    a = json.loads((RAIZ / "recibo-banda-15-lote11.json").read_text())["veredictos"]
+    b = json.loads((RAIZ / "recibo-banda-14-lote11.json").read_text())["veredictos"]
+    assert json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
+
+
+def test_el_sello_declara_su_pre_registro_y_el_verificador_no_lo_adivina(tmp_path):
+    """Un recibo puede juzgar un pre-registro anterior; adivinar por lote lo falsearia."""
+    (tmp_path / "bench").mkdir()
+    for f in ("recibo.py", "predicado.py"):
+        (tmp_path / "bench" / f).write_bytes((RAIZ / "bench" / f).read_bytes())
+    for f in ("fuera-de-dominio-10.json", "prediccion-batch-11.json",
+              "predicado-batch-15-lote11.json", "recibo-banda-15-lote11.json"):
+        (tmp_path / f).write_bytes((RAIZ / f).read_bytes())
+    # No se copia prediccion-batch-15.json: si el verificador adivina, no encuentra nada.
+    r = subprocess.run(
+        [sys.executable, str(tmp_path / "bench" / "recibo.py"),
+         "--artefacto", str(tmp_path / "fuera-de-dominio-10.json"),
+         "--check", str(tmp_path / "recibo-banda-15-lote11.json")],
+        capture_output=True, text=True, cwd=tmp_path, env={"PATH": "/usr/bin:/bin"},
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_el_predicado_del_lote_quince_reproduce_el_recibo_que_emitio(tmp_path):
+    """El fichero de predicado es carga, no adorno: recomputar debe dar la huella sellada.
+
+    Sin esto, cambiar ``y`` por ``o`` en L3 (una lectura dentro de banda basta para sobrevivir)
+    pasaria la suite entera sin que ningun test lo notara.
+    """
+    (tmp_path / "bench").mkdir()
+    for f in ("recibo.py", "predicado.py"):
+        (tmp_path / "bench" / f).write_bytes((RAIZ / "bench" / f).read_bytes())
+    for f in ("fuera-de-dominio-9.json", "prediccion-batch-9.json", "prediccion-batch-15.json",
+              "predicado-batch-15.json", "recibo-banda-15-lote9.json"):
+        (tmp_path / f).write_bytes((RAIZ / f).read_bytes())
+    r = subprocess.run(
+        [sys.executable, str(tmp_path / "bench" / "recibo.py"),
+         "--artefacto", str(tmp_path / "fuera-de-dominio-9.json"),
+         "--check", str(tmp_path / "recibo-banda-15-lote9.json")],
+        capture_output=True, text=True, cwd=tmp_path, env={"PATH": "/usr/bin:/bin"},
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_en_profundidad_dos_un_nodo_mudo_no_vota_y_no_se_lee_como_cero():
+    """La ausencia se propaga dentro del paso compuesto: el cero seria un voto falso."""
+    doc = {"actos": [
+        {"hechos": {"bloques": [{"min_s": 2.0, "jitter_s": 1.0}, {"min_s": 6.0, "jitter_s": 1.0}]}},
+        {"hechos": {"bloques": [{"min_s": 4.0, "jitter_s": 1.0}]}},
+        {"hechos": {"bloques": [{"min_s": 99.0}]}},
+        {"hechos": {"bloques": []}},
+    ]}
+    pred = {"expr": {"de": "/actos/*",
+                     "despliega": {"op": "razon",
+                                   "a": {"de": "/hechos/bloques/*/min_s", "agrega": "min"},
+                                   "b": {"de": "/hechos/bloques/*/jitter_s", "agrega": "max"}},
+                     "agrega": "media"},
+            "rel": "entre", "valor": [0.0, 10.0]}
+    v = r11.predicado.evaluar(pred, doc)
+    assert (v["estado"], v["sobrevive"]) == ("evaluado", True)
+    # Votan dos de cuatro actos: media(2, 4) = 3,0. Contarlos como cero daria 1,5.
+    assert v["medido"]["expr"] == 3.0, v["medido"]
+    solo_mudos = {"actos": [{"hechos": {"bloques": [{"min_s": 99.0}]}}]}
+    mudo = r11.predicado.evaluar(pred, solo_mudos)
+    assert (mudo["estado"], mudo["causa"]) == ("no_medido", "poblacion_vacia"), mudo

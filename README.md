@@ -1549,6 +1549,70 @@ the file it is verifying. `tests/test_recibo.py` recomputes every cell of both t
 pre-registration files on disk, runs the ten mutants that would each have to survive for a rule to be
 untested, and asserts that a v2 seal needs neither the interpreter nor the translation.
 
+## One degree of composition, and an absence that declares itself
+
+The fourteenth batch closed the positive branch: the verdict is a function of the predicate, not of the
+identifier. It left two debts open, and both are one rule each.
+
+**A declared rule beats the default.** `L3` — the ratio of two block aggregates collapsed within each
+act, divided by the dispersion of the per-act minima — was the one prediction the algebra could not
+write down. `predicado-batch-9.json` lists it under `no_se_traduce`, so the receipt could only report
+it as *not measured*: a debt of language that the corpus could not tell apart from a debt of data.
+Opening exactly **one** degree of composition — a pointer, then a sub-expression per node, then an
+aggregate that collapses them — closes it. `predicado-batch-15.json` declares `no_se_traduce: []`, and
+`predicado.validar` decides that it is expressible **without the document**, before a single value is
+read. A second degree is refused by name (`profundidad 3 supera PROFUNDIDAD_MAXIMA=2`), so the
+language cannot grow in depth without someone declaring that it grew.
+
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-9.json --lote 9 --predicados predicado-batch-15.json --salida recibo-banda-15-lote9.json --prediccion prediccion-batch-15.json ```
+
+That seal prints `3876e573…`, and for the first time the ratio is judged rather than skipped: one
+declared, one emitted, **one evaluated, zero not measured**.
+
+**The frozen prose contradicts itself, and the algebra does not choose.** `prediccion-batch-9.json`
+describes the observability ratio as the mean over acts of `max(jitter) / min(min)`, and in the same
+claim pins its error bound at `2,4797 / 2,1019 = 1,18` — a number that lives in the reciprocal scale,
+`min / jitter`. The two readings are not approximately equal, they are reciprocal: measured on the same
+seal they give `0.276556` and `1.035898`. One is inside the declared band `[0.80, 1.25]` and the other
+is outside — and the band is its own reciprocal (`1 / 1.25 = 0.80`), which is exactly why applying it
+to both readings picks neither. Choosing the reading after seeing the numbers would be fitting the
+instrument to the data, so the translation writes the honest rule instead: `L3` is the conjunction of
+both readings, the verdict is `false` attributed to the literal one, and `medido.y` publishes both
+figures. The falsifier is in the sealed file: a reading that puts *both* interpretations inside the
+band, or a batch in which the literal reading is the one that survives, retires the rule.
+
+**Prose is not a declared cause.** In `predicado-batch-11.json`, `P2` and `P3` travel as bare strings
+(`"P2: mide el coste…"`). A string documents an absence, it does not decide one: reading it as
+`sin_predicado` let a note beat the table, and the four seals of the fourteenth batch changed their
+bytes. Now the declared `motivo` wins, the table `FUERA_DE_LA_HUELLA` answers only for what declares
+nothing, and `P2`/`P3` are written as objects that name their own locus. The fifteenth batch re-judges
+the eleventh batch's four predictions and publishes the same verdicts, byte for byte, under the new
+rules:
+
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-10.json --lote 11 --predicados predicado-batch-15-lote11.json --salida recibo-banda-15-lote11.json --prediccion prediccion-batch-11.json ```
+
+That seal prints `9460000e…` — the same verdicts as the fourteenth batch, under a rule the earlier
+one did not have.
+
+**A seal declares its own pre-registration.** `--check` used to guess the pre-registration from the
+batch number, so a receipt that judges an older batch under newer rules was verified against a text it
+never read and failed with exit code 5. The seal now wins: `pre_registro.ruta` is read first, and the
+number is only a default. Both fifteenth-batch seals verify, and the four seals of the fourteenth batch
+still print `2bf1e78b…`, `cfaadb30…`, `44190141…` and `e800979f…`.
+
+| seal | artefact | pre-registration cited | verdicts |
+|---|---|---|---|
+| `recibo-banda-15-lote9.json` | `fuera-de-dominio-9.json` | `prediccion-batch-15.json` | 1 evaluated, 0 not measured |
+| `recibo-banda-15-lote11.json` | `fuera-de-dominio-10.json` | `prediccion-batch-11.json` | 2 evaluated, 2 out of the footprint |
+
+**Ten mutants, run on 27-Nov-2026, one per rule, all dead.** Each is a single edit that a rule of this batch forbids, and
+each one makes the suite fail: raising the depth ceiling, closing the sub-expression by the wrong
+aggregate, letting a mute node vote as zero, reading the interpreter's absence list as empty, letting
+a bare string declare a cause, letting `_ausencia` ignore the declaration, letting `--check` ignore the
+seal, and turning `L3`'s conjunction into a disjunction. That last one is the reason the suite
+recomputes the ninth batch's receipt instead of reading it: a stored seal is not evidence that its
+translation still says what it said.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

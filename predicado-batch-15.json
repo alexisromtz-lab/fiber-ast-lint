@@ -1,0 +1,65 @@
+{
+ "schema": "fiber-ast-lint/predicado/1",
+ "batch": 15,
+ "title": "L3 traducida: un grado de composicion, declarado y con techo",
+ "cita_pre_registro": {
+  "ruta": "prediccion-batch-15.json",
+  "sha256": "a99c4cbe9db4682b9ad76f93bf8acf8534a9fb6450ee35d05e631cf381776173"
+ },
+ "regla_de_lectura": {
+  "ambiguedad": "El texto congelado escribe '(media de max(jitter de bloque) / min(minimo de bloque))' y a la vez cifra su cota de error en 2,4797, que esta en la escala min/jitter y no en su reciproca. Las dos lecturas no son casi iguales: por acto se diferencian por el cuadrado de la razon. La banda declarada, 0,80 a 1,25, es reciproca de si misma, asi que aplicarla a las dos lecturas no elige ninguna.",
+  "regla": "No se elige lectura despues de conocer los datos. Un pre-registro ambiguo no tiene un valor: tiene un conjunto de valores admisibles, y la prediccion sobrevive solo si sobrevive en todos ellos. Por eso evalua es una conjuncion y cada conjunta lleva su lectura; el medido publica las dos cifras, de modo que el veredicto sea discutible sin tener que repetir la medida.",
+  "lecturas": [
+   {"nombre": "min(min_s) / max(jitter_s) por acto, colapsado por media",
+    "por_que": "es la magnitud que el recibo del lote 9 ya nombra como ratio_min_jitter, y la unica que reproduce la cota de error declarada"},
+   {"nombre": "max(jitter_s) / min(min_s) por acto, colapsado por media",
+    "por_que": "es el cociente que la prosa del claim escribe"}
+  ],
+  "falsifier": "quien muestre que el texto congelado admite una sola lectura. Si admite solo la primera, L3 sobrevive, porque la cifra publicada cae en banda; si admite solo la segunda, L3 no sobrevive. Las dos cifras viajan juntas para que la discusion sea sobre el texto y no sobre el instrumento."
+ },
+ "predicados": [
+  {
+   "id": "L3",
+   "expresa": "dentro de cada acto, una razon de dos agregados de bloque se colapsa por media, y esa media se divide por la dispersion de los minimos de acto. Un acto que no declara bloques no vota, y si no queda ningun acto la poblacion es vacia, nunca cierta. Es el unico grado de composicion del algebra: puntero, sub-expresion, agregado",
+   "evalua": {
+    "y": [
+     {
+      "expr": {
+       "op": "razon",
+       "a": {
+        "de": "/actos/*",
+        "despliega": {
+         "op": "razon",
+         "a": {"de": "/hechos/bloques/*/min_s", "agrega": "min"},
+         "b": {"de": "/hechos/bloques/*/jitter_s", "agrega": "max"}
+        },
+        "agrega": "media"
+       },
+       "b": {"de": "/actos/*/hechos/minimo_s", "agrega": "dispersion"}
+      },
+      "rel": "entre",
+      "valor": [0.8, 1.25]
+     },
+     {
+      "expr": {
+       "op": "razon",
+       "a": {
+        "de": "/actos/*",
+        "despliega": {
+         "op": "razon",
+         "a": {"de": "/hechos/bloques/*/jitter_s", "agrega": "max"},
+         "b": {"de": "/hechos/bloques/*/min_s", "agrega": "min"}
+        },
+        "agrega": "media"
+       },
+       "b": {"de": "/actos/*/hechos/minimo_s", "agrega": "dispersion"}
+      },
+      "rel": "entre",
+      "valor": [0.8, 1.25]
+     }
+    ]
+   }
+  }
+ ],
+ "no_se_traduce": []
+}

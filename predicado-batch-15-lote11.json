@@ -1,0 +1,79 @@
+{
+ "schema": "fiber-ast-lint/predicado/1",
+ "batch": 15,
+ "title": "Las mismas cuatro predicciones del lote 14, con la ausencia declarada en vez de heredada",
+ "cita_pre_registro": {
+  "ruta": "prediccion-batch-11.json",
+  "sha256": "5108db85cdc2f39fd1257cce17185cc3e6b2adeb4e1ecb721fedc87774e5da53"
+ },
+ "predicados": [
+  {
+   "id": "P1",
+   "expresa": "hay al menos un publicable (publicables > 0), al menos un acto en banda de riesgo, y la proporcion de actos en banda de riesgo sobre los publicables es como mucho la mitad",
+   "evalua": {
+    "y": [
+     {
+      "expr": {
+       "de": "/resumen/publicables_como_booleano",
+       "agrega": "valor"
+      },
+      "rel": "gt",
+      "valor": 0
+     },
+     {
+      "expr": {
+       "de": "/resumen/en_banda_de_riesgo_n",
+       "agrega": "valor"
+      },
+      "rel": "ge",
+      "valor": 1
+     },
+     {
+      "expr": {
+       "op": "razon",
+       "a": {
+        "de": "/resumen/en_banda_de_riesgo_n",
+        "agrega": "valor"
+       },
+       "b": {
+        "de": "/resumen/publicables_como_booleano",
+        "agrega": "valor"
+       }
+      },
+      "rel": "le",
+      "valor": 0.5
+     }
+    ]
+   }
+  },
+  {
+   "id": "P4",
+   "expresa": "usos_para_amortizar del acto mas caro cae entre 20 y 40 comprobaciones de nueve relojes; el maximo se toma sobre los actos que declaran cotizacion",
+   "evalua": {
+    "expr": {
+     "de": "/actos/*/cotizacion/usos_para_amortizar",
+     "agrega": "max"
+    },
+    "rel": "entre",
+    "valor": [
+     20,
+     40
+    ]
+   }
+  }
+ ],
+ "no_se_traduce": [
+  {
+   "id": "P2",
+   "motivo": "fuera_de_la_huella",
+   "locus": "tests/test_recibo.py::test_verificar_el_recibo_cuesta_menos_de_una_centesima_parte_de_medir_la_compuerta",
+   "por_que": "mide el coste de verificar el recibo, y un veredicto sobre la verificacion no puede viajar dentro de la huella que esa verificacion firma"
+  },
+  {
+   "id": "P3",
+   "motivo": "fuera_de_la_huella",
+   "locus": "tests/test_recibo.py::test_la_huella_se_reproduce_con_jq_y_shasum_sin_python",
+   "por_que": "mide la estabilidad de la huella, y por la misma razon se queda fuera de ella"
+  }
+ ]
+}

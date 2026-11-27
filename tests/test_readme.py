@@ -8,6 +8,7 @@ vendored here; they stay dated and sourced, and no test pretends otherwise.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -242,3 +243,64 @@ def test_los_sellos_del_lote_14_publicados_son_los_de_los_recibos() -> None:
     assert len(publicadas) == 11, (
         f"el README cita {len(publicadas)} sellos; son cuatro del lote 14 y siete anteriores"
     )
+
+
+SECCION_15 = "## One degree of composition, and an absence that declares itself"
+
+
+def _seccion_15() -> list[str]:
+    dentro = False
+    salida: list[str] = []
+    for linea in README.splitlines():
+        if linea.startswith(SECCION_15):
+            dentro = True
+            continue
+        if dentro and linea.startswith("## "):
+            break
+        if dentro:
+            salida.append(linea)
+    assert salida, f"el README no publica la seccion `{SECCION_15}`"
+    return salida
+
+
+def test_la_tabla_de_sellos_del_lote_15_se_recomputa() -> None:
+    """Cada celda de la tabla del lote 15 se compara contra el fichero que nombra."""
+    filas = [
+        [c.strip() for c in l.strip().strip("|").split("|")]
+        for l in _seccion_15()
+        if l.startswith("| `recibo-banda-15-")
+    ]
+    assert len(filas) == 2, filas
+    texto = "\n".join(_seccion_15())
+    for fichero, artefacto, pre_registro, recuento in filas:
+        real = json.loads((RAIZ / fichero.strip("`")).read_text(encoding="utf-8"))
+        assert real["fuente_artefacto"]["ruta"] == artefacto.strip("`"), artefacto
+        assert (RAIZ / artefacto.strip("`")).exists(), artefacto
+        assert real["pre_registro"]["ruta"] == pre_registro.strip("`"), pre_registro
+        assert real["pre_registro"]["sha256"] == hashlib.sha256(
+            (RAIZ / pre_registro.strip("`")).read_bytes()).hexdigest(), pre_registro
+        assert f"`{real['huella'][:8]}…`" in texto, f"el README no publica {real['huella'][:8]}"
+        v = real["resumen"]["veredictos"]
+        assert f"{v['evaluadas']} evaluated" in recuento, recuento
+        assert re.search(rf"{v['no_medidas']} (not measured|out of the footprint)", recuento), recuento
+
+
+def test_el_readme_del_lote_15_publica_las_dos_lecturas_medidas() -> None:
+    """Las dos cifras del README son las del recibo, y la banda es reciproca de si misma."""
+    texto = "\n".join(_seccion_15())
+    l3 = json.loads((RAIZ / "recibo-banda-15-lote9.json").read_text())["veredictos"][0]
+    cifras = [c["expr"] for c in l3["medido"]["y"]]
+    for c in cifras:
+        assert f"{c:.6f}" in texto, f"el README no publica {c:.6f}"
+    bajo, alto = l3["medido"]["y"][0]["valor"]
+    assert round(1 / alto, 10) == bajo, (bajo, alto)
+    assert "its own reciprocal" in texto
+
+
+def test_el_readme_del_lote_15_declara_el_techo_que_el_interprete_aplica() -> None:
+    """Un techo citado en prosa y otro aplicado en codigo es una segunda fuente de verdad."""
+    from bench import predicado as p11
+
+    texto = "\n".join(_seccion_15())
+    assert f"PROFUNDIDAD_MAXIMA={p11.PROFUNDIDAD_MAXIMA}" in texto, texto[:400]
+    assert f"profundidad {p11.PROFUNDIDAD_MAXIMA + 1} supera" in texto

@@ -248,8 +248,19 @@ def _leer_predicciones(ruta: Path | None) -> list[dict] | None:
     return list(json.loads(ruta.read_text()).get("predictions", []))
 
 
-def _ruta_prediccion(lote: int | None, junto_a: Path) -> Path | None:
-    """El pre-registro del lote que el recibo cita, si vive junto al recibo."""
+def _ruta_prediccion(lote: int | None, junto_a: Path,
+                     sellado: dict | None = None) -> Path | None:
+    """El pre-registro del lote que el recibo cita, si vive junto al recibo.
+
+    El sello declara su pre-registro y esa declaracion vence al default: un recibo puede
+    juzgar las predicciones de un lote anterior bajo las reglas de uno nuevo, y adivinar por
+    numero de lote lo haria citar un texto que no es el que sus veredictos juzgaron.
+    """
+    decl = (sellado or {}).get("pre_registro") or {}
+    if decl.get("ruta"):
+        ruta = junto_a / decl["ruta"]
+        if ruta.exists():
+            return ruta
     if lote is None:
         return None
     ruta = junto_a / f"prediccion-batch-{lote}.json"
@@ -302,6 +313,9 @@ EVALUA = {
 }
 # Predicciones cuya magnitud se mide, pero fuera de la huella: un veredicto sobre la
 # verificacion o sobre la propia huella no puede viajar dentro de la huella que firma.
+# El default de la ausencia para lo que no la declara. El contrato v1 la lee siempre desde
+# aqui y por eso se queda: su recuento viaja dentro de la huella de los recibos sellados. En
+# v3 una regla declarada vence a esta tabla, y la tabla solo responde por lo que calla.
 FUERA_DE_LA_HUELLA = {
     "P2": "tests/test_recibo.py::test_verificar_el_recibo_cuesta_menos_de_una_centesima_parte_de_medir_la_compuerta",
     "P3": "tests/test_recibo.py::test_la_huella_se_reproduce_con_jq_y_shasum_sin_python",
@@ -453,26 +467,58 @@ def _resolucion(rec: dict) -> dict:
                                 "dispersiones_por_sesion") if k in rec}
 
 
-def _veredictos_v3(rec: dict, preds: list[dict] | None, mapa: dict) -> list[dict]:
+def _ausencia(pid: str, ausencias: dict) -> dict:
+    """El registro de una prediccion que no se traduce: la causa es una propiedad declarada.
+
+    Antes de este lote la unica fuente era ``FUERA_DE_LA_HUELLA``, una tabla indexada por
+    identificador: el juicio negativo seguia dependiendo del nombre aunque el positivo ya no.
+    Ahora manda la declaracion de la traduccion y la tabla queda como default para lo que no
+    declara nada. El ``por_que`` del fichero no viaja al veredicto: documenta la ausencia sin
+    mover la huella de un recibo que solo cambia de procedencia.
+    """
+    a = ausencias.get(pid) or {}
+    motivo = a.get("motivo")
+    if not motivo:
+        if pid in FUERA_DE_LA_HUELLA:
+            return {"estado": "no_medido", "causa": "fuera_de_la_huella",
+                    "locus": FUERA_DE_LA_HUELLA[pid]}
+        return {"estado": "no_medido", "causa": "sin_predicado"}
+    if motivo not in CAUSAS:
+        motivo = "sin_predicado"
+    fuera = {"estado": "no_medido", "causa": motivo}
+    if a.get("locus"):
+        fuera["locus"] = a["locus"]
+    return fuera
+
+
+def _veredictos_v3(rec: dict, preds: list[dict] | None, mapa: dict,
+                   ausencias: dict | None = None) -> list[dict]:
     """Un registro por prediccion declarada, juzgado por su predicado y no por su nombre.
 
     Ninguna rama de esta funcion consulta el identificador para decidir el juicio: el
     identificador solo sirve para buscar la traduccion y para etiquetar el registro. Lo que
-    el pre-registro no traduce se publica ``sin_predicado``, y lo que el interprete no
-    entiende se publica ``predicado_ilegible``: las dos son causas, ninguna es una caida.
+    el pre-registro no traduce se publica con la causa que la traduccion declare, y lo que el
+    interprete no entiende se publica ``predicado_ilegible``; las dos son causas, ninguna es
+    una caida.
+
+    El defecto de gramatica se decide con ``predicado.validar`` **antes** de leer un valor: es
+    deuda del lenguaje, y confundirla con la deuda del dato es lo que hacia que las dos se
+    contaran como la misma cifra.
     """
     doc = _resolucion(rec)
     out = []
     for p in preds or []:
         pid = p["id"]
         base = {"id": pid, "prediccion": p.get("claim")}
-        if pid in FUERA_DE_LA_HUELLA:
-            out.append({**base, "estado": "no_medido", "causa": "fuera_de_la_huella",
-                        "locus": FUERA_DE_LA_HUELLA[pid]})
-            continue
         traducido = mapa.get(pid)
         if traducido is None:
-            out.append({**base, "estado": "no_medido", "causa": "sin_predicado"})
+            out.append({**base, **_ausencia(pid, ausencias or {})})
+            continue
+        defectos = predicado.validar(traducido["evalua"])
+        if defectos:
+            out.append({**base, "estado": "no_medido", "causa": "predicado_ilegible",
+                        "detalle": "; ".join(defectos),
+                        "evalua": traducido.get("expresa", "")})
             continue
         r = predicado.evaluar(traducido["evalua"], doc)
         if r["estado"] == "no_medido":
@@ -515,8 +561,8 @@ def recibo_v3(arte: dict, fuente: str, lote: int | None = None,
             "k_mediana": mediana,
             "dispersion": round(max(ks) / min(ks), 6) if n > 1 else None,
         }
-    mapa, cita = predicado.leer(predc_ruta,
-                                junto_a=predc_ruta.parent if predc_ruta else None)
+    mapa, cita, ausencias = predicado.leer(predc_ruta,
+                                           junto_a=predc_ruta.parent if predc_ruta else None)
     preds = _leer_predicciones(pred_ruta)
     if cita is not None and rec.get("pre_registro") is not None:
         if cita["cita_pre_registro"]["sha256"] != rec["pre_registro"]["sha256"]:
@@ -526,7 +572,7 @@ def recibo_v3(arte: dict, fuente: str, lote: int | None = None,
                 f" {rec['pre_registro']['sha256']}")
     rec["schema"] = CONTRATO_V3
     rec["predicados"] = cita
-    rec["veredictos"] = _veredictos_v3(rec, preds, mapa)
+    rec["veredictos"] = _veredictos_v3(rec, preds, mapa, ausencias)
     rec["resumen"]["veredictos"] = {
         "declaradas": None if preds is None else len(preds),
         "emitidas": len(rec["veredictos"]),
@@ -623,7 +669,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.prediccion:
         pred_ruta = args.prediccion
     elif sellado and (sellado.get("veredictos") or sellado.get("pre_registro")):
-        pred_ruta = _ruta_prediccion(lote, args.check.parent)
+        pred_ruta = _ruta_prediccion(lote, args.check.parent, sellado)
     else:
         pred_ruta = None
     # La traduccion tampoco se adivina: la declara el recibo sellado, o el argumento.

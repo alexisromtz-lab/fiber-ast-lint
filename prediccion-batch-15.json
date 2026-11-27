@@ -1,0 +1,75 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 15,
+ "title": "Un grado de composicion y la ausencia declarada: dos deudas distintas, dos causas distintas",
+ "declared_at": "2026-11-27",
+ "declared_before_computation": true,
+ "why": "El lote 14 demostro que el juicio positivo no consulta el identificador. Su lector de esa propiedad no la comprueba: la guarda de test_r1 busca la palabra 'id' y el codigo consulta 'pid', de modo que la unica rama que sigue consultando el identificador es la de ausencia, FUERA_DE_LA_HUELLA. El lote 15 no anade una ley: aplica a la rama negativa la ley que el lote 14 ya publico para la positiva, y abre exactamente un grado de composicion para cerrar el unico hueco expresivo medido (L3).",
+ "what_is_new": {
+  "despliega": "Una expresion puede desplegar una sub-expresion sobre cada nodo de un puntero y colapsar los resultados con un agregado. Es profundidad 2: puntero, sub-expresion, agregado. No se abre profundidad 3.",
+  "profundidad_declarada": "La profundidad es una constante del algebra (PROFUNDIDAD_MAXIMA = 2), no una propiedad emergente de la recursion. Un despliega dentro de un despliega es ilegible, y se sabe antes de leer un solo dato.",
+  "ausencia_declarada": "Una prediccion no traducida puede declarar el motivo de su ausencia en el fichero de traduccion, con su locus. Una regla declarada vence al default: la tabla FUERA_DE_LA_HUELLA queda como valor por defecto para lo que no declara nada."
+ },
+ "method": {
+  "separacion": "El recibo juzga al sujeto. El banco juzga al instrumento. Las reglas F1 a F6 no son predicciones sobre el artefacto y por eso no entran en 'predictions': entrarian como veredictos que ningun predicado puede emitir.",
+  "no_retroajuste": "L3 no es una prediccion nueva. Se declaro en prediccion-batch-9.json antes de que los datos existieran, con su rango fijado. El lote 15 solo aporta la gramatica que faltaba para juzgarla, y la traduccion cita aquel fichero por sha256.",
+  "causas_congeladas": "La particion de la deuda usa cuatro causas que ya estan en CAUSAS. No se anade una quinta: una causa nueva re-firmaria los recibos del lote 14, que viajan dentro de su huella."
+ },
+ "predictions": [
+  {
+   "id": "L3",
+   "kind": "cuantitativa",
+   "claim": "La dispersion dentro de un acto es del tamano de la dispersion entre actos: (media de max(jitter de bloque) / min(minimo de bloque) sobre los cinco actos) / dispersion(min) cae en [0,80, 1,25].",
+   "umbral": [
+    0.8,
+    1.25
+   ],
+   "cita": "prediccion-batch-9.json, prediccion L3. El rango y el estadistico son los que aquel fichero declaro; aqui no se tocan.",
+   "cota_error": "el lote 8 da 2,4797 / 2,1019 = 1,18 con dos actos; el rango admite que la razon se mueva con ventanas distintas",
+   "falsifier": "la razon fuera de [0,80, 1,25]"
+  }
+ ],
+ "reglas_del_instrumento": [
+  {
+   "id": "F1",
+   "claim": "despliega es una incrustacion de la profundidad 1: para todo puntero plano P y todo agregado A del corpus, {\"de\": P, \"agrega\": A} y {\"de\": raiz(P), \"despliega\": {\"de\": resto(P), \"agrega\": \"valor\"}, \"agrega\": A} devuelven el mismo float, bit a bit, sobre los cuatro artefactos sellados.",
+   "falsifier": "cualquier par que difiera, aunque sea en el ultimo decimal"
+  },
+  {
+   "id": "F2",
+   "claim": "La profundidad es declarada y no emergente: un predicado con despliega dentro de despliega es ilegible, y clasificar() lo dice sin recibir el documento.",
+   "falsifier": "que la profundidad 3 emita un veredicto, con datos o sin ellos"
+  },
+  {
+   "id": "F3",
+   "claim": "Una regla declarada vence al default: si la traduccion declara el motivo y el locus de una ausencia, el veredicto publica esa causa y ese locus; cambiar el motivo en el fichero cambia la causa sin tocar una linea de Python.",
+   "falsifier": "que el motivo del fichero no tenga efecto sobre el veredicto"
+  },
+  {
+   "id": "F4",
+   "claim": "La deuda de un NO_MEDIDO es total y disjunta en cuatro clases: gramatica (predicado_ilegible, decidida antes de leer datos), hueco (fuera_de_la_huella, el sello no contiene la magnitud), traduccion (sin_predicado, el pre-registro no se tradujo) y dato (metrica_ausente o poblacion_vacia, la magnitud esta en el esquema y falta en el valor).",
+   "falsifier": "una causa fuera de esas cuatro, o un sin_predicado que sea un fallo de gramatica"
+  },
+  {
+   "id": "F5",
+   "claim": "Tras el lote 15 el residual de NO_MEDIDO sobre las 13 predicciones declaradas es de tamano 2, las dos fuera_de_la_huella, con cero sin_predicado y cero inexpresables.",
+   "falsifier": "un residual distinto de 2, o un sin_predicado entre las 13"
+  },
+  {
+   "id": "F6",
+   "claim": "Los cuatro recibos del lote 14 sobreviven intactos: mismo blob y --check con RC 0, sin re-firmar nada de lo publicado.",
+   "falsifier": "cualquier blob distinto, o un --check que devuelva algo que no sea 0"
+  }
+ ],
+ "falsification": "Cada regla nombra su falsador arriba. El lote se publica igual si alguna cae: lo que cambia es la conclusion, no la entrega. No se admite cambiar el estadistico de L3, ni ensanchar el rango despues de verlo, ni retirar un acto por su resultado.",
+ "what_it_would_mean": {
+  "F1_a_F4_y_F6_sobreviven": "el algebra tiene una profundidad declarada y la ausencia tiene causa declarada: la deuda del lenguaje y la del dato dejan de ser la misma cifra.",
+  "L3_sobrevive": "la dispersion intra-acto es del tamano de la inter-acto, y un bloque no representa al acto ni el acto a otro acto.",
+  "L3_cae": "dentro del acto hay mas (o menos) dispersion que entre actos y el piso hay que medirlo intercalado, no antes de cotizar"
+ },
+ "cost": {
+  "actos_nuevos": 0,
+  "relojes_nuevos": 0,
+  "razon": "el lote no mide el sujeto: mide el instrumento sobre artefactos ya sellados. Cero relojes, cero escrituras fuera del arbol del repo."
+ }
+}
