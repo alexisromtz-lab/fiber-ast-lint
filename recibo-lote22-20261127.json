@@ -399,6 +399,11 @@
       "alcance": "vale para el instante del censo, no para ahora: un push posterior mueve HEAD y este recibo no lo vuelve a medir",
       "limite": "no se re-midio el defaultBranchRef despues de leer; el veredicto de P1 no depende de ello porque el locus citable esta al sha congelado"
     },
+    "reproducibilidad": {
+      "procedimiento": "cada fila de loci lleva sujeto, sha, archivo, linea y el texto de la linea: se baja raw.githubusercontent.com/<sujeto>/<sha>/<archivo>, se abre esa linea y se adjudica contra el vocabulario de causas. No hace falta el constructor ni la maquina que midio",
+      "lo_que_no_es_reproducible": "la lectura se hizo a mano sobre la funcion entera; un tercero puede llegar a otro veredicto sobre la misma fila, y para eso esta el texto y la causa: la discrepancia se discute sobre la fila, no sobre el total",
+      "lo_que_falta": "el constructor vive fuera del arbol porque depende de los out.json de la corrida; el recibo publica el agregado de los veinte y la fila por sujeto con rc y bytes, que es lo que el constructor consumia"
+    },
     "por_causa": {
       "proyeccion_inyectiva": 60,
       "fichero_no_parsea": 5,
