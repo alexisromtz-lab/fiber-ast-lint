@@ -1802,6 +1802,16 @@ reproduces no line, and declares `NO_MEDIDO_POR_FALTA_DE_LICENCIA` for the rest.
 outward produced a finding that this corpus forbids publishing in the form this corpus demands. The
 tension is recorded, not resolved.
 
+The first green of this act was false, and in the direction that matters. The test that checks the
+seal cites a commit and asserts that it exists. Run here, on a clone holding the whole history, it
+passed. Run in CI, on the default `fetch-depth: 1` checkout, it failed. The assertion said *this
+repository* and measured *this clone*: an observer reporting the size of its own window as a
+property of the subject. The fix is not to soften the assertion but to widen the window — the
+checkout now fetches the full history, forty-seven commits — and to make the shallow case fail under
+its own name, `NO_MEDIDO` and not a zero, so that whoever reads the failure is told which of the two
+things broke. Nothing is rescued inside the test: fetching the object there would mutate the clone
+under the feet of the next reader, which is the same error one level down.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

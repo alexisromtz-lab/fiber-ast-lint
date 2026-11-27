@@ -48,15 +48,51 @@ def test_el_recibo_nombra_sus_dos_sujetos_con_sha_completo() -> None:
     )
 
 
+def _clon_superficial() -> bool:
+    """Un clon con ``--depth`` no ve el historial: no es el repositorio, es una ventana."""
+    r = _git("rev-parse", "--is-shallow-repository")
+    return r.returncode == 0 and r.stdout.strip() == "true"
+
+
 def test_el_sha_del_instrumento_existe_en_este_repositorio() -> None:
     """La mitad verificable sin red: el recibo no puede citar una version que nunca existio.
 
     La otra mitad —que el sujeto siga en el sha medido— necesita red y no se comprueba aqui.
     Se declara NO_MEDIDO en el recibo en lugar de darse por buena.
+
+    El universo de este lector es el clon, no el repositorio, y esas dos cosas difieren en
+    cuanto el clon es superficial. La primera version de este test afirmaba lo segundo
+    midiendo lo primero: verde en local con el historial completo, rojo en CI con
+    ``fetch-depth: 1``. Aqui no se rescata nada: pedir el objeto desde el test mutaria el
+    clon bajo los pies del lector siguiente. El fallo separa las dos causas —no existe en el
+    repositorio, o existe fuera de la ventana de este clon— y la correccion es del checkout.
     """
     sha = _recibo()["instrumento"]["sha"]
     existe = _git("cat-file", "-e", f"{sha}^{{commit}}").returncode == 0
-    assert existe, f"el recibo cita el commit {sha}, que no esta en este repositorio"
+    if existe:
+        return
+    if _clon_superficial():
+        raise AssertionError(
+            f"clon superficial: no se puede concluir que {sha} no exista, solo que esta fuera "
+            "de la ventana que este clon ve. NO_MEDIDO, que no es un cero. fetch-depth: 0."
+        )
+    raise AssertionError(f"el recibo cita el commit {sha}, que no esta en este repositorio")
+
+
+def test_el_clon_del_lector_ve_el_historial_que_sus_afirmaciones_suponen() -> None:
+    """El contrato del universo, aparte del veredicto: quien mide tiene que decir que ve.
+
+    Los dos tests que citan commits solo pueden afirmar sobre el historial si el clon lo
+    tiene. Declararlo aqui convierte un ``fetch-depth`` recortado en un fallo con nombre en
+    lugar de en un verde o un rojo que mienten los dos por el mismo motivo.
+    """
+    if _clon_superficial():
+        raise AssertionError(
+            "este clon es superficial: los tests que citan commits miden una ventana del "
+            "historial, no el historial. Usa fetch-depth: 0 (47 commits, barato)."
+        )
+    total = _git("rev-list", "--count", "HEAD")
+    assert total.returncode == 0 and int(total.stdout.strip()) > 0
 
 
 def test_el_sha_del_sujeto_no_es_un_relleno() -> None:

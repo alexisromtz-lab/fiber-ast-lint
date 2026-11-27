@@ -13,7 +13,11 @@ jobs:
       matrix:
         python: ["3.11", "3.12", "3.13"]
     steps:
+      # Historial completo: los tests que citan commits miden el repositorio, y con
+      # fetch-depth: 1 medirian una ventana. 47 commits, no es un coste.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -46,7 +50,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      # Historial completo: los tests que citan commits miden el repositorio, y con
+      # fetch-depth: 1 medirian una ventana. 47 commits, no es un coste.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
