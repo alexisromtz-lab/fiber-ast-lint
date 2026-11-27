@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
 
 from fiber_ast_lint.cli import construir
@@ -299,8 +300,10 @@ def test_el_readme_del_lote_15_publica_las_dos_lecturas_medidas() -> None:
 
 def test_el_readme_del_lote_15_declara_el_techo_que_el_interprete_aplica() -> None:
     """Un techo citado en prosa y otro aplicado en codigo es una segunda fuente de verdad."""
-    from bench import predicado as p11
+    sys.path.insert(0, str(RAIZ / "bench"))
+    import predicado
 
     texto = "\n".join(_seccion_15())
-    assert f"PROFUNDIDAD_MAXIMA={p11.PROFUNDIDAD_MAXIMA}" in texto, texto[:400]
-    assert f"profundidad {p11.PROFUNDIDAD_MAXIMA + 1} supera" in texto
+    techo = predicado.PROFUNDIDAD_MAXIMA
+    assert f"PROFUNDIDAD_MAXIMA={techo}" in texto, texto[:400]
+    assert f"profundidad {techo + 1} supera" in texto
