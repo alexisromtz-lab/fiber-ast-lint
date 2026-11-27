@@ -133,6 +133,22 @@ def test_todo_confirmado_tiene_fila_y_licencia() -> None:
         assert filas[clave]["licencia"] in OSI
 
 
+def test_ninguna_fila_se_publica_sin_la_linea_que_se_adjudico() -> None:
+    """La frase de `lectura.reproducibilidad` dice donde vive la linea; aqui se cuenta.
+
+    Una fila sin la linea adjudicada no se puede volver a leer, y el recibo afirma que las 125
+    se pueden. Las refutadas y las no medidas la llevan en `texto`; las confirmadas la llevan
+    abriendo `evidencia`, cuyo resto es la razon. Nadie lleva las dos y nadie lleva ninguna.
+    """
+    loci = _cargar(RECIBO)["loci"]
+    con_linea = [x for x in loci if x.get("texto")]
+    con_evidencia = [x for x in loci if x.get("evidencia")]
+    assert not [x for x in loci if not x.get("texto") and not x.get("evidencia")]
+    assert not [x for x in loci if x.get("texto") and x.get("evidencia")]
+    assert {x["veredicto"] for x in con_linea} == {"REFUTADO", "NO_MEDIDO"}
+    assert {x["veredicto"] for x in con_evidencia} == {"CONFIRMADO"}
+
+
 def test_el_agregado_reconcilia_y_no_deja_sumando_huerfano() -> None:
     agregado = _cargar(RECIBO)["corrida"]["agregado"]
     partes = ["pierde", "guardadas", "acumulacion", "posicional", "sin_len"]
