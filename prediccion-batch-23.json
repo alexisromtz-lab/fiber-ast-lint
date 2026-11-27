@@ -1,0 +1,66 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 23,
+  "title": "la precision por familia y no por caso: el denominador ya esta pagado",
+  "declared_before_computation": true,
+  "que_es": "El lote 22 dejo escrito su proximo acto en recibo-lote22-20261127.json y este fichero lo ejecuta sin gastar un clon ni un reloj: se declara antes de cruzar una sola fila. El acto no vuelve a ejecutar el detector ni relee codigo ajeno, porque el denominador ya se pago leyendo. Lo que se predice aqui no es un recuento --los recuentos ya estan publicados-- sino el acoplamiento entre dos particiones de las mismas 125 filas: la familia (la regla compuesta que emitio la fila) y la causa (el motivo por el que la lectura la refuto). Si esas dos particiones son independientes, el instrumento no puede prometer precision por ningun camino barato; si estan acopladas, la superficie se puede suprimir en el emisor a coste cero en vez de adjudicarla leyendo a coste por fila. Se declara ademas, antes de mirar, que las tres predicciones no son independientes entre si: miden el mismo acoplamiento desde tres proyecciones y la decision se toma con las tres, no con la mejor.",
+  "lo_ya_medido_antes_de_este_fichero": {
+    "el_acto_lo_declaro_el_lote_22": "recibo-lote22-20261127.json, proximo_acto: nombre `lote 23, la precision por familia y no por caso`, predicado `sobre la misma cohorte congelada de veinte sujetos y sin releer una sola linea, la familia declarada por el instrumento separa los 10 confirmados de las 107 refutadas mejor que el azar: la razon de verosimilitud de la familia CAJA+ruta sobre el resto es mayor que 3`, falsador `cada familia con confirmados tiene refutadas de la misma familia en proporcion mayor que la de los confirmados: la familia no informa y el instrumento debe callar la superficie en vez de publicarla`, requisito `el denominador ya esta pagado: 125 loci adjudicados con causa nombrada en este recibo`.",
+    "el_denominador_esta_pagado": "recibo-lote22-20261127.json publica 125 loci adjudicados, cada uno con familia, causa y veredicto nombrados: 10 CONFIRMADO, 107 REFUTADO, 8 NO_MEDIDO. Este acto los cuenta; no los vuelve a juzgar, no clona ningun sujeto y no toca detect.py.",
+    "la_precision_del_lote_22_y_su_denominador": "recibo-lote22-20261127.json, veredictos: P2 refutada con 10/125 = 0.080 contra el umbral 1/6. Ese denominador es el de la salida del instrumento, no el de la poblacion que el instrumento ofrece como candidata: incluye filas que ninguna lectura puede confirmar por construccion. Este acto declara el subconjunto candidato antes de contarlo, y no reescribe P2 del lote 22: un veredicto publicado no se re-evalua con otro denominador, se mide aparte y se publica al lado.",
+    "dos_vocabularios_distintos_que_el_reporte_mezclo": "El recibo del lote 22 tiene dos campos de clasificacion y no uno: `familia` toma 19 valores y nombra la regla compuesta que emitio la fila (CAJA, CAJA+ESPACIO, CAJA+ESPACIO+NORMALIZA, CAJA+ESPACIO+REGEX, CAJA+REBANADA, CAJA+REGEX, CAJA+RUTA, CAJA+SEPARADOR, COLUMNA, CONJUNTO+ESPACIO, CONJUNTO+ESPACIO+REGEX, ESPACIO, ESPACIO+REBANADA, NORMALIZA, NORMALIZA+SEPARADOR, PREFIJO, REBANADA, RUTA, SEPARADOR); `causa` toma 10 valores y nombra el motivo de la adjudicacion (agregacion_intencionada, clave_de_protocolo, colision_sin_perdida, escritura_posicional, fichero_no_parsea, invariante_externo_no_declarado, normalizacion_para_consulta, proyeccion_inyectiva, proyeccion_no_inyectiva_sin_medicion, uso_como_conjunto). El reporte del turno las trato como el mismo objeto. Se separan aqui antes de medir porque la prediccion heredada del lote 22 habla de familia y la benignidad estructural vive en causa: confundirlas produciria una prediccion sobre un campo que no es el que se mide.",
+    "una_cifra_relayada_que_este_fichero_no_adopta_como_medicion_propia": "El reporte del lote 22 relayado en el turno del CEO afirma 85 filas de causa estructural benigna (proyeccion_inyectiva o escritura_posicional) frente a 40 candidatas. No la he recomputado. Entra aqui declarada como relayada, y el acto la recomputa como primer paso: si no reproduce 85/40, la discrepancia se publica antes que cualquier veredicto y ninguna de las tres predicciones se evalua contra el numero ajeno. Ninguna de las tres predicciones depende de esa cifra: las tres se enuncian sobre el acoplamiento familia-causa, que el relay no toca.",
+    "el_instrumento_congelado": "src/fiber_ast_lint/detect.py mide sha256 b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6 (31437 bytes) sobre el arbol 350ebc4, el mismo que el recibo del lote 22 publico como detect_py_sha256_antes y detect_py_sha256_despues. Este acto no lo ejecuta, asi que la serie externa no puede moverse por su culpa."
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "Sobre los 117 loci adjudicados (CONFIRMADO + REFUTADO; los 8 NO_MEDIDO quedan fuera y su sensibilidad se publica aparte), la familia que el instrumento declaro separa lo confirmado de lo refutado mejor que el azar: la razon de verosimilitud de la familia CAJA+RUTA sobre el resto es mayor que 3. La razon se define LR = P(CAJA+RUTA | CONFIRMADO) / P(CAJA+RUTA | REFUTADO) contada sobre filas, sin suavizado; un denominador cero se publica como NO_MEDIDO y no como infinito, porque un cero de denominador es estado del calculo y no del objeto. Es la prediccion que el lote 22 dejo escrita, con su umbral y su sujeto.",
+      "falsifier": "LR(CAJA+RUTA) <= 3 sobre los 117 adjudicados de recibo-lote22-20261127.json, o denominador cero que deje la razon en NO_MEDIDO",
+      "falsador_declarado_en_el_lote_22": "cada familia con confirmados tiene refutadas de la misma familia en proporcion mayor que la de los confirmados: la familia no informa y el instrumento debe callar la superficie en vez de publicarla",
+      "locus": "recibo-lote22-20261127.json",
+      "declared_before": "cualquier cruce de familia por veredicto sobre los loci del lote 22"
+    },
+    {
+      "id": "P2",
+      "claim": "Los 10 CONFIRMADO no se concentran en una sola familia: al menos dos valores distintos de familia llevan al menos un CONFIRMADO. Si una sola regla compuesta explica los diez, el instrumento no tiene una superficie sino un caso, y ofrecerlo como producto seria ofrecer un ejemplo. La prediccion es sobre la forma de la evidencia, no sobre su tamano: con diez confirmados, la diferencia entre una regla y dos no se puede vender como tasa, pero si decide si el siguiente acto es suprimir superficie o ampliar reglas.",
+      "falsifier": "una sola familia concentra los 10 CONFIRMADO en recibo-lote22-20261127.json, es decir familias_con_confirmado == 1",
+      "locus": "recibo-lote22-20261127.json",
+      "declared_before": "cualquier cruce de familia por veredicto sobre los loci del lote 22"
+    },
+    {
+      "id": "P3",
+      "claim": "La causa estructural benigna no se reparte por igual entre familias: existe al menos una familia con diez o mas filas de causa benigna (proyeccion_inyectiva o escritura_posicional) y cero confirmados, y existe al menos una familia con confirmados y cero filas de causa benigna. Ese acoplamiento es lo que permite suprimir la superficie en el emisor, a coste cero, en vez de adjudicarla leyendo, a coste por fila. Si en cambio toda familia que confirma carga tambien causas benignas, la benignidad no es una propiedad de la regla y la supresion tendria que hacerse por causa, que se paga leyendo: es la diferencia entre una compuerta y una opinion.",
+      "falsifier": "toda familia con confirmados carga ademas al menos una fila de causa benigna, o ninguna familia acumula diez filas de causa benigna sin un confirmado, medido en recibo-lote22-20261127.json",
+      "locus": "recibo-lote22-20261127.json",
+      "declared_before": "cualquier cruce de familia por causa sobre los loci del lote 22"
+    }
+  ],
+  "no_independencia": "Las tres predicciones se cuentan sobre las mismas 125 filas y no son independientes: P1 y P3 miden el mismo acoplamiento familia-causa desde dos proyecciones, y P1 puede cumplirse con una sola familia confirmada, que es exactamente el falsador de P2. No se aplica correccion por multiplicity y no se declara significancia: lo que se decide es una accion --suprimir la superficie en el emisor o no-- y la accion se toma con las tres, no con la mejor de las tres. Publicar tres veredictos y escoger el favorable seria el defecto que este parrafo declara antes de medir.",
+  "universo": {
+    "poblacion": "los 125 loci adjudicados de recibo-lote22-20261127.json: 20 sujetos congelados del lote 22, ya leidos, ninguno releido en este acto",
+    "adjudicados": "117 = 10 CONFIRMADO + 107 REFUTADO; es el denominador de P1, P2 y P3",
+    "no_medidos": "8, excluidos del denominador y publicados aparte; su sensibilidad se declara: P1 se recomputa contando los 8 NO_MEDIDO como REFUTADO y el resultado se publica al lado, cumpla o no el umbral",
+    "definiciones": {
+      "familia": "la regla compuesta que emitio la fila, tal como el campo `familia` la nombra; 19 valores en el recibo del lote 22",
+      "causa_benigna": "causa en {proyeccion_inyectiva, escritura_posicional}: la fila existe porque la proyeccion es inyectiva por construccion o porque la escritura es posicional y no indexada, y ninguna lectura puede confirmarla como defecto",
+      "confirmado": "el veredicto que el lote 22 publico como CONFIRMADO tras leer el codigo del sujeto; este acto no re-adjudica"
+    },
+    "invariante": "confirmados + refutados + no_medidos = 125, y ninguna fila cambia de veredicto en este acto",
+    "limite": "un lector de este fichero recomputa las tres predicciones desde el recibo del lote 22, que esta en el arbol. No necesita red, ni clones, ni los sujetos: el acoplamiento familia-causa es una propiedad del recibo, no del codigo ajeno."
+  },
+  "instrumento_antes": {
+    "version": "0.5.0",
+    "arbol": "350ebc4596d962367bbf04f786bb4c6e30d9bd03",
+    "detect_py_sha256": "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6",
+    "dependencias": [],
+    "regla": "este acto no ejecuta el detector: cuenta un recibo que el detector ya produjo. Que el instrumento no se mueva es una condicion del acto y no un resultado suyo, y por eso se declara antes: si el sha256 de detect.py cambia durante el acto, el acto se detiene y se publica el cambio en vez de contarlo."
+  },
+  "cost": {
+    "relojes_nuevos": 0,
+    "clones": 0,
+    "bytes_temporales_tope": "0 B",
+    "persistido_fuera_de_tmp": "cero",
+    "justificacion": "el denominador ya esta pagado: los 125 loci se adjudicaron leyendo codigo en el lote 22 y viven en recibo-lote22-20261127.json. Este acto solo cuenta filas que ya existen, y por eso su coste marginal es cero. Un acto que necesitara releer para responder esta pregunta estaria diciendo que la lectura del lote 22 no se guardo con la causa y la familia, que es la unica cosa que ese recibo se comprometio a guardar."
+  }
+}
