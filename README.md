@@ -1827,6 +1827,55 @@ stated; this one is not a claim, it is an assertion.
 (RC 4) if it does not close. Note the size of `unmeasured`: five of nine stores have no cardinal
 anybody reads, so the tool stays silent about them instead of inventing a verdict.
 
+## The frontier returns a defect of the instrument, not of its subject
+
+Batch 19 crossed the frontier once and could not publish what it found: the subject declared no
+licence. The obvious next move is to look for more subjects of that kind. This batch measured the
+denominator instead, and sealed the prediction before the first network call — because a filter run
+against an API and not frozen leaves a denominator that no third party can recompute.
+
+The census holds `48` rows. One GraphQL query with one alias per repository returns `9` with
+Python among their languages and `13` with a valid SPDX identifier. Ninety-six REST calls and one
+query measure the same thing; the query fits the limit and leaves a single raw response to freeze.
+Both conditions at once: **`0`**. Python and licence are not merely independent over that
+population, they are disjoint — every row that can be read by this instrument is a row that cannot
+be cited. The narrow span closes with nothing to scan, and that is a measurement of the census, not
+of the instrument.
+
+The wide span was declared in advance so the batch could not stop at an empty set: three searches
+with fixed parameters, five results each, ordered by update, and a size cap of fifty thousand
+kibibytes applied *before* cloning. Fifteen items, nine eligible, six excluded — among them
+repositories the API declares at 15.7 GB and 3.9 GB. With 2.2 GiB free on the root volume, the size
+filter paid for itself before it was used: those six exclusions are the `Errno 28` of batch 19 not
+happening again.
+
+Nine subjects, one clone at a time, depth one, purged before the next one opens. Free space held at
+2.2 GiB for the whole sweep. The aggregate over them: `251` accumulators, `187`
+`cardinal_sin_medir` — 74.5 % —, `10` losses, `27` candidates, `17` aggregates, `873` files.
+
+Of the `27` candidates, `11` carry candidate severity and `3` sit under test paths, which are not
+read: a candidate where a test is already looking has not crossed any frontier. Six distinct
+productive loci, six read, zero left unread. Five are refuted against the subject and each keeps its
+reason, because a refutation is also a measurement: the assertion is the HTTP specification, the
+docstring says it aggregates on purpose, the identifier is case-insensitive by construction, a dict
+insertion-ordered deduplication is the requested result. Reading the code before repeating what the
+instrument said is what kept five true greens from being published as findings.
+
+The sixth does not refute. `scrum-around-and-find-out/src/safo/ratebudget.py:1239` watches the
+collision — with a comment naming it — but the witness is a **sibling set**, not the accumulator.
+`detect.py:588` looks for the witness only on the accumulator. A twenty-line fixture with two
+functions, one guarding against a sibling set and one guarding against nothing, receives the same
+verdict, `cardinal_sin_medir`: the instrument cannot tell watching from not looking. That is a
+defect of the instrument, not of the subject, and it is the first time the outward move produced
+one. A frontier that only ever returns defects of other people is a frontier that has not been
+pointed at itself.
+
+No report was opened, and the reason is a measurement: the defect is ours, and what this batch
+delivers is the class, not a citation. The invariant for the next batch is stated so it can fail:
+the sibling witness moves to measured and the function with no witness stays where it is; if both
+move, the fix confused watching with accumulating. `tests/test_lote20_universo.py` pins today's
+behaviour on purpose, so the day it changes, the pin has to be broken deliberately.
+
 ## Cost, measured before optimising anything
 
 An honest baseline first: a benchmark published *after* the fix cannot predict anything.

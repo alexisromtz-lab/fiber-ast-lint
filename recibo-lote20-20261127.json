@@ -1,0 +1,131 @@
+{
+ "schema": "fiber-ast-lint/lote20/1",
+ "acto": "el denominador legal: censo congelado y el primer defecto del instrumento devuelto por la frontera",
+ "fecha": "2026-11-27",
+ "pre_registro": {
+  "ruta": "prediccion-batch-20.json",
+  "sha256": "a7089c442dcc32a297892e4bd231a052246e130c78e64beec5d4d255fcc7615e",
+  "commit": "b506423",
+  "declarado_antes": true
+ },
+ "censo": {
+  "ruta": "censo-20-20261127.json",
+  "bytes": 13708,
+  "sha256": "5fd290fc1de0447ddfbfe8ab1c71b6efe529a993bf8aa92b0efabfa51df3cf71"
+ },
+ "veredictos": [
+  {
+   "id": "P1",
+   "veredicto": "CONFIRMADA",
+   "evidencia": "Cuarenta y ocho filas: nueve declaran Python, trece declaran licencia SPDX valida, cero cumplen las dos. El tope declarado era tres."
+  },
+  {
+   "id": "P2",
+   "veredicto": "CORREGIDA_EN_EL_ACTO",
+   "evidencia": "Con cero sujetos legales el falsador original se cumple por vacuidad y no mide nada. Se sustituye por la medicion no vacua: Python y licencia son disjuntos, no meramente independientes, en esta poblacion."
+  },
+  {
+   "id": "P3",
+   "veredicto": "CONFIRMADA",
+   "evidencia": "Ciento ochenta y siete de doscientos cincuenta y un almacenes caen en cardinal_sin_medir, setenta y cuatro coma cinco por ciento, sobre un umbral de cincuenta."
+  },
+  {
+   "id": "P4",
+   "veredicto": "CONFIRMADA",
+   "evidencia": "Veintisiete candidatos en cuatro sujetos, cada uno con repositorio, sha, fichero y linea. Cuatro sujetos devuelven codigo de salida uno y uno devuelve cuatro."
+  }
+ ],
+ "correcciones_posteriores": [
+  {
+   "que": "El falsador de P2 exige que las filas con senal social contengan a todos los sujetos legales.",
+   "por_que": "Con el conjunto legal vacio la contencion es cierta sin medir nada. Un falsador sobre una poblacion vacia no distingue exito de silencio.",
+   "remedio": "La medicion publicada es que la interseccion de Python y licencia es cero de cuarenta y ocho, y que de los nueve con Python cuatro tienen senal social y ninguno tiene licencia."
+  }
+ ],
+ "revision": {
+  "candidatos": 27,
+  "con_severidad_candidato": 11,
+  "en_rutas_de_test": 3,
+  "loci_productivos_distintos": 6,
+  "loci_leidos": 6,
+  "loci_sin_leer_en_rutas_productivas": 0,
+  "nota": "Los tres candidatos bajo rutas de test no se leen, por la misma regla del lote 19: un candidato donde ya hay un test mirando no ha cruzado ninguna frontera.",
+  "loci": [
+   {
+    "repo": "obendidi/httpx-cache",
+    "sha": "c5145a95f6661e90703b535c5a9a87a1752d7bd8",
+    "loci": "httpx_cache/policy.py:48-50",
+    "familia": "PROYECCION_VISIBLE",
+    "severidad": "CANDIDATO",
+    "veredicto": "REFUTADO_COMO_DEFECTO_DEL_SUJETO",
+    "razon": "Los nombres de directiva de Cache-Control son insensibles a mayusculas por especificacion. El colapso sobre la clave normalizada es el contrato de la funcion, no una perdida."
+   },
+   {
+    "repo": "obendidi/httpx-cache",
+    "sha": "c5145a95f6661e90703b535c5a9a87a1752d7bd8",
+    "loci": "httpx_cache/policy.py:96-98",
+    "familia": "PROYECCION_VISIBLE",
+    "severidad": "CANDIDATO",
+    "veredicto": "REFUTADO_COMO_DEFECTO_DEL_SUJETO",
+    "razon": "Segunda implementacion de la misma funcion en el mismo modulo, con la misma semantica de normalizacion. Misma refutacion."
+   },
+   {
+    "repo": "travisghansen/hass-opnsense",
+    "sha": "6503ed5d88102156ea26bb72f2c8f1aa023fb075",
+    "loci": "custom_components/opnsense/device_tracker_evidence.py:539",
+    "familia": "SELECCION_COLUMNA_BUCLE",
+    "severidad": "CANDIDATO",
+    "veredicto": "REFUTADO_COMO_DEFECTO_DEL_SUJETO",
+    "razon": "Indexa por MAC para quedarse con el ultimo avistamiento de cada una. La agregacion es la funcion y el docstring la declara."
+   },
+   {
+    "repo": "ChiefGyk3D/scrum-around-and-find-out",
+    "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+    "loci": "src/safo/items.py:465",
+    "familia": "PROYECCION_VISIBLE",
+    "severidad": "CANDIDATO",
+    "veredicto": "REFUTADO_COMO_DEFECTO_DEL_SUJETO",
+    "razon": "Los nombres de repositorio de GitHub ya son unicos sin distinguir mayusculas. La normalizacion es canonica y el colapso es imposible en ese espacio."
+   },
+   {
+    "repo": "ChiefGyk3D/scrum-around-and-find-out",
+    "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+    "loci": "src/safo/idea_gate_routes.py:194",
+    "familia": "PROYECCION_ARRIBA_CON_PERDIDA",
+    "severidad": "CANDIDATO",
+    "veredicto": "REFUTADO_COMO_DEFECTO_DEL_SUJETO",
+    "razon": "El diccionario se usa como conjunto ordenado y la funcion devuelve tuple(seen). Deduplicar es el resultado pedido."
+   },
+   {
+    "repo": "ChiefGyk3D/scrum-around-and-find-out",
+    "sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+    "loci": "src/safo/ratebudget.py:1239",
+    "familia": "PROYECCION_ARRIBA_CON_PERDIDA",
+    "severidad": "CANDIDATO",
+    "veredicto": "DEFECTO_DEL_INSTRUMENTO",
+    "razon": "El codigo vigila la colision con key in seen sobre un conjunto hermano del mismo espacio de claves, y hasta la nombra en un comentario. El instrumento busca el testigo solo sobre el propio acumulador y archiva el locus como cardinal_sin_medir."
+   }
+  ]
+ },
+ "el_hallazgo": {
+  "clase": "DEFECTO_DEL_INSTRUMENTO",
+  "enunciado": "El instrumento reconoce el testigo por pertenencia, pero solo cuando el testigo nombra al propio acumulador. El codigo real vigila la colision con un conjunto hermano del mismo espacio de claves, y ahi el testigo es invisible.",
+  "locus_del_instrumento": "src/fiber_ast_lint/detect.py:588",
+  "minimo_reproducible": {
+   "archivo": "tres funciones de veinte lineas, escritas en un directorio temporal, sin tocar el arbol",
+   "comando": "el CLI con --json sobre ese directorio",
+   "observado": "hermano y sin_testigo reciben el mismo veredicto, cardinal_sin_medir; guardadas queda en cero; len_propio si se reconoce y pasa a medido",
+   "por_que_importa": "La clase que el instrumento llama ciega contiene codigo que vigila mejor que len, porque la pertenencia detecta la colision en el acto y len solo la detecta al final."
+  },
+  "invariante_para_el_lote_21": "hermano pasa a guardadas y sin_testigo sigue en cardinal_sin_medir; si los dos cambian, el arreglo confundio vigilar con acumular"
+ },
+ "no_se_hizo": {
+  "reportes_abiertos": 0,
+  "por_que": "Ninguno de los seis loci productivos leidos sobrevive como defecto del sujeto. Abrir un reporte con ellos seria publicar el ruido del instrumento como defecto de su sujeto."
+ },
+ "proximo_acto": {
+  "nombre": "lote 21, el testigo hermano",
+  "predicado": "si el testigo se busca sobre cualquier nombre del cuerpo con la misma clave, al menos uno de los veintisiete candidatos externos cambia de clase y el fixture minimo se parte en dos",
+  "falsador": "ni uno solo de los veintisiete cambia de clase al habilitar el testigo hermano, en cuyo caso el defecto es real pero no tiene diametro externo"
+ }
+}

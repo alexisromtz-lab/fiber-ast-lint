@@ -1,0 +1,719 @@
+{
+"schema": "fiber-ast-lint/censo-20/1",
+"medido_utc": "2026-11-27T17:47Z",
+"origen": "censo_canal_activo_20261126.tsv, cuarenta y ocho filas leidas en solo lectura desde fuera de este repositorio",
+"comando": "una sola consulta GraphQL con un alias por repositorio pidiendo licenseInfo, diskUsage, pushedAt, primaryLanguage y languages",
+"total_filas": 48,
+"filas": [
+{
+"repo": "Adarshagupta/ags",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 3906,
+"pushed": "2026-05-29",
+"archivado": false
+},
+{
+"repo": "Aditya-Gadge/TrustCart-AI",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 322,
+"pushed": "2026-10-27",
+"archivado": false
+},
+{
+"repo": "Aparnap2/SupportPilot",
+"spdx": null,
+"principal": "HTML",
+"python_en_lenguajes": true,
+"kib": 51863,
+"pushed": "2026-06-29",
+"archivado": false
+},
+{
+"repo": "Bismark299/kemdataplus",
+"spdx": null,
+"principal": "HTML",
+"python_en_lenguajes": false,
+"kib": 7082,
+"pushed": "2026-10-18",
+"archivado": false
+},
+{
+"repo": "ChinmaySN/algo-trading-platform",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 276,
+"pushed": "2026-02-06",
+"archivado": false
+},
+{
+"repo": "Ci-Pro/rejofood",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 21487,
+"pushed": "2026-08-14",
+"archivado": false
+},
+{
+"repo": "Denisi64/projet-clean-archi-react-WDC-2025-2026",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 1409,
+"pushed": "2026-02-08",
+"archivado": false
+},
+{
+"repo": "Diamond-Dogs-Devs/evoventa-api",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 226,
+"pushed": "2026-09-29",
+"archivado": false
+},
+{
+"repo": "Doy679/CodigoApparel",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 23677,
+"pushed": "2026-07-22",
+"archivado": false
+},
+{
+"repo": "Eli5DeFi/ventureclaw",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 10933,
+"pushed": "2026-02-09",
+"archivado": false
+},
+{
+"repo": "MISTOM/KLaw-Ecom",
+"spdx": null,
+"principal": "JavaScript",
+"python_en_lenguajes": false,
+"kib": 10834,
+"pushed": "2026-06-19",
+"archivado": false
+},
+{
+"repo": "MohammedSalaheldenHassan/E-Commerce-Backend",
+"spdx": null,
+"principal": "JavaScript",
+"python_en_lenguajes": false,
+"kib": 48,
+"pushed": "2026-07-15",
+"archivado": false
+},
+{
+"repo": "NhungVu248/DressSense",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": true,
+"kib": 2390,
+"pushed": "2026-11-04",
+"archivado": false
+},
+{
+"repo": "Niduka292/Lenspect",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 498,
+"pushed": "2026-10-29",
+"archivado": false
+},
+{
+"repo": "PurpleDigitalSolution/servo_backend",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 672,
+"pushed": "2026-10-30",
+"archivado": false
+},
+{
+"repo": "RedaAwwad/Food-Delivery",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 34924,
+"pushed": "2026-05-30",
+"archivado": false
+},
+{
+"repo": "Rishabh7575/EComWeb",
+"spdx": "NOASSERTION",
+"principal": "JavaScript",
+"python_en_lenguajes": false,
+"kib": 3974,
+"pushed": "2026-01-25",
+"archivado": false
+},
+{
+"repo": "SDawson777/nimbus-cms",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 4241,
+"pushed": "2026-02-26",
+"archivado": false
+},
+{
+"repo": "SxxAq/seedforge",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 140,
+"pushed": "2026-03-12",
+"archivado": false
+},
+{
+"repo": "UWASEdjaria/n-a-garments-backend",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 438,
+"pushed": "2026-11-07",
+"archivado": false
+},
+{
+"repo": "Visital-Projects/restaurant_pos_updated",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 7485,
+"pushed": "2026-07-20",
+"archivado": false
+},
+{
+"repo": "WendyBEAUTYSPA/WENDY-BEAUTY-SPARKLING-",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 193,
+"pushed": "2026-10-01",
+"archivado": false
+},
+{
+"repo": "Williks102/cafe",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 817,
+"pushed": "2026-11-27",
+"archivado": false
+},
+{
+"repo": "agntdev/orderbook-telegram-bot",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 155,
+"pushed": "2026-04-14",
+"archivado": false
+},
+{
+"repo": "ahmedharidy2004/Food-Delivery-Backend",
+"spdx": "MIT",
+"principal": "JavaScript",
+"python_en_lenguajes": false,
+"kib": 783,
+"pushed": "2026-10-28",
+"archivado": false
+},
+{
+"repo": "banana0324/ecommerce-store",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": true,
+"kib": 1845,
+"pushed": "2026-04-14",
+"archivado": false
+},
+{
+"repo": "berverlyjoseph3-source/Goodwill",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 19894,
+"pushed": "2026-04-05",
+"archivado": false
+},
+{
+"repo": "daniRincon/stylehub",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 12541,
+"pushed": "2026-10-21",
+"archivado": false
+},
+{
+"repo": "doanduyvan/theramd",
+"spdx": null,
+"principal": "JavaScript",
+"python_en_lenguajes": false,
+"kib": 496,
+"pushed": "2026-06-04",
+"archivado": false
+},
+{
+"repo": "dustankibaja/Afrilink-marketplace",
+"spdx": null,
+"principal": "JavaScript",
+"python_en_lenguajes": false,
+"kib": 113,
+"pushed": "2026-01-17",
+"archivado": false
+},
+{
+"repo": "ecm-digital/herbalifeportal",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 414,
+"pushed": "2026-01-20",
+"archivado": false
+},
+{
+"repo": "fanmihua/fanstudio",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 2246,
+"pushed": "2026-08-13",
+"archivado": false
+},
+{
+"repo": "fazt/ecommerce-basictech",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": true,
+"kib": 276,
+"pushed": "2026-01-04",
+"archivado": false
+},
+{
+"repo": "fmendozag/vendly-platform_old",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 742,
+"pushed": "2026-04-17",
+"archivado": false
+},
+{
+"repo": "free-bad-Man/rahima-consulting_v2-0",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": true,
+"kib": 5891,
+"pushed": "2026-04-16",
+"archivado": false
+},
+{
+"repo": "hany170/eventbook",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 620,
+"pushed": "2026-02-18",
+"archivado": false
+},
+{
+"repo": "iquldev/Next-Pizza",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 923,
+"pushed": "2026-10-27",
+"archivado": false
+},
+{
+"repo": "leidermadafakazz/delivery",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 384,
+"pushed": "2026-11-09",
+"archivado": false
+},
+{
+"repo": "leqir/riqle",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 43933,
+"pushed": "2026-09-01",
+"archivado": false
+},
+{
+"repo": "linkjavier/complete_restaurant_admin",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": true,
+"kib": 28648,
+"pushed": "2026-11-25",
+"archivado": false
+},
+{
+"repo": "mahdijihad001/mini-e-com-backend",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 191,
+"pushed": "2026-10-24",
+"archivado": false
+},
+{
+"repo": "mohamedelbeek55/ecommerce-api-nestjs",
+"spdx": "MIT",
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 1157,
+"pushed": "2026-10-17",
+"archivado": false
+},
+{
+"repo": "omarandresjimenez/bella-luna-inventory",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 1646,
+"pushed": "2026-02-17",
+"archivado": false
+},
+{
+"repo": "pras75299/Jewellery",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": false,
+"kib": 5235,
+"pushed": "2026-01-12",
+"archivado": false
+},
+{
+"repo": "satyasahu8317/sih26090-artisan-platform",
+"spdx": null,
+"principal": "Dart",
+"python_en_lenguajes": true,
+"kib": 1962,
+"pushed": "2026-09-25",
+"archivado": false
+},
+{
+"repo": "shuvro108/pernStack_ecommerce",
+"spdx": "MIT",
+"principal": "JavaScript",
+"python_en_lenguajes": false,
+"kib": 24379,
+"pushed": "2026-01-18",
+"archivado": false
+},
+{
+"repo": "tarek99samy/Adwya-Backend",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": true,
+"kib": 684,
+"pushed": "2026-09-01",
+"archivado": false
+},
+{
+"repo": "upskiill201/upskiill",
+"spdx": null,
+"principal": "TypeScript",
+"python_en_lenguajes": true,
+"kib": 279794,
+"pushed": "2026-11-03",
+"archivado": false
+}
+],
+"filtro_20A": {
+"tramo": "20A",
+"con_python": 9,
+"con_licencia_valida": 13,
+"con_ambas": 0,
+"repos_con_python": [
+"Aparnap2/SupportPilot",
+"NhungVu248/DressSense",
+"banana0324/ecommerce-store",
+"fazt/ecommerce-basictech",
+"free-bad-Man/rahima-consulting_v2-0",
+"linkjavier/complete_restaurant_admin",
+"satyasahu8317/sih26090-artisan-platform",
+"tarek99samy/Adwya-Backend",
+"upskiill201/upskiill"
+],
+"repos_con_licencia": [
+"Aditya-Gadge/TrustCart-AI",
+"Diamond-Dogs-Devs/evoventa-api",
+"Niduka292/Lenspect",
+"SxxAq/seedforge",
+"Visital-Projects/restaurant_pos_updated",
+"Williks102/cafe",
+"agntdev/orderbook-telegram-bot",
+"ahmedharidy2004/Food-Delivery-Backend",
+"fanmihua/fanstudio",
+"fmendozag/vendly-platform_old",
+"iquldev/Next-Pizza",
+"mohamedelbeek55/ecommerce-api-nestjs",
+"shuvro108/pernStack_ecommerce"
+],
+"repos_con_python_y_licencia": [],
+"nota": "python y licencia son disjuntos en esta poblacion: cero filas cumplen las dos"
+},
+"tramo_20B": {
+"disparado": true,
+"busquedas": [
+"language:python license:mit pushed:>2026-09-01 stars:>10",
+"language:python license:apache-2.0 pushed:>2026-09-01 stars:>10",
+"language:python license:bsd-3-clause pushed:>2026-09-01 stars:>10"
+],
+"orden": "actualizacion descendente, cinco por busqueda, sin solapamiento",
+"tope_kib": 51200,
+"resultados": {
+"mit": {
+"total_count": 36914,
+"items": [
+{
+"repo": "AIPMAndy/Andy-Writing-Skill",
+"spdx": "MIT",
+"kib": 568,
+"pushed": "2026-11-27",
+"stars": 15,
+"issues": 1
+},
+{
+"repo": "AIPMAndy/Andy-Video-Skill",
+"spdx": "MIT",
+"kib": 28078,
+"pushed": "2026-11-27",
+"stars": 21,
+"issues": 1
+},
+{
+"repo": "nuuuwan/lk_irrigation",
+"spdx": "MIT",
+"kib": 15693529,
+"pushed": "2026-11-27",
+"stars": 24,
+"issues": 0
+},
+{
+"repo": "chengwang96/Awesome-World-Models-for-Healthcare",
+"spdx": "MIT",
+"kib": 801,
+"pushed": "2026-11-27",
+"stars": 24,
+"issues": 0
+},
+{
+"repo": "0xRadikal/Free-v2ray-Configs",
+"spdx": "MIT",
+"kib": 3947594,
+"pushed": "2026-11-27",
+"stars": 943,
+"issues": 2
+}
+]
+},
+"apache-2.0": {
+"total_count": 15105,
+"items": [
+{
+"repo": "Yongchu-Yitao/Cyrene",
+"spdx": "Apache-2.0",
+"kib": 185835,
+"pushed": "2026-11-27",
+"stars": 11,
+"issues": 12
+},
+{
+"repo": "emersonfelipesp/netbox-proxbox",
+"spdx": "Apache-2.0",
+"kib": 75989,
+"pushed": "2026-11-27",
+"stars": 616,
+"issues": 0
+},
+{
+"repo": "ChiefGyk3D/scrum-around-and-find-out",
+"spdx": "Apache-2.0",
+"kib": 3625,
+"pushed": "2026-11-27",
+"stars": 78,
+"issues": 231
+},
+{
+"repo": "travisghansen/hass-opnsense",
+"spdx": "Apache-2.0",
+"kib": 13020,
+"pushed": "2026-11-27",
+"stars": 476,
+"issues": 4
+},
+{
+"repo": "gradio-app/gradio",
+"spdx": "Apache-2.0",
+"kib": 143522,
+"pushed": "2026-11-27",
+"stars": 44169,
+"issues": 121
+}
+]
+},
+"bsd-3-clause": {
+"total_count": 2975,
+"items": [
+{
+"repo": "RealOrangeOne/django-tasks-db",
+"spdx": "BSD-3-Clause",
+"kib": 473,
+"pushed": "2026-11-27",
+"stars": 127,
+"issues": 15
+},
+{
+"repo": "cdelv/JaxDEM",
+"spdx": "BSD-3-Clause",
+"kib": 25935,
+"pushed": "2026-11-27",
+"stars": 11,
+"issues": 1
+},
+{
+"repo": "developersociety/wagtail-link-block",
+"spdx": "BSD-3-Clause",
+"kib": 106,
+"pushed": "2026-11-27",
+"stars": 24,
+"issues": 22
+},
+{
+"repo": "JarryShaw/PyPCAPKit",
+"spdx": "BSD-3-Clause",
+"kib": 595163,
+"pushed": "2026-11-27",
+"stars": 274,
+"issues": 115
+},
+{
+"repo": "obendidi/httpx-cache",
+"spdx": "BSD-3-Clause",
+"kib": 1596,
+"pushed": "2026-11-27",
+"stars": 53,
+"issues": 0
+}
+]
+}
+}
+},
+"escaneo": {
+"comando": "clon con profundidad uno, un sujeto a la vez, purgado antes del siguiente",
+"sujetos": [
+{
+"repo": "AIPMAndy/Andy-Writing-Skill",
+"sha": "5a7b37d9b8c5abf8e6ad1816c29d228529496092",
+"archivos": 7,
+"kib": 1292,
+"rc": 0,
+"almacenes": 2,
+"candidatos": 0
+},
+{
+"repo": "AIPMAndy/Andy-Video-Skill",
+"sha": "7e48373999acd1e18f412e67ef8155a5e3300f55",
+"archivos": 27,
+"kib": 10252,
+"rc": 0,
+"almacenes": 3,
+"candidatos": 0
+},
+{
+"repo": "chengwang96/Awesome-World-Models-for-Healthcare",
+"sha": "b5df06bf6b19647b57ab0c6a2f1758f8b21959e0",
+"archivos": 4,
+"kib": 624,
+"rc": 0,
+"almacenes": 1,
+"candidatos": 0
+},
+{
+"repo": "ChiefGyk3D/scrum-around-and-find-out",
+"sha": "9bfe6d1315d7fc703252d0a39ac597509956d59c",
+"archivos": 445,
+"kib": 14436,
+"rc": 1,
+"almacenes": 134,
+"candidatos": 9
+},
+{
+"repo": "travisghansen/hass-opnsense",
+"sha": "6503ed5d88102156ea26bb72f2c8f1aa023fb075",
+"archivos": 50,
+"kib": 3908,
+"rc": 4,
+"almacenes": 16,
+"candidatos": 1
+},
+{
+"repo": "RealOrangeOne/django-tasks-db",
+"sha": "abd847502d8f1bde4b045130e7658bd7d1fb11d1",
+"archivos": 41,
+"kib": 460,
+"rc": 0,
+"almacenes": 0,
+"candidatos": 0
+},
+{
+"repo": "cdelv/JaxDEM",
+"sha": "1d8d847f33c6453d3cd513e6741bd3e0f603c161",
+"archivos": 268,
+"kib": 5300,
+"rc": 1,
+"almacenes": 86,
+"candidatos": 13
+},
+{
+"repo": "developersociety/wagtail-link-block",
+"sha": "4fb4d9767b35b59bd1ea41c6d2aea52017dd06e7",
+"archivos": 7,
+"kib": 272,
+"rc": 0,
+"almacenes": 2,
+"candidatos": 0
+},
+{
+"repo": "obendidi/httpx-cache",
+"sha": "c5145a95f6661e90703b535c5a9a87a1752d7bd8",
+"archivos": 33,
+"kib": 864,
+"rc": 1,
+"almacenes": 7,
+"candidatos": 4
+}
+],
+"almacenes": 251,
+"sin_len": 187,
+"pierde": 10,
+"candidatos": 27,
+"guardadas": 28,
+"acumulacion": 17,
+"archivos": 873
+},
+"disco": {
+"libre_al_empezar": "2.2 GiB",
+"libre_al_terminar": "2.2 GiB"
+}
+}
