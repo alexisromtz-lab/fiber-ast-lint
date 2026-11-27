@@ -1,0 +1,58 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 18,
+ "title": "La promesa y su instrumento no son el mismo conjunto: la direccion de la desigualdad decide el veredicto",
+ "declared_at": "2026-11-27",
+ "declared_before_computation": true,
+ "why": "El lote 17 midio que cincuenta y cinco de las cincuenta y siete predicciones no tienen sujeto y se paro ahi. De las dos que si lo tienen, una nunca se recomputo y la otra se recomputo sola: el test que la cubre pasa, y por eso nadie miro si mide lo mismo que la promesa. Un test verde no dice que la promesa sea cierta: dice que el instrumento no encontro nada dentro de su alcance. Cuando el alcance del instrumento es menor que el de la promesa, el verde es compatible con que la promesa sea falsa, y esa es la unica direccion peligrosa. Este lote publica la reconciliacion de las dos predicciones con sujeto, clasifica la direccion de la desigualdad y prohibe por codigo el unico caso que no admite discusion: una promesa mas ancha que su instrumento no puede publicar SOBREVIVE.",
+ "lo_ya_medido_antes_de_este_fichero": "Se midio antes de escribir esto y por eso no se declara como prediccion. (a) Las dos unicas predicciones historicas con locus son prediccion-batch-12.json::P2 y prediccion-batch-14.json::R1, y las dos nombran bench/recibo.py. (b) P2 se recomputa hoy con cero comparaciones de un nombre que contenga lote contra una constante entera en el AST del sujeto: su instrumento recorre todo ast.Compare, que es un conjunto mayor que el de la promesa, luego medir de mas no puede dar verde falso. (c) R1 tiene dos mitades: la primera —dos ids con la misma forma dan el mismo sobrevive— se cumple; la segunda —ninguna rama de recibo.py nombra un id para decidir un juicio— es falsa, porque _evaluar consulta EVALUADORES por id y decide sobrevive en la via v2, y hay tres ramas que consultan pid en el fichero. Su propio test acota la guarda al cuerpo de _veredictos_v3 y por eso pasa. (d) Vaciando EVALUADORES en una copia del arbol mueren cuatro tests, uno de ellos la recomputacion de los cuatro recibos del lote 13: la tabla esta congelada por conservacion y no es codigo muerto. (e) El censo heredado es con_locus 2, umbral_sin_locus 36, sin_falsador 19 sobre 57, y el sujeto bench/recibo.py tiene sha256 2e34b3c6547eba7429e6b8fd7225bc1d0256871ade12db29ba9ddf7b1eb4bea1 en 32612 bytes.",
+ "method": {
+  "universo": "Los dieciseis pre-registros de lote dos a dieciseis para la deuda heredada, y las dos predicciones de ese universo que ya nombran un artefacto para la reconciliacion. Este fichero no se cuenta a si mismo.",
+  "instrumento": "tests/test_reconciliacion.py para el sello y su ley, y la constante de deuda de tests/test_prediccion_locus.py para el trinquete. El sujeto de la reconciliacion es bench/recibo.py, citado por sha256 y por bytes.",
+  "sin_retroajuste": "R1 se juzga como esta escrita y no como su test la acota. El lote no reescribe la promesa del catorce: publica que su alcance declarado era mayor que el medido y que el falsador que ella misma se puso se cumple.",
+  "no_se_hace": "No se retira EVALUADORES ni se toca bench/recibo.py. Cuatro tests y un recibo firmado dependen de la tabla, de modo que satisfacer R1 al pie de la letra destruiria la conservacion byte a byte de los sellos. La tension se publica; el arreglo, si lo hay, es un contrato v4 y no un parche dentro de este lote."
+ },
+ "predictions": [
+  {
+   "id": "Q1",
+   "kind": "estructural",
+   "claim": "La ley de direccion muerde: una entrada de reconciliacion que declare direccion promesa_mas_ancha y veredicto SOBREVIVE rompe la suite. La guarda se ejercita sobre entradas sinteticas, porque hoy el arbol solo tiene una reconciliacion por clase y la rama peligrosa se cubre con un caso construido.",
+   "locus": {
+    "poblacion": "las entradas de reconciliacion-batch-18.json",
+    "instrumento": "tests/test_reconciliacion.py, ley de direccion"
+   },
+   "falsifier": "que una entrada sintetica con direccion promesa_mas_ancha y veredicto SOBREVIVE pase pytest sin romper"
+  },
+  {
+   "id": "Q2",
+   "kind": "estructural",
+   "claim": "El trinquete cierra la puerta trasera del lote declarado: un fichero nuevo que declare batch 16 en el campo llamandose prediccion-batch-19.json y anada una prediccion sin falsador eleva el censo heredado por encima de la cota y rompe la suite, aunque su lote declarado sea anterior a la ley.",
+   "locus": {
+    "poblacion": "los dieciseis pre-registros historicos con su censo de deuda",
+    "instrumento": "tests/test_prediccion_locus.py, cota monotona de deuda"
+   },
+   "falsifier": "que un fichero sintetico con batch 16 en el campo y un nombre de lote diecinueve anada una prediccion sin falsador y la suite siga verde"
+  },
+  {
+   "id": "Q3",
+   "kind": "estructural",
+   "claim": "El sello de reconciliacion nombra su sujeto y caduca: si bench/recibo.py cambia sin reemitir reconciliacion-batch-18.json, la suite falla con el comando de reemision. Un veredicto sobre un fichero que se mueve sin decir sobre que version se midio es prosa otra vez.",
+   "locus": {
+    "poblacion": "el sujeto bench/recibo.py y el sello reconciliacion-batch-18.json",
+    "instrumento": "tests/test_reconciliacion.py, guarda de digest y bytes"
+   },
+   "falsifier": "que una edicion de bench/recibo.py deje la suite verde con el sello sin reemitir"
+  }
+ ],
+ "falsification": "Cada prediccion nombra su falsador arriba. El lote se publica igual si alguna cae, y una caida se escribe con su numero y su locus, no se retira del denominador.",
+ "what_it_would_mean": {
+  "Q1_alto": "la direccion de la desigualdad es un dato del artefacto y no una opinion del lector: una promesa mas ancha que su instrumento queda prohibida de verde",
+  "Q2_bajo": "el trinquete mide el arbol de hoy y no el de manana: la deuda historica puede crecer declarando un lote viejo, y el lote 17 habria cerrado la puerta de adelante con la de atras abierta",
+  "Q3_bajo": "la reconciliacion seria un acto fechado sobre un sujeto movil, que es exactamente lo que el lote 16 quito de los seis sellos del README"
+ },
+ "cost": {
+  "actos_nuevos": 0,
+  "relojes_nuevos": 0,
+  "razon": "lectura pura sobre ficheros commiteados y sobre una copia desechable del arbol para el mutante. Cero relojes, cero escrituras fuera del arbol del repo."
+ }
+}

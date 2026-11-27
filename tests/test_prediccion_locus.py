@@ -37,6 +37,13 @@ PATRON_LOTUS = re.compile(
 
 SECCION_17 = "## A falsifier without a locus is a threshold with no subject"
 
+# La deuda heredada, acotada por arriba. El lote 17 la midio; el lote 18 impide que crezca.
+# Un fichero que declare un lote viejo llamandose como uno nuevo entra por esta puerta, y es
+# la unica que el trinquete de adelante deja abierta: por eso la cota se mide sobre el censo
+# —que deduce el lote del nombre cuando el campo falta— y no sobre una lista de ficheros.
+DEUDA_UMBRAL_SIN_LOCUS = 36
+DEUDA_SIN_FALSADOR = 19
+
 
 def _batch_de(ruta: Path, doc: dict) -> int | None:
     """El lote del pre-registro: el campo si lo declara, el nombre del fichero si no.
@@ -205,3 +212,33 @@ def test_la_clasificacion_no_depende_del_orden_ni_de_la_clave() -> None:
     assert [_clase(p) for p in doc["predictions"]] == [
         _clase(p) for p in renombrado["predictions"]
     ]
+
+
+def test_la_deuda_heredada_no_crece() -> None:
+    """Una cota, no un censo: el censo dice cuanto hay hoy, la cota dice cuanto puede haber.
+
+    Sin la segunda, la deuda de cincuenta y cinco predicciones sin sujeto se puede ampliar
+    manana sin que nada lo note, y el lote 17 habria cerrado la puerta de adelante dejando
+    la de atras abierta.
+    """
+    censo = _censo()
+    assert censo["umbral_sin_locus"] <= DEUDA_UMBRAL_SIN_LOCUS, censo
+    assert censo["sin_falsador"] <= DEUDA_SIN_FALSADOR, censo
+
+
+def test_el_lote_declarado_no_puede_discrepar_del_nombre_del_fichero() -> None:
+    """Un fichero no puede declararse viejo para no cumplir una ley que ya existe.
+
+    Tres pre-registros no declaran `batch` y su lote se deduce del nombre; ese hecho se
+    publico en el lote 17. Lo que aqui se fija es la otra mitad: cuando el campo existe,
+    tiene que valer lo mismo que el nombre. Si discrepan, el lote real es el mayor de los
+    dos y el fichero miente sobre su fecha.
+    """
+    discrepancias = []
+    for ruta in sorted(RAIZ.glob("prediccion-batch-*.json")):
+        match = re.fullmatch(r"prediccion-batch-(\d+)\.json", ruta.name)
+        doc = json.loads(ruta.read_text(encoding="utf-8"))
+        campo = doc.get("batch")
+        if isinstance(campo, int) and campo != int(match.group(1)):
+            discrepancias.append((ruta.name, campo, int(match.group(1))))
+    assert discrepancias == [], discrepancias

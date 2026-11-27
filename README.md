@@ -1702,6 +1702,69 @@ batch 17, the first-lot constant raised to eighteen so the incumbent escaped, a 
 given a locus so the `sin_falsador` class shrank, and the lot number taken from the field alone so
 the three fieldless files fell out of the denominator again.
 
+## A promise and its instrument are not the same set
+
+Batch 17 found that two of fifty-seven falsifiers name an artefact. The next question looks like a
+report card on batches twelve and fourteen and turns out to be a property of the pair, not of the
+prediction: a claim and the test that guards it are two sets, and the direction of the containment
+between them decides whether a green means anything.
+
+Here is the arithmetic. Take a promise "X does not occur in file `F`" and an instrument that checks
+"X does not occur in function `g` of file `F`". Both are green, and the second does not corroborate
+the first, because it measured a subset. This repository had been reading a green test as evidence
+for its own pre-register without ever checking which set contained which. When the instrument is
+wider than the promise (`instrument ⊇ promise`) a green is a conclusion: the claim holds on
+everything the instrument saw, and it saw more than was asked. When the promise is wider than the
+instrument (`promise ⊃ instrument`) a green is silence: the only region where the claim could fail
+is the region nobody looked at. The safe direction may publish `SOBREVIVE`. The dangerous one may
+not, whatever the test says.
+
+Recomputing the two historical predictions that have a subject, in `reconciliacion-batch-18.json`:
+
+| id | direction | verdict |
+|---|---|---|
+| `P2` | `instrumento_mas_ancho` | `SOBREVIVE` |
+| `R1` | `promesa_mas_ancha` | `CAE` |
+
+P2 promised that `bench/recibo.py` holds no branch comparing a name containing `lote` against an
+integer constant, and its instrument walks every `ast.Compare` in the file: seventy-one of them
+today, including the ones outside any branch. Wider instrument, zero hits, and the zero is a
+conclusion rather than a gap.
+
+R1 is the other case, and it is the first prediction in this series to fall for a reason internal
+to its own measurement. It promised that the verdict of a predicate does not depend on its
+identifier, anywhere in `recibo.py`, with the falsifier "there exists in `recibo.py` a branch that
+consults the id to decide `sobrevive`". The test that guards it restricts its scope to the body of
+`_veredictos_v3`. Three lines outside that body consult the identifier, and one of them decides:
+`_evaluar` resolves `EVALUADORES.get(pid)` and that lookup is what sets `sobrevive` on the v2 path.
+The falsifier is satisfied literally. The test is green because it looks at less than it promised,
+which is the false green in the dangerous direction, applied to ourselves.
+
+What follows is not a patch. Emptying `EVALUADORES` kills four tests and un-signs
+`recibo-banda-13-lote11.json`, a `recibo/2` seal that published two `sobrevive` verdicts through
+exactly that table. The table is frozen by conservation, and conservation is a law of this corpus as
+well. Batch 18 therefore records the collision instead of picking a winner: R1 falls and stays
+fallen, the identifier path stays, and the repair belongs to a `recibo/4` contract and not to a
+reconciliation lot.
+
+Two closures keep this from being an anecdote about two files. The first is a ceiling on the
+inherited debt: batch 17 measured fifty-five predictions with no subject, and a measurement that
+cannot grow is not a ratchet. `tests/test_prediccion_locus.py` now bounds it at
+`DEUDA_UMBRAL_SIN_LOCUS = 36` and `DEUDA_SIN_FALSADOR = 19`, read off the same census the reader
+already computes. The second is the back door that ceiling leaves open: the lot number is taken from
+the `batch` field when present, so a file named `prediccion-batch-19.json` declaring `batch: 16` is
+counted as lot sixteen and escapes the law that starts at seventeen. A second test requires the
+declared lot and the file name to agree whenever both exist.
+
+Both were exercised rather than asserted. A batch-19 file declaring `batch: 16` with one falsifier
+that names no artefact was written into the tree and killed three guards — the debt bound, the
+name/field agreement, and the published census — while the forward law of batch 17 stayed green,
+because it reads that file as lot sixteen. That last detail is the finding: the law that starts at
+seventeen was blind to the very file that pretended to predate it, and the bound is what caught it.
+Then two mutations against the artifacts themselves: flipping R1 to `SOBREVIVE` with its direction
+untouched killed the law and the recomputation, and appending a comment to `bench/recibo.py` killed
+the seal with a message naming the command that reissues it.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

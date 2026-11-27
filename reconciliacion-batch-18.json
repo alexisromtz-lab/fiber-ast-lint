@@ -1,0 +1,68 @@
+{
+ "schema": "fiber-ast-lint/reconciliacion/1",
+ "batch": 18,
+ "title": "Dos promesas con sujeto, un veredicto cada una, y la direccion de la desigualdad entre cada promesa y su instrumento",
+ "fecha": "2026-11-27",
+ "declared_before_computation": true,
+ "que_es": "El lote 17 midio cuantas predicciones historicas nombran un sujeto y publico que eran dos de cincuenta y siete. Este sello no cuenta: recomputa esas dos y escribe su veredicto con la fecha de hoy, que es la unica fecha en la que el veredicto se midio. Las otras cincuenta y cinco siguen en NO_MEDIDO declarado y no en cero.",
+ "sujeto": {
+  "archivo": "bench/recibo.py",
+  "sha256": "2e34b3c6547eba7429e6b8fd7225bc1d0256871ade12db29ba9ddf7b1eb4bea1",
+  "bytes": 32612,
+  "lineas": 736
+ },
+ "direcciones": {
+  "instrumento_mas_ancho": "el instrumento recorre un conjunto que contiene al de la promesa; un verde es seguro porque medir de mas solo puede refutar de mas",
+  "promesa_mas_ancha": "la promesa cuantifica sobre un conjunto que contiene al del instrumento; un verde es compatible con que la promesa sea falsa y por eso no puede publicarse como SOBREVIVE"
+ },
+ "reconciliaciones": [
+  {
+   "pre_registro": "prediccion-batch-12.json",
+   "pre_registro_sha256": "2b1e4511a4cde37c73f1b22e45574b514e210ee4fa378d51cdb5844aac474306",
+   "id": "P2",
+   "promesa_citada": "su arbol sintactico no tiene un if, un match ni un ternario que compare un nombre que contenga lote con una constante entera",
+   "instrumento": "tests/test_recibo.py::test_el_instrumento_no_compara_contra_ningun_numero_de_lote",
+   "alcance_promesa": "las comparaciones dentro de if, match o ternario",
+   "alcance_instrumento": "todo ast.Compare del fichero, sin mirar el nodo que lo contiene",
+   "direccion": "instrumento_mas_ancho",
+   "por_que": "el instrumento no filtra por el nodo contenedor, de modo que su universo contiene al de la promesa: un resultado vacio sobre todo el arbol es un resultado vacio sobre el subconjunto",
+   "medicion": {
+    "comparaciones_lote_contra_entero": 0,
+    "comparaciones_totales_del_fichero": 71
+   },
+   "veredicto": "SOBREVIVE"
+  },
+  {
+   "pre_registro": "prediccion-batch-14.json",
+   "pre_registro_sha256": "38caa4f7a0d61fec8512d5892f2158523924e59619ba02566bf7df341102da88",
+   "id": "R1",
+   "promesa_citada": "ninguna rama de recibo.py nombra un id para decidir un juicio",
+   "instrumento": "tests/test_recibo.py::test_r1_el_juicio_no_depende_del_identificador_sino_de_la_forma",
+   "alcance_promesa": "todas las ramas de bench/recibo.py",
+   "alcance_instrumento": "el cuerpo de _veredictos_v3, mas una comprobacion de que la rama de _ausencia que si existe sigue existiendo",
+   "direccion": "promesa_mas_ancha",
+   "por_que": "el test acota su guarda al cuerpo de _veredictos_v3 y ademas afirma que la rama por identificador de _ausencia existe; la promesa dice recibo.py entero, y _evaluar consulta EVALUADORES por id y decide sobrevive en la via v2",
+   "mitades": {
+    "dos_ids_misma_forma_mismo_sobrevive": "SOBREVIVE",
+    "ninguna_rama_de_recibo_py_nombra_un_id_para_decidir": "CAE"
+   },
+   "falsificador_cumplido": "o que exista en recibo.py una rama que consulte el id para decidir sobrevive",
+   "medicion": {
+    "ramas_que_consultan_pid_en_bench_recibo_py": 3,
+    "ramas_que_consultan_pid_en_el_cuerpo_de_veredictos_v3": 0,
+    "punto_que_decide_sobrevive_por_id": "bench/recibo.py:325 _evaluar -> EVALUADORES.get(pid)",
+    "tests_que_mueren_si_se_vacia_evaluadores": 4
+   },
+   "congelada_por": "recibo-banda-13-lote11.json es un recibo de contrato v2 firmado con dos veredictos que salieron de EVALUADORES; retirar la tabla rompe la recomputacion byte a byte de ese sello y de cuatro tests",
+   "veredicto": "CAE"
+  }
+ ],
+ "heredadas": {
+  "con_locus": 2,
+  "umbral_sin_locus": 36,
+  "sin_falsador": 19,
+  "total": 57,
+  "nota": "Las cincuenta y cinco sin locus no se recomputan aqui: rellenarlas seria inventar una fecha que no existe. Se acotan por arriba con el trinquete de tests/test_prediccion_locus.py para que no crezcan."
+ },
+ "lo_que_este_sello_no_hace": "No arregla R1. Satisfacerla al pie de la letra exige retirar EVALUADORES, y eso cambia la huella de un recibo ya publicado: la ley de conservacion byte a byte y la ley del identificador chocan, y este sello publica el choque en vez de elegir un bando sin decirlo."
+}
