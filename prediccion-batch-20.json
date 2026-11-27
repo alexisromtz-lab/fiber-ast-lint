@@ -1,0 +1,58 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 20,
+  "title": "el denominador legal: el sujeto externo se filtra antes de clonarse",
+  "declared_before_computation": true,
+  "que_es": "El lote 19 cruzó la frontera con un sujeto y no pudo publicar su hallazgo, porque el sujeto no declara licencia. Este lote no busca más sujetos del mismo tipo: cambia el denominador. Antes de clonar nada se mide, sobre las cuarenta y ocho filas del censo, cuántas son a la vez Python y licenciables, y si no alcanzan se amplía por un procedimiento determinista y publicado, no por una lista recordada.",
+  "lo_ya_medido_antes_de_este_fichero": {
+    "el_censo_no_es_un_universo_de_sujetos": "censo_canal_activo_20261126.tsv tiene cuarenta y ocho filas y ordena por actividad de canal, no por propiedad del sujeto. De los ocho repositorios con senal social revisados en el lote 19, uno declara Python y ese uno no declara licencia.",
+    "el_instrumento_ya_transfiere": "sobre el sujeto del lote 19 el instrumento midio cinco almacenes, cero candidatos y un recibo con los dos shas. Lo que fallo no fue la medicion: fue el permiso.",
+    "el_censo_no_viaja_con_el_repo": "las cuarenta y ocho filas viven fuera de este arbol, asi que un filtro corrido contra la API y no congelado deja un denominador que ningun tercero puede recomputar. Este lote publica la respuesta cruda junto al recibo.",
+    "el_espacio_en_disco_es_el_recurso_escaso": "el volumen raiz quedo por debajo de dos gibibytes durante el viernes. Un filtro por API cuesta cero bytes; un clon cuesta cientos de megabytes. Por eso el tamano del sujeto se mide por API antes de clonarlo, y no despues."
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "De las cuarenta y ocho filas del censo, las que declaran Python entre sus lenguajes y ademas una licencia SPDX distinta de nula o de NOASSERTION son como mucho tres. Si se cumple, el cuello de botella hacia afuera es el censo y no la precision del instrumento: sin sujeto licenciable no hay locus publicable aunque el instrumento acierte, y ampliar la herramienta no mueve el resultado.",
+      "falsifier": "el filtro sobre las cuarenta y ocho filas congeladas devuelve seis o mas sujetos legales, medido en tests/test_lote20_universo.py",
+      "locus": "tests/test_lote20_universo.py"
+    },
+    {
+      "id": "P2",
+      "claim": "La actividad del canal y la propiedad del sujeto son conjuntos casi disjuntos: el orden por empuje reciente de las cuarenta y ocho filas no predice cual es Python ni cual esta licenciado, de modo que el tramo estrecho tiene que medirse entero y no sobre las filas con senal social. El filtro se aplica a las cuarenta y ocho, no a las ocho.",
+      "falsifier": "las filas con senal social contienen a todos los sujetos legales del censo, medido en tests/test_lote20_universo.py",
+      "locus": "censo-48-lenguajes-licencia-20261127.json"
+    },
+    {
+      "id": "P3",
+      "claim": "Sobre la cohorte legal, mas de la mitad de los almacenes detectados caen en cardinal_sin_medir, porque la regla fuerte solo dispara cuando el programa vigila la cardinalidad del almacen en su propio ambito y esa vigilancia es rara fuera de los proyectos con miles de tests. Una tasa de disparo alta convertiria el instrumento en un detector de estilo; una tasa muy baja lo convertiria en un detector de nada.",
+      "falsifier": "menos del veinte por ciento de los almacenes externos cae en cardinal_sin_medir, medido en recibo-lote20-20261127.json",
+      "locus": "recibo-lote20-20261127.json"
+    },
+    {
+      "id": "P4",
+      "claim": "Al menos uno de los sujetos legales devuelve un candidato en HEAD citable como repositorio, sha, fichero y linea, reproducible por un tercero con una instalacion desde git y sin dependencias. Si ninguno lo devuelve, el giro hacia afuera sigue sin sujeto y la siguiente regla a promover es la del trinquete ordinal, no una regla nueva de este instrumento.",
+      "falsifier": "cero candidatos en HEAD sobre la cohorte legal, medido en recibo-lote20-20261127.json",
+      "locus": "recibo-lote20-20261127.json"
+    }
+  ],
+  "universo": {
+    "20A": {
+      "poblacion": "las cuarenta y ocho filas de censo_canal_activo_20261126.tsv, sin filtrar por senal social",
+      "predicado": "Python entre los lenguajes del repositorio Y licencia SPDX distinta de nula y distinta de NOASSERTION",
+      "comando": "una sola consulta GraphQL con un alias por repositorio sobre repository(owner,name) pidiendo licenseInfo{spdxId}, diskUsage, pushedAt y languages(first:10)",
+      "por_que_un_solo_comando": "noventa y seis llamadas REST y una consulta GraphQL miden lo mismo; la consulta unica entra en el limite y deja una sola respuesta cruda que congelar."
+    },
+    "20B": {
+      "condicion": "se dispara solo si el tramo 20A devuelve menos de dos sujetos legales",
+      "procedimiento": "tres busquedas con parametros fijos, cinco resultados cada una, en este orden: license mit, license apache-2.0, license bsd-3-clause, todas con language python, pushed mayor que 2026-09-01 y stars mayor que 10, ordenadas por actualizacion descendente",
+      "filtro_de_tamano": "se conservan solo los sujetos cuyo tamano declarado por la API no supera cincuenta y doce mil kibibytes",
+      "por_que_no_una_lista": "una lista de quince repositorios escrita de memoria no es un universo: no la puede reproducir nadie. Tres busquedas con parametros fijos si."
+    },
+    "protocolo_de_disco": "un clon a la vez, profundidad uno, en un directorio temporal propio, borrado en el mismo acto antes de abrir el siguiente; si el espacio libre del volumen raiz cae por debajo de uno coma siete gibibytes el acto se detiene y se declara NO_MEDIDO por recurso"
+  },
+  "cost": {
+    "relojes_nuevos": 1,
+    "justificacion": "el filtro por API no abre reloj de clon. El unico reloj nuevo es el escaneo secuencial de los sujetos legales, con purga entre uno y otro. La instalacion desde git y la autoaplicacion ya corrieron antes de este fichero."
+  }
+}
