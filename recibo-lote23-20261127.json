@@ -1,0 +1,382 @@
+{
+  "schema": "fiber-ast-lint/lote23/1",
+  "fecha": "2026-11-27",
+  "acto": "la precision por familia y no por caso: el denominador de 125 no es el denominador de la superficie",
+  "pre_registro": {
+    "ruta": "prediccion-batch-23.json",
+    "bytes": 10961,
+    "sha256": "c1dc2a50492ed13ce209d8b2dc0a813c36ff9e5667ce6d1c085684ed7abdfd1e",
+    "declarado_antes": true,
+    "verificado_en_este_acto": "c1dc2a50492ed13ce209d8b2dc0a813c36ff9e5667ce6d1c085684ed7abdfd1e",
+    "lector": "tests/test_prediccion_locus.py, 9 passed"
+  },
+  "fuente": {
+    "ruta": "recibo-lote22-20261127.json",
+    "sha256": "8da3aae6b78410c2127dfc4e1ae34969b6f7a8e6a41aaa2987e09d9e09c2dfe2",
+    "loci": 125,
+    "nota": "las 125 filas no se re-adjudican en este acto: se cuentan. El veredicto y la causa son los que el lote 22 publico tras leer el codigo del sujeto, y ninguno se mueve aqui."
+  },
+  "instrumento": {
+    "version": "0.5.0",
+    "detect_py_sha256_antes": "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6",
+    "detect_py_sha256_despues": "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6",
+    "congelado": true,
+    "nota": "el acto no ejecuta el detector: cuenta un recibo que el detector ya produjo. Que el sha256 coincida es la condicion que el pre-registro declaro antes de medir, y se verifica sobre el fichero vivo, no sobre la prosa del pre-registro."
+  },
+  "medicion": {
+    "relojes_nuevos": 0,
+    "clones": 0,
+    "red": false,
+    "pasos": [
+      "recontar la particion por causa declarada como benigna, y comparar con la cifra relayada antes de usarla",
+      "cruzar familia por veredicto sobre los 117 adjudicados (P1 y P2)",
+      "cruzar familia por causa sobre las 125 filas (P3)",
+      "publicar aparte, marcado como medido despues del pre-registro, lo que el cruce dejo ver y el fichero no habia predicho"
+    ]
+  },
+  "reproduccion_de_la_cifra_relayada": {
+    "relayada": "85 filas de causa estructural benigna frente a 40 candidatas",
+    "recomputada": {
+      "benignas": 85,
+      "candidatas": 40
+    },
+    "coincide": true,
+    "nota": "la cifra se reprodujo antes de evaluar cualquier prediccion. Ninguna de las tres depende de ella: las tres se enuncian sobre el acoplamiento familia-causa. Se publica porque una cifra relayada que nadie recomputa es una cifra creida, y porque su reparto por veredicto es lo que cambia la lectura de la precision.",
+    "reparto_por_veredicto": {
+      "benignas": {
+        "REFUTADO": 85
+      },
+      "candidatas": {
+        "NO_MEDIDO": 8,
+        "REFUTADO": 22,
+        "CONFIRMADO": 10
+      }
+    }
+  },
+  "tabla_familia": [
+    {
+      "familia": "CAJA",
+      "n": 8,
+      "confirmados": 2,
+      "refutados": 6,
+      "no_medidos": 0,
+      "causa_benigna": 3
+    },
+    {
+      "familia": "CAJA+ESPACIO",
+      "n": 2,
+      "confirmados": 0,
+      "refutados": 1,
+      "no_medidos": 1,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "CAJA+ESPACIO+NORMALIZA",
+      "n": 1,
+      "confirmados": 0,
+      "refutados": 1,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "CAJA+ESPACIO+REGEX",
+      "n": 1,
+      "confirmados": 0,
+      "refutados": 1,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "CAJA+REBANADA",
+      "n": 1,
+      "confirmados": 1,
+      "refutados": 0,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "CAJA+REGEX",
+      "n": 2,
+      "confirmados": 1,
+      "refutados": 1,
+      "no_medidos": 0,
+      "causa_benigna": 1
+    },
+    {
+      "familia": "CAJA+RUTA",
+      "n": 2,
+      "confirmados": 2,
+      "refutados": 0,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "CAJA+SEPARADOR",
+      "n": 1,
+      "confirmados": 1,
+      "refutados": 0,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "COLUMNA",
+      "n": 55,
+      "confirmados": 0,
+      "refutados": 50,
+      "no_medidos": 5,
+      "causa_benigna": 44
+    },
+    {
+      "familia": "CONJUNTO+ESPACIO",
+      "n": 1,
+      "confirmados": 0,
+      "refutados": 1,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "CONJUNTO+ESPACIO+REGEX",
+      "n": 1,
+      "confirmados": 0,
+      "refutados": 1,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "ESPACIO",
+      "n": 6,
+      "confirmados": 2,
+      "refutados": 4,
+      "no_medidos": 0,
+      "causa_benigna": 1
+    },
+    {
+      "familia": "ESPACIO+REBANADA",
+      "n": 1,
+      "confirmados": 0,
+      "refutados": 1,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "NORMALIZA",
+      "n": 3,
+      "confirmados": 0,
+      "refutados": 3,
+      "no_medidos": 0,
+      "causa_benigna": 3
+    },
+    {
+      "familia": "NORMALIZA+SEPARADOR",
+      "n": 1,
+      "confirmados": 0,
+      "refutados": 1,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "PREFIJO",
+      "n": 1,
+      "confirmados": 0,
+      "refutados": 1,
+      "no_medidos": 0,
+      "causa_benigna": 0
+    },
+    {
+      "familia": "REBANADA",
+      "n": 27,
+      "confirmados": 0,
+      "refutados": 27,
+      "no_medidos": 0,
+      "causa_benigna": 27
+    },
+    {
+      "familia": "RUTA",
+      "n": 10,
+      "confirmados": 1,
+      "refutados": 8,
+      "no_medidos": 1,
+      "causa_benigna": 6
+    },
+    {
+      "familia": "SEPARADOR",
+      "n": 1,
+      "confirmados": 0,
+      "refutados": 0,
+      "no_medidos": 1,
+      "causa_benigna": 0
+    }
+  ],
+  "tabla_causa": [
+    {
+      "causa": "agregacion_intencionada",
+      "n": 2,
+      "confirmados": 0,
+      "refutados": 2,
+      "no_medidos": 0,
+      "benigna": false,
+      "tautologica": false
+    },
+    {
+      "causa": "clave_de_protocolo",
+      "n": 6,
+      "confirmados": 0,
+      "refutados": 6,
+      "no_medidos": 0,
+      "benigna": false,
+      "tautologica": false
+    },
+    {
+      "causa": "colision_sin_perdida",
+      "n": 3,
+      "confirmados": 0,
+      "refutados": 3,
+      "no_medidos": 0,
+      "benigna": false,
+      "tautologica": false
+    },
+    {
+      "causa": "escritura_posicional",
+      "n": 25,
+      "confirmados": 0,
+      "refutados": 25,
+      "no_medidos": 0,
+      "benigna": true,
+      "tautologica": false
+    },
+    {
+      "causa": "fichero_no_parsea",
+      "n": 5,
+      "confirmados": 0,
+      "refutados": 0,
+      "no_medidos": 5,
+      "benigna": false,
+      "tautologica": false
+    },
+    {
+      "causa": "invariante_externo_no_declarado",
+      "n": 3,
+      "confirmados": 0,
+      "refutados": 0,
+      "no_medidos": 3,
+      "benigna": false,
+      "tautologica": false
+    },
+    {
+      "causa": "normalizacion_para_consulta",
+      "n": 2,
+      "confirmados": 0,
+      "refutados": 2,
+      "no_medidos": 0,
+      "benigna": false,
+      "tautologica": false
+    },
+    {
+      "causa": "proyeccion_inyectiva",
+      "n": 60,
+      "confirmados": 0,
+      "refutados": 60,
+      "no_medidos": 0,
+      "benigna": true,
+      "tautologica": false
+    },
+    {
+      "causa": "proyeccion_no_inyectiva_sin_medicion",
+      "n": 10,
+      "confirmados": 10,
+      "refutados": 0,
+      "no_medidos": 0,
+      "benigna": false,
+      "tautologica": true
+    },
+    {
+      "causa": "uso_como_conjunto",
+      "n": 9,
+      "confirmados": 0,
+      "refutados": 9,
+      "no_medidos": 0,
+      "benigna": false,
+      "tautologica": false
+    }
+  ],
+  "veredictos": [
+    {
+      "id": "P1",
+      "veredicto": "REFUTADA",
+      "causa": "denominador_cero",
+      "evidencia": "CAJA+RUTA aporta 2 de los 10 CONFIRMADO y 0 de los 107 REFUTADO. El numerador existe y el denominador no: la razon de verosimilitud no es un numero, y el falsador declarado antes de medir decia que un denominador cero deja la razon en NO_MEDIDO y no en infinito. El predicado heredado del lote 22 no se sostiene en su forma declarada.",
+      "el_caso_sustantivo_queda_en_no_medido": "las 2 filas de CAJA+RUTA son 2 confirmadas y 0 refutadas: la familia acierta el cien por cien de lo que emite y no tiene una sola fila refutada que la contradiga. Eso no es una victoria del predicado, es la ausencia de su denominador.",
+      "sensibilidad_declarada_y_publicada": {
+        "sin_suavizado": "indefinida (0/107 en el denominador)",
+        "laplace_alfa_1": 13.03448275862069,
+        "laplace_alfa_0_5": 21.724137931034484,
+        "nota": "con cualquier suavizado el predicado se cumpliria, porque el numerador es positivo y el denominador es cero. El veredicto depende entonces del prior que el que mide elige, y el pre-registro no lo declaro: el defecto es del predicado, no del sujeto. Se publica REFUTADA en la forma literal y el caso sustantivo en NO_MEDIDO, para que nadie lea en el numero lo que el numero no dice."
+      },
+      "por_que_el_predicado_heredado_no_podia_funcionar": "la particion tiene 19 familias sobre 125 filas y 13 de ellas no pasan de dos filas. Una razon de verosimilitud por familia exige celdas con denominador, y esta tabla no las tiene: el estadistico se eligio antes de contar cuantas filas habia por celda."
+    },
+    {
+      "id": "P2",
+      "veredicto": "CONFIRMADA",
+      "evidencia": "los 10 CONFIRMADO se reparten en 7 familias distintas: CAJA x2, CAJA+REBANADA x1, CAJA+REGEX x1, CAJA+RUTA x2, CAJA+SEPARADOR x1, ESPACIO x2, RUTA x1. No hay una sola regla detras de la evidencia: hay al menos siete."
+    },
+    {
+      "id": "P3",
+      "veredicto": "CONFIRMADA",
+      "evidencia": "existe al menos una familia con diez o mas filas de causa benigna y ningun confirmado (COLUMNA 44, REBANADA 27), y existe al menos una familia con confirmados y cero causas benignas (CAJA+REBANADA 1, CAJA+RUTA 2, CAJA+SEPARADOR 1). La benignidad estructural es, en esta cohorte, una propiedad de la regla y no solo de la causa."
+    }
+  ],
+  "medido_despues_del_pre_registro": {
+    "que_es": "el pre-registro se sello en 4517a26 antes de cruzar una fila. Lo que sigue no estaba predicho: se publica al lado, marcado, para que no se confunda con una prediccion cumplida. Una prediccion no se amplia despues de ver el resultado.",
+    "la_causa_separa_perfectamente_y_es_una_tautologia": {
+      "medido": "proyeccion_no_inyectiva_sin_medicion tiene 10 filas, 10 confirmadas y 0 refutadas; ninguna otra causa tiene un solo confirmado. Sobre estas 125 filas la causa discrimina mejor que la familia.",
+      "por_que_no_se_vende": "la causa la asigno el mismo lector que firmo el veredicto y nombra exactamente la condicion que define CONFIRMADO en el vocabulario del lote 22. Un clasificador perfecto que reproduce la definicion del etiquetador no informa: es la etiqueta con otro nombre. Se publica para que nadie lo lea como un hallazgo."
+    },
+    "la_supresion_de_superficie_cuesta_cero": {
+      "familias": [
+        "COLUMNA",
+        "REBANADA"
+      ],
+      "filas_suprimidas": 82,
+      "fraccion_de_la_salida": 0.656,
+      "confirmados_suprimidos": 0,
+      "precision_antes": {
+        "denominador": 117,
+        "confirmados": 10,
+        "valor": 0.08547
+      },
+      "precision_despues": {
+        "denominador": 40,
+        "confirmados": 10,
+        "valor": 0.25
+      },
+      "factor": 2.925,
+      "nota": "la compuerta que sale de aqui cuesta cero lineas de lectura y no toca el instrumento: suprime dos familias enteras y no pierde ni uno de los diez confirmados. Es una candidata, no una validacion: las dos familias se eligieron mirando estas mismas 125 filas, y usarlas para predecir sobre ellas es seleccion posterior."
+    },
+    "la_precision_sobre_la_poblacion_candidata": {
+      "candidatas": 40,
+      "confirmadas": 10,
+      "no_medidas": 8,
+      "precision_sobre_las_40": 0.25,
+      "precision_sobre_las_32_adjudicadas": 0.3125,
+      "nota": "10/40 = 0.25 y 10/32 = 0.3125, las dos por encima de 1/6, frente a 10/125 = 0.08 sobre la salida entera. No reescribe el veredicto P2 del lote 22, que queda refutado con el denominador con el que se declaro: lo que se publica es que su denominador mezclaba dos poblaciones, y cual era el numero de la otra."
+    }
+  },
+  "politica": {
+    "familia_como_discriminador": "no se vende: P1 cae en su forma declarada y la particion es demasiado rala para sostener una razon de verosimilitud por familia.",
+    "supresion_de_superficie": "se adopta como compuerta candidata y no como resultado: dos familias sin un solo confirmado, 82 de 125 filas, cero perdidas. Se valida fuera de muestra en el lote 24 o se retira.",
+    "causa_como_clasificador": "no se vende: separa perfectamente porque es la definicion del veredicto, no porque el instrumento la calcule."
+  },
+  "no_se_hizo": {
+    "reportes_abiertos": 0,
+    "instrumento": "no se toca detect.py ni se sube version: este acto cuenta un recibo, no ejecuta el detector. La serie externa sigue siendo comparable con el lote 21 y el 22.",
+    "filtro_de_precision": "no se implementa en este acto: un filtro por familia entrenado sobre estas 125 filas seria seleccion posterior. Se publica la cifra y se deja la compuerta para el lote 24, donde se mide sobre filas que no la eligieron.",
+    "relectura": "no se relee ni una linea de codigo ajeno y no se clona ningun sujeto: los 125 loci ya estaban adjudicados con causa y familia."
+  },
+  "proximo_acto": {
+    "nombre": "lote 24, el adjudicador mecanico: la causa se calcula o no se vende",
+    "predicado": "una regla mecanica que asigne causa desde el AST del locus, escrita antes de mirar los veredictos del lote 22 y sin tocar detect.py, reproduce al menos el 90 por cien de los 117 veredictos adjudicados cuando se aplica sobre los mismos veinte sujetos y los mismos sha",
+    "falsador": "menos del 75 por cien de acuerdo sobre los 117 adjudicados en recibo-lote24-20261127.json, o cualquier escritura en src/fiber_ast_lint/detect.py durante el acto",
+    "requisito": "si la causa se calcula, la compuerta de superficie se puede vender; si no se calcula, lo que se vende es lectura humana y hay que decirlo con ese nombre",
+    "coste": "veinte clones de hasta 20 MiB, purgados uno a uno, cero relojes nuevos: el sujeto ya esta congelado en censo-22-20261127.json"
+  }
+}
