@@ -67,3 +67,65 @@ def test_exit_codes_table_matches_contract() -> None:
                 codigos.add(int(m.group(1)))
     contrato = {RC_OK, RC_CANDIDATO, RC_VACIO, RC_CONSERVACION}
     assert codigos == contrato, f"README declara {sorted(codigos)}, el codigo {sorted(contrato)}"
+
+
+# --- The install line is a claim about a name, and a name resolves or it does not ---------------
+#
+# Measured 2026-11-27: `uvx fiber-ast-lint` answers `unsatisfiable requirements`, so every console
+# line that asks the registry for the bare name teaches a command that cannot run. On 2026-11-27 a
+# commit landed on `main` that put that line back as the documented install, and the whole suite
+# stayed green: nothing read the block. This is that reader.
+
+NOMBRE_RESUELVE_EN_PYPI = False
+NOMBRE = "fiber-ast-lint"
+PROGRAMAS = ("uvx", "pip", "pip3", "pipx")
+
+
+def _comandos() -> list[str]:
+    """Every line the README prints as a command, with the `$ ` prompt removed.
+
+    Fences are not tracked on purpose: this README carries an odd number of them (a pre-existing
+    orphan), so pairing fences would mis-scope every block after it. A line counts as a command if
+    it carries the prompt or if it opens with a program this README could plausibly invoke.
+    """
+    comandos: list[str] = []
+    for linea in README.splitlines():
+        limpia = linea.strip()
+        if limpia.startswith("$ "):
+            limpia = limpia[2:].strip()
+        elif not limpia.startswith(PROGRAMAS):
+            continue
+        if limpia:
+            comandos.append(limpia)
+    return comandos
+
+
+def _pide_el_nombre_al_registro(comando: str) -> bool:
+    """True when the command asks a registry for the name with no `git+`/`gh:` source."""
+    piezas = comando.split()
+    if not piezas or piezas[0] not in PROGRAMAS:
+        return False
+    if NOMBRE not in piezas:
+        return False
+    return not any(p.startswith(("git+", "gh:")) for p in piezas)
+
+
+def test_el_readme_no_ensena_un_nombre_que_no_resuelve() -> None:
+    if NOMBRE_RESUELVE_EN_PYPI:
+        return
+    culpables = [c for c in _comandos() if _pide_el_nombre_al_registro(c)]
+    assert not culpables, (
+        f"README enseña `{NOMBRE}` sin fuente `git+` y ese nombre no resuelve: {culpables}"
+    )
+
+
+def test_la_guarda_ve_comandos_y_discrimina() -> None:
+    assert _comandos(), "el lector no encontro ningun comando: la guarda seria un verde vacio"
+    assert _pide_el_nombre_al_registro("uvx fiber-ast-lint [ruta]")
+    assert _pide_el_nombre_al_registro("pip install fiber-ast-lint       # or: pipx install")
+    assert not _pide_el_nombre_al_registro(
+        "uvx --from git+https://github.com/alexisromtz-lab/fiber-ast-lint fiber-ast-lint x.py"
+    )
+    assert not _pide_el_nombre_al_registro(
+        "pip install git+https://github.com/alexisromtz-lab/fiber-ast-lint@v0.4.6"
+    )
