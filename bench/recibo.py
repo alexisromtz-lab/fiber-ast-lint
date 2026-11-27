@@ -39,16 +39,54 @@ import sys
 import time
 from pathlib import Path
 
+# El interprete de predicados es del contrato v3. Un recibo v1 o v2 se verifica sin el al
+# lado: el claim comercial es que un tercero con el recibo, la prediccion y el artefacto
+# recomputa el veredicto, y cobrarle un modulo que su contrato no nombra lo rompe en silencio.
+_MOD = None
+
+
+class _Interprete:
+    """Carga ``predicado`` desde el directorio de este archivo, la primera vez que se usa."""
+
+    def __getattr__(self, nombre):
+        global _MOD
+        if _MOD is None:
+            aqui = str(Path(__file__).resolve().parent)
+            if aqui not in sys.path:
+                sys.path.insert(0, aqui)
+            import predicado as m
+
+            _MOD = m
+        return getattr(_MOD, nombre)
+
+
+predicado = _Interprete()
+
 RELOJES_SONDA = 9
 ZONAS = ("margen_sano", "banda_de_riesgo", "fuera_de_cota")
 VOLATILES = ("huella", "medicion_de_si_mismo")
 
 CONTRATO_V1 = "fiber-ast-lint/recibo/1"
 CONTRATO_V2 = "fiber-ast-lint/recibo/2"
+CONTRATO_V3 = "fiber-ast-lint/recibo/3"
 
 # Causas cerradas de un veredicto NO_MEDIDO. Una causa fuera de este conjunto es un
 # defecto del instrumento, no una medida: ausencia declarada, nunca ausencia omitida.
-CAUSAS = ("sin_evaluador", "metrica_ausente", "fuera_de_la_huella")
+# Las tres del contrato v2 quedan congeladas: su recuento viaja dentro de la huella de los
+# cuatro recibos sellados del lote 13, y una causa nueva re-firmaria lo ya publicado.
+CAUSAS_V2 = ("sin_evaluador", "metrica_ausente", "fuera_de_la_huella")
+CAUSAS = CAUSAS_V2 + ("sin_predicado", "predicado_ilegible", "poblacion_vacia")
+
+# Magnitudes que el recibo publica por acto para que un predicado pueda apuntarlas. Son
+# lecturas del sujeto, no juicios: quien juzga es el predicado, y el recibo solo tiene que
+# llevar consigo la resolucion suficiente para que un tercero lo haga sin el artefacto.
+CAMPOS_HECHO = (
+    "minimo_s", "jitter_s", "mediana_s", "p50_min_s", "p50_max_s", "minimo_publicable_s",
+    "predicho_s", "q", "relojes", "lecturas_n", "n_bloques", "bytes_py_pin", "dispersion",
+    "coste_compuerta_s", "coste_arnes_s", "trabajo_s", "sonda_sobre_min",
+    "sonda_jitter_sobre_jitter", "arranque_sobre_sonda", "coste_sobre_trabajo",
+)
+CAMPOS_BLOQUE = ("min_s", "p50_s", "max_s", "jitter_s", "n")
 
 
 def canonico(obj: dict) -> bytes:
@@ -374,6 +412,126 @@ def recibo_v2(arte: dict, fuente: str, lote: int | None = None,
         "emitidas": len(rec["veredictos"]),
         "evaluadas": sum(1 for v in rec["veredictos"] if v["estado"] == "evaluado"),
         "no_medidas": sum(1 for v in rec["veredictos"] if v["estado"] == "no_medido"),
+        "causas": {c: sum(1 for v in rec["veredictos"] if v.get("causa") == c) for c in CAUSAS_V2},
+    }
+    rec["huella"] = huella(rec)
+    return rec
+
+
+def _hechos(acto: dict) -> dict:
+    """Las magnitudes del acto, en la resolucion que un predicado necesita.
+
+    Se publican tal como el artefacto las declaro, sin reinterpretar: los derivados que se
+    anaden son cocientes entre dos campos ya presentes, y ninguno decide nada. Los bloques
+    van sin sus lecturas crudas -- esas viven en el artefacto, que el recibo cita por hash --
+    pero con su minimo, su maximo y su jitter, que es lo que una prediccion sobre mitades
+    necesita y no puede reconstruir desde el agregado del acto.
+    """
+    out = {}
+    for c in CAMPOS_HECHO:
+        v = acto.get(c)
+        if isinstance(v, bool) or v is None:
+            continue
+        out[c] = round(v, 6) if isinstance(v, float) else v
+    mn, jt = acto.get("minimo_s"), acto.get("jitter_s")
+    if isinstance(mn, (int, float)) and isinstance(jt, (int, float)) and jt:
+        out["ratio_min_jitter"] = round(mn / jt, 6)
+    coste, relojes, mediana = (acto.get("coste_compuerta_s"), acto.get("relojes"),
+                               acto.get("mediana_s"))
+    if "coste_sobre_trabajo" not in out and None not in (coste, relojes, mediana) and relojes * mediana:
+        out["coste_sobre_trabajo"] = round(coste / (relojes * mediana), 6)
+    bloques = acto.get("bloques")
+    if isinstance(bloques, list) and bloques and all(isinstance(b, dict) for b in bloques):
+        out["bloques"] = [{k: (round(b[k], 6) if isinstance(b.get(k), float) else b.get(k))
+                           for k in CAMPOS_BLOQUE if k in b} for b in bloques]
+    return out
+
+
+def _resolucion(rec: dict) -> dict:
+    """La vista sobre la que un predicado resuelve: las secciones, no la firma."""
+    return {k: rec[k] for k in ("lote", "sujeto", "actos", "resumen",
+                                "dispersiones_por_sesion") if k in rec}
+
+
+def _veredictos_v3(rec: dict, preds: list[dict] | None, mapa: dict) -> list[dict]:
+    """Un registro por prediccion declarada, juzgado por su predicado y no por su nombre.
+
+    Ninguna rama de esta funcion consulta el identificador para decidir el juicio: el
+    identificador solo sirve para buscar la traduccion y para etiquetar el registro. Lo que
+    el pre-registro no traduce se publica ``sin_predicado``, y lo que el interprete no
+    entiende se publica ``predicado_ilegible``: las dos son causas, ninguna es una caida.
+    """
+    doc = _resolucion(rec)
+    out = []
+    for p in preds or []:
+        pid = p["id"]
+        base = {"id": pid, "prediccion": p.get("claim")}
+        if pid in FUERA_DE_LA_HUELLA:
+            out.append({**base, "estado": "no_medido", "causa": "fuera_de_la_huella",
+                        "locus": FUERA_DE_LA_HUELLA[pid]})
+            continue
+        traducido = mapa.get(pid)
+        if traducido is None:
+            out.append({**base, "estado": "no_medido", "causa": "sin_predicado"})
+            continue
+        r = predicado.evaluar(traducido["evalua"], doc)
+        if r["estado"] == "no_medido":
+            out.append({**base, **{k: v for k, v in r.items() if k != "estado"},
+                        "estado": "no_medido",
+                        "evalua": traducido.get("expresa", "")})
+            continue
+        out.append({**base, "estado": "evaluado", "sobrevive": r["sobrevive"],
+                    "medido": r["medido"], "evalua": traducido.get("expresa", ""),
+                    "via": "predicado"})
+    return out
+
+
+def recibo_v3(arte: dict, fuente: str, lote: int | None = None,
+              pred_ruta: Path | None = None, predc_ruta: Path | None = None) -> dict:
+    """El contrato recibo/3: el juicio es funcion del predicado, no del identificador.
+
+    Parte del recibo v2 y le anade lo que un interprete necesita para juzgar sin el
+    artefacto: los hechos por acto, las dispersiones con su mediana, y la cita del fichero
+    de predicados que traduce el pre-registro. El pre-registro no se toca: la traduccion lo
+    cita por sha256, y si el texto cambia el predicado deja de valer.
+    """
+    rec = recibo_v2(arte, fuente, lote, pred_ruta)
+    crudos = {a["nombre"]: a for a in _actos(arte)}
+    for a in rec["actos"]:
+        a["hechos"] = _hechos(crudos.get(a["nombre"], {}))
+    por_sesion: dict[int, list[float]] = {}
+    for a in rec["actos"]:
+        if a["sesion"] is not None:
+            por_sesion.setdefault(a["sesion"], []).append(a["k"])
+    rec["dispersiones_por_sesion"] = {}
+    for s, ks in sorted(por_sesion.items()):
+        orden = sorted(ks)
+        n = len(orden)
+        mediana = orden[n // 2] if n % 2 else round((orden[n // 2 - 1] + orden[n // 2]) / 2, 6)
+        rec["dispersiones_por_sesion"][str(s)] = {
+            "n": n,
+            "k_min": round(min(ks), 6),
+            "k_max": round(max(ks), 6),
+            "k_mediana": mediana,
+            "dispersion": round(max(ks) / min(ks), 6) if n > 1 else None,
+        }
+    mapa, cita = predicado.leer(predc_ruta,
+                                junto_a=predc_ruta.parent if predc_ruta else None)
+    preds = _leer_predicciones(pred_ruta)
+    if cita is not None and rec.get("pre_registro") is not None:
+        if cita["cita_pre_registro"]["sha256"] != rec["pre_registro"]["sha256"]:
+            raise predicado.Ilegible(
+                f"el predicado traduce {cita['cita_pre_registro']['ruta']}"
+                f" {cita['cita_pre_registro']['sha256']} y el recibo cita"
+                f" {rec['pre_registro']['sha256']}")
+    rec["schema"] = CONTRATO_V3
+    rec["predicados"] = cita
+    rec["veredictos"] = _veredictos_v3(rec, preds, mapa)
+    rec["resumen"]["veredictos"] = {
+        "declaradas": None if preds is None else len(preds),
+        "emitidas": len(rec["veredictos"]),
+        "evaluadas": sum(1 for v in rec["veredictos"] if v["estado"] == "evaluado"),
+        "no_medidas": sum(1 for v in rec["veredictos"] if v["estado"] == "no_medido"),
         "causas": {c: sum(1 for v in rec["veredictos"] if v.get("causa") == c) for c in CAUSAS},
     }
     rec["huella"] = huella(rec)
@@ -415,8 +573,9 @@ def _resumen_legible(rec: dict) -> str:
         f" {r['en_banda_de_riesgo_n']} estan en banda de riesgo",
     ]
     for v in rec["veredictos"]:
+        via = f" [{v['via']}]" if v.get("via") else ""
         if v.get("estado") == "evaluado":
-            lineas.append(f"{v['id']}: {'sobrevive' if v['sobrevive'] else 'CAE'} · {v['medido']}")
+            lineas.append(f"{v['id']}: {'sobrevive' if v['sobrevive'] else 'CAE'}{via} · {v['medido']}")
         elif v.get("estado") == "no_medido":
             lineas.append(f"{v['id']}: NO_MEDIDO · {v['causa']}")
         else:
@@ -432,7 +591,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--lote", type=int, help="lote de la emision; por defecto, el del artefacto")
     ap.add_argument("--prediccion", type=Path,
                     help="pre-registro que el recibo cita; sin el, el recibo no emite veredictos")
-    ap.add_argument("--contrato", choices=(CONTRATO_V1, CONTRATO_V2), default=CONTRATO_V2,
+    ap.add_argument("--predicados", type=Path,
+                    help="traduccion del pre-registro a expresiones evaluables (contrato recibo/3)")
+    ap.add_argument("--contrato", choices=(CONTRATO_V1, CONTRATO_V2, CONTRATO_V3),
+                    default=CONTRATO_V3,
                     help="contrato que se emite; al verificar manda el que el fichero declara")
     args = ap.parse_args(argv)
     if not args.salida and not args.check:
@@ -464,13 +626,39 @@ def main(argv: list[str] | None = None) -> int:
         pred_ruta = _ruta_prediccion(lote, args.check.parent)
     else:
         pred_ruta = None
+    # La traduccion tampoco se adivina: la declara el recibo sellado, o el argumento.
+    if args.predicados:
+        predc_ruta = args.predicados
+    elif sellado and sellado.get("predicados"):
+        predc_ruta = args.check.parent / sellado["predicados"]["ruta"]
+    elif contrato == CONTRATO_V3 and lote is not None:
+        candidato = Path(__file__).resolve().parent.parent / f"predicado-batch-{lote}.json"
+        predc_ruta = candidato if candidato.exists() else None
+    else:
+        predc_ruta = None
+
+    # Un v3 sin interprete al lado no se verifica: se declara, no se degrada a verde.
+    if contrato == CONTRATO_V3:
+        try:
+            fallo_predicado = (predicado.Ilegible,)
+        except ModuleNotFoundError as e:
+            print(f"el contrato v3 necesita predicado.py junto al recibo: {e}", file=sys.stderr)
+            return 5
+    else:
+        fallo_predicado = ()
 
     t0 = time.perf_counter()
-    if contrato == CONTRATO_V1:
-        rec = _reanclar_veredictos(recibo(arte, str(args.artefacto), lote),
-                                   _leer_prediccion(pred_ruta))
-    else:
-        rec = recibo_v2(arte, str(args.artefacto), lote, pred_ruta)
+    try:
+        if contrato == CONTRATO_V1:
+            rec = _reanclar_veredictos(recibo(arte, str(args.artefacto), lote),
+                                       _leer_prediccion(pred_ruta))
+        elif contrato == CONTRATO_V2:
+            rec = recibo_v2(arte, str(args.artefacto), lote, pred_ruta)
+        else:
+            rec = recibo_v3(arte, str(args.artefacto), lote, pred_ruta, predc_ruta)
+    except fallo_predicado as e:
+        print(f"predicado ilegible: {e}", file=sys.stderr)
+        return 5
     coste = round(time.perf_counter() - t0, 6)
     total = sum(a.get("coste_compuerta_s") or 0.0 for a in _actos(arte))
     rec["medicion_de_si_mismo"] = {

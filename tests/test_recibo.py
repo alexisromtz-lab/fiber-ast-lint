@@ -682,3 +682,224 @@ def test_los_cuatro_recibos_del_lote_13_verifican_su_huella():
             capture_output=True, text=True, cwd=RAIZ,
         )
         assert r.returncode == 0, r.stdout + r.stderr
+
+
+# --- el lote 14: el juicio como funcion del predicado -----------------------
+
+PREDICADOS_14 = {n: RAIZ / f"predicado-batch-{n}.json" for n in (8, 9, 10, 11)}
+
+
+def _v3(lote: int) -> dict:
+    return json.loads((RAIZ / f"recibo-banda-14-lote{lote}.json").read_text())
+
+
+def _crudo14(lote: int) -> dict:
+    """El artefacto con el que se emitio el recibo: el lote 11 se juzga sobre el del lote 10."""
+    return json.loads(FUENTES_13[lote].read_text())
+
+
+def _rec14(lote: int) -> dict:
+    """Recomputa el recibo v3 en proceso: es lo que permite matar mutantes del interprete."""
+    return r11.recibo_v3(_crudo14(lote), str(FUENTES_13[lote]), lote,
+                         RAIZ / f"prediccion-batch-{lote}.json", PREDICADOS_14[lote])
+
+
+def _ids(rec: dict) -> dict:
+    return {v["id"]: v for v in rec["veredictos"]}
+
+
+def test_r3_las_poblaciones_del_lote_14_son_las_declaradas():
+    """10 expresables y 3 no: el numero lo fija el pre-registro, no el codigo."""
+    declaradas = sum(len(json.loads(PREDICADOS_14[lote].read_text())["predicados"])
+                     for lote in (8, 9, 10, 11))
+    vistos = {"declaradas": 0, "evaluado": 0, "no_medido": 0}
+    for lote in (8, 9, 10, 11):
+        for v in _rec14(lote)["veredictos"]:
+            vistos["declaradas"] += 1
+            vistos[v["estado"]] += 1
+    assert vistos == {"declaradas": 13, "evaluado": 10, "no_medido": 3}
+    assert declaradas == 10
+    ciegas = {v["id"] for lote in (8, 9, 10, 11) for v in _rec14(lote)["veredictos"]
+              if v["estado"] == "no_medido"}
+    assert ciegas == {"L3", "P2", "P3"}
+
+
+def test_r2_el_predicado_juzga_lo_mismo_que_el_evaluador_cableado():
+    """P1 y P4 tienen las dos vias escritas; el lote 14 no puede cambiar su veredicto."""
+    cableado = _ids(json.loads((RAIZ / "recibo-banda-13-lote11.json").read_text()))
+    con_pred = _ids(_rec14(11))
+    for pid in ("P1", "P4"):
+        assert con_pred[pid]["estado"] == "evaluado"
+        assert con_pred[pid]["sobrevive"] == cableado[pid]["sobrevive"], pid
+        assert con_pred[pid]["via"] == "predicado"
+
+
+def test_r1_el_juicio_no_depende_del_identificador_sino_de_la_forma():
+    """El mismo predicado bajo dos nombres distintos tiene que dar el mismo veredicto."""
+    doc = r11._resolucion(_rec14(11))
+    forma = {"expr": {"de": "/resumen/publicables_como_booleano", "agrega": "valor"},
+             "rel": "gt", "valor": 3}
+    a = r11.predicado.evaluar(forma, doc)
+    b = r11.predicado.evaluar(json.loads(json.dumps(forma)), doc)
+    assert a == b and a["estado"] == "evaluado"
+    mapa = {"P1": {"evalua": forma}, "ZZ": {"evalua": forma}}
+    preds = json.loads((RAIZ / "prediccion-batch-11.json").read_text())["predictions"]
+    v = {x["id"]: x for x in r11._veredictos_v3(_rec14(11), preds + [{"id": "ZZ",
+                                                                     "claim": "la misma forma"}],
+                                                mapa)}
+    assert v["P1"]["sobrevive"] == v["ZZ"]["sobrevive"] is True
+    # Y el codigo no puede consultar el identificador para decidir.
+    fuente = (RAIZ / "bench" / "recibo.py").read_text()
+    cuerpo = fuente.split("def _veredictos_v3", 1)[1].split("\ndef ", 1)[0]
+    assert re.search(r'\bid\b\s*(==|!=|in\s*[\(\[])', cuerpo) is None, cuerpo
+
+
+def test_r4_una_poblacion_vacia_no_es_una_poblacion_que_cumple():
+    doc = {"actos": [{"nombre": "A", "hechos": {"minimo_s": 0.2}}]}
+    pred = {"de": "/actos/*/hechos/sonda_sobre_min", "todos": {"rel": "le", "valor": 1.15}}
+    v = r11.predicado.evaluar(pred, doc)
+    assert (v["estado"], v["causa"]) == ("no_medido", "poblacion_vacia"), v
+    assert r11.predicado.evaluar({"no": pred}, doc)["estado"] == "no_medido"
+
+
+def test_r5_un_predicado_ilegible_no_es_un_predicado_falso():
+    doc = {"x": 1}
+    for roto in ({"expr": {"de": "/x", "agrega": "valor"}, "rel": "aproximado", "valor": 1},
+                 {"expr": {"de": "/x", "agrega": "mediana"}, "rel": "lt", "valor": 1},
+                 {"expr": {"de": "/x", "agrega": "valor"}, "rel": "lt"},
+                 {"expr": {"op": "suma", "a": {"de": "/x", "agrega": "valor"},
+                           "b": {"de": "/x", "agrega": "valor"}},
+                  "rel": "lt", "valor": 2}):
+        v = r11.predicado.evaluar(roto, doc)
+        assert v["estado"] == "no_medido" and v["causa"] == "predicado_ilegible", roto
+        assert "sobrevive" not in v
+
+
+def test_una_magnitud_ausente_es_una_causa_y_no_un_cero():
+    doc = {"actos": [{"nombre": "A", "hechos": {}}]}
+    v = r11.predicado.evaluar(
+        {"expr": {"de": "/actos/A/hechos/minimo_s", "agrega": "valor"}, "rel": "lt", "valor": 1},
+        doc)
+    assert (v["estado"], v["causa"]) == ("no_medido", "metrica_ausente"), v
+
+
+def test_la_poblacion_de_un_cuantificador_es_la_que_declara_la_magnitud():
+    """M2 no la votan los actos que no corrieron la sonda: seria inventar un cero."""
+    actos = _acto_de_los_fuera_de_dominio(10)
+    con = [a for a in actos if "sonda_sobre_min" in a]
+    sin = [dict(a, nombre="Z") for a in actos if "sonda_sobre_min" not in a]
+    assert con and sin
+    doc = {"actos": con + sin}
+    v = r11.predicado.evaluar(
+        {"de": "/actos/*/hechos/sonda_sobre_min", "todos": {"rel": "le", "valor": 1.15}},
+        r11._resolucion({"actos": [{**a, "hechos": r11._hechos(a)} for a in doc["actos"]]}))
+    m = v["medido"]
+    assert m["poblacion"] == len(con) and m["cumplen"] == m["poblacion"], v
+
+
+def _acto_de_los_fuera_de_dominio(lote: int) -> list[dict]:
+    return r11._actos(json.loads((RAIZ / f"fuera-de-dominio-{lote}.json").read_text()))
+
+
+def test_la_resolucion_no_depende_del_orden_en_que_el_json_se_escribio():
+    doc = {"m": {"b": 2, "a": 1, "c": 3}}
+    ordenado = r11.predicado.resolver(doc, "/m/*")
+    desordenado = r11.predicado.resolver({"m": {"c": 3, "a": 1, "b": 2}}, "/m/*")
+    assert ordenado == desordenado == [1, 2, 3]
+
+
+def test_un_acto_se_nombra_y_no_se_cuenta():
+    """'/actos/B' tiene que decir lo mismo aunque el artefacto reordene sus actos."""
+    doc = {"actos": [{"nombre": "A", "k": 1}, {"nombre": "B", "k": 2}]}
+    assert r11.predicado.resolver(doc, "/actos/B/k") == [2]
+    invertido = {"actos": [{"nombre": "B", "k": 2}, {"nombre": "A", "k": 1}]}
+    assert r11.predicado.resolver(invertido, "/actos/B/k") == [2]
+    assert r11.predicado.resolver(invertido, "/actos/0/k") == [2]
+
+
+def test_el_predicado_cita_su_pre_registro_por_hash_y_si_el_texto_cambia_no_vale():
+    for lote in (8, 9, 10, 11):
+        p = json.loads(PREDICADOS_14[lote].read_text())
+        real = hashlib.sha256((RAIZ / f"prediccion-batch-{lote}.json").read_bytes()).hexdigest()
+        assert p["cita_pre_registro"]["sha256"] == real, lote
+    _, cita = r11.predicado.leer(PREDICADOS_14[8])
+    assert cita["cita_pre_registro"]["sha256"] == hashlib.sha256(
+        (RAIZ / "prediccion-batch-8.json").read_bytes()).hexdigest()
+
+
+def test_los_cuatro_recibos_del_lote_14_verifican_su_huella():
+    for lote in (8, 9, 10, 11):
+        r = subprocess.run(
+            [sys.executable, str(RAIZ / "bench" / "recibo.py"),
+             "--artefacto", str(FUENTES_13[lote]),
+             "--check", str(RAIZ / f"recibo-banda-14-lote{lote}.json")],
+            capture_output=True, text=True, cwd=RAIZ,
+        )
+        assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_el_contrato_v2_no_cambia_cuando_el_v3_anade_causas():
+    """Las causas del v3 no pueden reescribir el resumen de un recibo ya sellado."""
+    assert r11.CAUSAS[: len(r11.CAUSAS_V2)] == r11.CAUSAS_V2
+    for lote in (8, 9, 10, 11):
+        rec = r11.recibo_v2(_crudo14(lote), str(FUENTES_13[lote]), lote,
+                            RAIZ / f"prediccion-batch-{lote}.json")
+        sellado = json.loads((RAIZ / f"recibo-banda-13-lote{lote}.json").read_text())
+        # ``medicion_de_si_mismo`` lo mide main, no recibo_v2: fuera del objeto firmado.
+        sellado.pop("medicion_de_si_mismo", None)
+        assert rec == sellado, lote
+
+
+def test_un_v3_sin_el_interprete_al_lado_no_se_publica_verde(tmp_path: Path):
+    (tmp_path / "bench").mkdir()
+    (tmp_path / "bench" / "recibo.py").write_bytes((RAIZ / "bench" / "recibo.py").read_bytes())
+    for f in ("fuera-de-dominio-10.json", "prediccion-batch-11.json",
+              "predicado-batch-11.json", "recibo-banda-14-lote11.json"):
+        (tmp_path / f).write_bytes((RAIZ / f).read_bytes())
+    r = subprocess.run(
+        [sys.executable, str(tmp_path / "bench" / "recibo.py"),
+         "--artefacto", str(tmp_path / "fuera-de-dominio-10.json"),
+         "--check", str(tmp_path / "recibo-banda-14-lote11.json")],
+        capture_output=True, text=True, cwd=tmp_path, env={"PATH": "/usr/bin:/bin"},
+    )
+    assert r.returncode == 5, r.stdout + r.stderr
+    assert "predicado.py" in r.stderr
+    # Con el interprete al lado verifica: son cinco archivos, no cuatro.
+    (tmp_path / "bench" / "predicado.py").write_bytes((RAIZ / "bench" / "predicado.py").read_bytes())
+    r = subprocess.run(
+        [sys.executable, str(tmp_path / "bench" / "recibo.py"),
+         "--artefacto", str(tmp_path / "fuera-de-dominio-10.json"),
+         "--check", str(tmp_path / "recibo-banda-14-lote11.json")],
+        capture_output=True, text=True, cwd=tmp_path, env={"PATH": "/usr/bin:/bin"},
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_un_v2_se_verifica_sin_el_interprete_al_lado():
+    """El claim comercial del v2 no puede cobrar un modulo que su contrato no nombra."""
+    assert "predicado" not in (RAIZ / "recibo-banda-11.json").read_text()
+
+
+def test_un_pre_registro_alterado_invalida_la_traduccion_que_lo_cita(tmp_path: Path):
+    """Traducir no es editar: si el texto cambio, el predicado deja de valer y el recibo no sale."""
+    retocado = json.loads((RAIZ / "prediccion-batch-8.json").read_text())
+    retocado["title"] = str(retocado.get("title", "")) + " (retocado)"
+    (tmp_path / "prediccion-batch-8.json").write_text(json.dumps(retocado))
+    (tmp_path / "predicado-batch-8.json").write_bytes(PREDICADOS_14[8].read_bytes())
+    with pytest.raises(r11.predicado.Ilegible):
+        r11.predicado.leer(tmp_path / "predicado-batch-8.json")
+
+    (tmp_path / "bench").mkdir()
+    for f in ("recibo.py", "predicado.py"):
+        (tmp_path / "bench" / f).write_bytes((RAIZ / "bench" / f).read_bytes())
+    (tmp_path / "fuera-de-dominio-8.json").write_bytes(FUENTES_13[8].read_bytes())
+    r = subprocess.run(
+        [sys.executable, str(tmp_path / "bench" / "recibo.py"),
+         "--artefacto", str(tmp_path / "fuera-de-dominio-8.json"),
+         "--prediccion", str(tmp_path / "prediccion-batch-8.json"),
+         "--predicados", str(tmp_path / "predicado-batch-8.json"),
+         "--lote", "8", "--salida", str(tmp_path / "r.json")],
+        capture_output=True, text=True, cwd=tmp_path, env={"PATH": "/usr/bin:/bin"},
+    )
+    assert r.returncode == 5, r.stdout + r.stderr
+    assert not (tmp_path / "r.json").exists()

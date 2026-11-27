@@ -1,0 +1,88 @@
+{
+ "schema": "fiber-ast-lint/prediccion/1",
+ "batch": 14,
+ "title": "el juicio deja de depender del identificador y pasa a depender de la forma del predicado",
+ "declared_before_computation": true,
+ "declared_at": "2026-11-27",
+ "why": "El lote 13 hizo que la poblacion juzgada igualase la declarada, pero el juez seguia siendo una tabla: EVALUADORES mapea dos identificadores a dos funciones y las otras once predicciones salen sin_evaluador. Eso significa que cada prediccion historica cuesta una rama de codigo nueva, y que el conjunto de cosas juzgables lo decide el programador y no el pre-registro. Un instrumento que solo entiende lo que le ensenaron a mano no tiene grados de libertad: tiene casos especiales.",
+ "what_is_new": "Un interprete de predicados: la declaracion dice puntero, agregado y relacion, y el instrumento resuelve. Se escribe en un fichero predicado-batch-N.json que cita el pre-registro congelado por su sha256 y traduce cada id a una expresion; el pre-registro no se toca, porque traducir una prosa no es editarla. Con eso, tres lotes cuyas once predicciones eran cajas negras pasan a tener juicio mecanico, y el recibo publica, para cada una, si sobrevive o la causa exacta por la que no se mide.",
+ "method": {
+  "sujetos": {
+   "lote8": "fuera-de-dominio-8.json con prediccion-batch-8.json (K1, K2, K3)",
+   "lote9": "fuera-de-dominio-9.json con prediccion-batch-9.json (L1, L2, L3)",
+   "lote10": "fuera-de-dominio-10.json con prediccion-batch-10.json (M1, M2, M3)",
+   "lote11": "fuera-de-dominio-10.json con --lote 11 y prediccion-batch-11.json (P1, P2, P3, P4)"
+  },
+  "relojes_nuevos": 0,
+  "por_que_cero": "este lote no cronometra: los 1350 relojes de los tres artefactos ya estan sellados, y el interprete los lee. La magnitud que se declara es de estructura, no de tiempo.",
+  "traducciones": [
+   {"id": "K1", "lote": 8, "expresable": true, "puntero": "/actos/B/banda/k", "forma": "valor lt 0.1509", "cita": "k_B = jitter_B / predicho es menor que q/2 = 0,1509"},
+   {"id": "K2", "lote": 8, "expresable": true, "puntero": "/actos/B/hechos/bloques/[:4]/max_s", "forma": "abs(rango_primera - rango_ultima) / predicho lt 0.1509, con rango = max(max_s) - min(min_s) de cada mitad", "cita": "|k_primera_mitad - k_ultima_mitad| < 0,1509"},
+   {"id": "K3", "lote": 8, "expresable": true, "puntero": "/actos/B/hechos/minimo_s entre /actos/A/hechos/minimo_s", "forma": "razon entre [0.90, 1.10]", "cita": "min_B / min_A cae en [0,90, 1,10]"},
+   {"id": "L1", "lote": 9, "expresable": true, "puntero": "/actos/*/hechos/ratio_min_jitter y /actos/*/hechos/minimo_s", "forma": "dispersion(ratio_min_jitter) le 1.30 y dispersion(minimo_s) ge 1.80", "cita": "dispersion(min / jitter) <= 1,30 mientras dispersion(min) >= 1,80"},
+   {"id": "L2", "lote": 9, "expresable": true, "puntero": "/actos/*/hechos/ratio_min_jitter", "forma": "todos entre [0.90, 1.40]", "cita": "en los cinco actos min / jitter cae en [0,90, 1,40]"},
+   {"id": "L3", "lote": 9, "expresable": false, "puntero": null, "forma": "sin_predicado", "cita": "la razon que pide L3 es una media sobre actos de un cociente por acto, y el algebra del lote 14 agrega sobre colecciones de punteros y compone expresiones binarias, pero no agrega el resultado de una expresion por elemento. Escribirla aqui exigiria inventar esa semantica despues de conocer los datos, que es el vicio que este corpus existe para no repetir"},
+   {"id": "M1", "lote": 10, "expresable": true, "puntero": "/dispersiones_por_sesion/*/dispersion y /dispersiones_por_sesion/*/k_mediana", "forma": "dispersion de la sesion nueva le 1.30 y razon entre medianas de sesiones ge 3.00", "cita": "dispersion(k) dentro de la sesion nueva <= 1,30 y dispersion(k) entre las medianas de las dos sesiones >= 3,00"},
+   {"id": "M2", "lote": 10, "expresable": true, "puntero": "/actos/*/hechos/sonda_sobre_min", "forma": "todos, sobre los actos que declaran la sonda, le 1.15; y todos sonda_jitter_sobre_jitter ge 0.50", "cita": "sonda_min / min <= 1,15 en los tres actos nuevos, y sonda_jitter >= 0,50 x el jitter del acto"},
+   {"id": "M3", "lote": 10, "expresable": true, "puntero": "/actos/*/hechos/coste_sobre_trabajo", "forma": "todos, sobre los actos que declaran coste, entre [3.0, 6.5]", "cita": "coste_compuerta_s / (relojes x p50) cae en [3,0; 6,5]"},
+   {"id": "P1", "lote": 11, "expresable": true, "puntero": "/actos/*/banda/k y /actos/*/banda/mitad_umbral", "forma": "cuenta de actos publicables con k gt mitad_umbral entre 1 y la mitad de los publicables", "cita": "de los actos con publicable = true, al menos uno y como mucho la mitad caen en banda_de_riesgo con k > q/2"},
+   {"id": "P2", "lote": 11, "expresable": false, "puntero": null, "forma": "fuera_de_la_huella", "cita": "un veredicto sobre el coste de verificar el recibo no puede viajar dentro de la huella que ese recibo firma; se mide en tests/test_recibo.py"},
+   {"id": "P3", "lote": 11, "expresable": false, "puntero": null, "forma": "fuera_de_la_huella", "cita": "un veredicto sobre la estabilidad de la huella no puede viajar dentro de la huella; se mide en tests/test_recibo.py"},
+   {"id": "P4", "lote": 11, "expresable": true, "puntero": "/actos/*/cotizacion/usos_para_amortizar", "forma": "max entre [20, 40]", "cita": "usos_para_amortizar del acto mas caro del lote 10 cae entre 20 y 40 comprobaciones de nueve relojes"}
+  ],
+  "arista": "El predicado no puede vivir en el pre-registro congelado: su sha256 viaja dentro de los cuatro recibos sellados del lote 13. Vive en predicado-batch-N.json, que cita el pre-registro por hash. Traducir no es editar, y la cita es lo que hace visible la diferencia.",
+  "causas": {
+   "sin_predicado": "hay interprete, pero la traduccion no existe o no es expresable en el algebra vigente",
+   "predicado_ilegible": "el predicado nombra un operador, un agregado o un puntero que el interprete no entiende; se publica, no se evalua como falso",
+   "poblacion_vacia": "el cuantificador no alcanzo ningun elemento; una conjuncion sobre el conjunto vacio es cierta por vacuidad y publicarla como sobrevive seria un falso verde"
+  }
+ },
+ "predictions": [
+  {
+   "id": "R1",
+   "kind": "estructural",
+   "claim": "El veredicto de un predicado no depende de su identificador. Dos ids distintos con la misma expresion producen el mismo sobrevive, y ninguna rama de recibo.py nombra un id para decidir un juicio.",
+   "falsifier": "que el mismo predicado bajo dos ids de distinto valor devuelva veredictos distintos, o que exista en recibo.py una rama que consulte el id para decidir sobrevive"
+  },
+  {
+   "id": "R2",
+   "kind": "cuantitativa",
+   "claim": "Paridad: en el recibo del lote 11 los predicados de P1 y P4 reproducen exactamente el sobrevive de los dos evaluadores cableados. Son dos juicios y los dos coinciden.",
+   "falsifier": "cualquier discrepancia entre el juicio cableado y el juicio por predicado en P1 o en P4"
+  },
+  {
+   "id": "R3",
+   "kind": "cuantitativa",
+   "claim": "De las trece predicciones declaradas en los cuatro pre-registros, diez pasan a estado evaluado y tres quedan no_medido con causa declarada: L3 por sin_predicado, P2 y P3 por fuera_de_la_huella. La poblacion emitida sigue igualando la declarada en los cuatro recibos.",
+   "umbral": {"evaluadas": 10, "no_medidas": 3, "declaradas": 13},
+   "falsifier": "cualquier reparto distinto de diez evaluadas y tres no_medidas, o un recibo cuya poblacion emitida no iguale su poblacion declarada"
+  },
+  {
+   "id": "R4",
+   "kind": "estructural",
+   "claim": "Un cuantificador universal sobre una poblacion vacia no se publica como sobrevive: devuelve no_medido con causa poblacion_vacia. La verdad por vacuidad no es una medida.",
+   "falsifier": "que un todos sobre cero elementos devuelva sobrevive verdadero"
+  },
+  {
+   "id": "R5",
+   "kind": "estructural",
+   "claim": "Un predicado que el interprete no entiende se publica no_medido con causa predicado_ilegible, nunca como caida. Un operador desconocido no es evidencia contra el sujeto.",
+   "falsifier": "que un predicado con operador desconocido devuelva sobrevive falso en vez de no_medido"
+  }
+ ],
+ "falsification": "El lote cae entero si R1 falla, porque entonces lo que se publica no es un interprete sino una tabla con otro nombre. Cae en su valor si R3 falla: la ganancia que se anuncia es el numero de predicciones que dejan de ser cajas negras, y ese numero esta escrito aqui antes de escribir el codigo.",
+ "what_it_would_mean": "Si sobrevive, fiber-ast-lint publica por primera vez un juicio cuyo coste marginal por prediccion es cero: el pre-registro declara, el instrumento resuelve. Y la deuda del lote 13 queda pagada con la forma que se prometio, un predicado escrito antes de medir.",
+ "cost": {
+  "relojes": 0,
+  "artefactos_leidos": 3,
+  "recibos_emitidos": 4,
+  "nota": "el coste de este lote es de escritura y de mutacion, no de reloj"
+ },
+ "no_se_hace": [
+  "no se anade el campo predicado a ningun pre-registro congelado: prediccion-batch-8.json, -9, -10 y -11 quedan byte a byte como se declararon, y los predicado-batch-N.json los citan por sha256",
+  "no se re-sella ningun recibo v1 ni v2: los siete sellos publicados son la prueba de que anadir recibo/3 no reescribio lo firmado, y el despacho sigue siendo por el schema que cada recibo declara",
+  "no se anade causa nueva al contrato v2: CAUSAS_V2 queda congelado con sus tres causas, porque el resumen de causas viaja dentro de la huella de los cuatro recibos sellados del lote 13",
+  "no se mide la caducidad de sesion ni se cronometra nada: sigue pendiente y no la paga este lote",
+  "no se declara L3 como no expresable para siempre: se declara no expresable en el algebra del lote 14, y el lote que anada agregacion por grupo la recupera"
+ ]
+}

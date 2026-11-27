@@ -1,0 +1,342 @@
+{
+ "schema": "fiber-ast-lint/recibo/3",
+ "lote": 8,
+ "sujeto": {
+  "sha256": "b2e05e6bac8e49b67be2a6ffa63422c60f7193fc72e8180255907b41ec997dc1",
+  "bytes_py_pin": 296870,
+  "actos": 2,
+  "relojes": 180
+ },
+ "fuente_artefacto": {
+  "ruta": "fuera-de-dominio-8.json",
+  "sha256": "82b5d00ad5a3356bba9836228e78525df68528fdbce1a0321adbae0c2b69f60b"
+ },
+ "actos": [
+  {
+   "k": 0.6054,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": -0.3036,
+   "margen_relativo": -1.006,
+   "zona": "fuera_de_cota",
+   "nombre": "A",
+   "sesion": 7,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": false,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null,
+   "hechos": {
+    "minimo_s": 0.5011,
+    "jitter_s": 0.5036,
+    "mediana_s": 0.6973,
+    "p50_min_s": 0.6342,
+    "p50_max_s": 0.8158,
+    "minimo_publicable_s": 1.6687,
+    "predicho_s": 0.8318,
+    "q": 0.3018,
+    "relojes": 90,
+    "lecturas_n": 90,
+    "n_bloques": 9,
+    "bytes_py_pin": 296870,
+    "dispersion": 2.0206,
+    "ratio_min_jitter": 0.995036,
+    "bloques": [
+     {
+      "min_s": 0.5089,
+      "p50_s": 0.8061,
+      "max_s": 1.0125,
+      "jitter_s": 0.5036,
+      "n": 10
+     },
+     {
+      "min_s": 0.5088,
+      "p50_s": 0.6737,
+      "max_s": 0.9143,
+      "jitter_s": 0.4055,
+      "n": 10
+     },
+     {
+      "min_s": 0.5047,
+      "p50_s": 0.8158,
+      "max_s": 0.9433,
+      "jitter_s": 0.4386,
+      "n": 10
+     },
+     {
+      "min_s": 0.6944,
+      "p50_s": 0.7147,
+      "max_s": 0.8019,
+      "jitter_s": 0.1075,
+      "n": 10
+     },
+     {
+      "min_s": 0.5252,
+      "p50_s": 0.738,
+      "max_s": 0.8552,
+      "jitter_s": 0.33,
+      "n": 10
+     },
+     {
+      "min_s": 0.5274,
+      "p50_s": 0.6342,
+      "max_s": 0.692,
+      "jitter_s": 0.1646,
+      "n": 10
+     },
+     {
+      "min_s": 0.5759,
+      "p50_s": 0.6768,
+      "max_s": 0.7871,
+      "jitter_s": 0.2112,
+      "n": 10
+     },
+     {
+      "min_s": 0.5011,
+      "p50_s": 0.6986,
+      "max_s": 0.8646,
+      "jitter_s": 0.3635,
+      "n": 10
+     },
+     {
+      "min_s": 0.5755,
+      "p50_s": 0.735,
+      "max_s": 0.9325,
+      "jitter_s": 0.357,
+      "n": 10
+     }
+    ]
+   }
+  },
+  {
+   "k": 0.2498,
+   "umbral": 0.3018,
+   "mitad_umbral": 0.1509,
+   "margen": 0.052,
+   "margen_relativo": 0.1723,
+   "zona": "banda_de_riesgo",
+   "nombre": "B",
+   "sesion": 8,
+   "sesion_n": 1,
+   "dispersion_dentro": null,
+   "publicable_como_booleano": true,
+   "coste_compuerta_s": null,
+   "trabajo_s": null,
+   "cotizacion": null,
+   "hechos": {
+    "minimo_s": 0.2384,
+    "jitter_s": 0.2078,
+    "mediana_s": 0.3286,
+    "p50_min_s": 0.2504,
+    "p50_max_s": 0.4099,
+    "predicho_s": 0.8318,
+    "q": 0.3018,
+    "relojes": 90,
+    "lecturas_n": 90,
+    "n_bloques": 9,
+    "bytes_py_pin": 296870,
+    "dispersion": 2.3213,
+    "ratio_min_jitter": 1.147257,
+    "bloques": [
+     {
+      "min_s": 0.2384,
+      "p50_s": 0.2504,
+      "max_s": 0.3726,
+      "jitter_s": 0.1342,
+      "n": 10
+     },
+     {
+      "min_s": 0.2459,
+      "p50_s": 0.3009,
+      "max_s": 0.3297,
+      "jitter_s": 0.0838,
+      "n": 10
+     },
+     {
+      "min_s": 0.268,
+      "p50_s": 0.3828,
+      "max_s": 0.4292,
+      "jitter_s": 0.1612,
+      "n": 10
+     },
+     {
+      "min_s": 0.2543,
+      "p50_s": 0.2744,
+      "max_s": 0.3816,
+      "jitter_s": 0.1273,
+      "n": 10
+     },
+     {
+      "min_s": 0.2878,
+      "p50_s": 0.3309,
+      "max_s": 0.3876,
+      "jitter_s": 0.0998,
+      "n": 10
+     },
+     {
+      "min_s": 0.2487,
+      "p50_s": 0.3044,
+      "max_s": 0.3707,
+      "jitter_s": 0.122,
+      "n": 10
+     },
+     {
+      "min_s": 0.2972,
+      "p50_s": 0.3885,
+      "max_s": 0.4422,
+      "jitter_s": 0.145,
+      "n": 10
+     },
+     {
+      "min_s": 0.2867,
+      "p50_s": 0.4099,
+      "max_s": 0.4503,
+      "jitter_s": 0.1636,
+      "n": 10
+     },
+     {
+      "min_s": 0.3456,
+      "p50_s": 0.3755,
+      "max_s": 0.5534,
+      "jitter_s": 0.2078,
+      "n": 10
+     }
+    ]
+   }
+  }
+ ],
+ "resumen": {
+  "actos": 2,
+  "publicables_como_booleano": 1,
+  "publicables": [
+   "B"
+  ],
+  "en_banda_de_riesgo": [
+   "B"
+  ],
+  "en_banda_de_riesgo_n": 1,
+  "por_zona": {
+   "margen_sano": [],
+   "banda_de_riesgo": [
+    "B"
+   ],
+   "fuera_de_cota": [
+    "A"
+   ]
+  },
+  "margen_relativo_min": -1.006,
+  "margen_relativo_max": 0.1723,
+  "dispersiones_por_sesion": {
+   "7": {
+    "n": 1,
+    "k_min": 0.6054,
+    "k_max": 0.6054,
+    "dispersion": null
+   },
+   "8": {
+    "n": 1,
+    "k_min": 0.2498,
+    "k_max": 0.2498,
+    "dispersion": null
+   }
+  },
+  "veredictos": {
+   "declaradas": 3,
+   "emitidas": 3,
+   "evaluadas": 3,
+   "no_medidas": 0,
+   "causas": {
+    "sin_evaluador": 0,
+    "metrica_ausente": 0,
+    "fuera_de_la_huella": 0,
+    "sin_predicado": 0,
+    "predicado_ilegible": 0,
+    "poblacion_vacia": 0
+   }
+  }
+ },
+ "veredictos": [
+  {
+   "id": "K1",
+   "prediccion": "En el acto B el sujeto es publicable: k_B = jitter_B / predicho es menor que q/2 = 0,1509, contra k_A = 0,6054 en el acto A. El piso es una lectura del acto y no una propiedad del sujeto.",
+   "estado": "evaluado",
+   "sobrevive": false,
+   "medido": {
+    "expr": 0.2498,
+    "rel": "lt",
+    "valor": 0.1509
+   },
+   "evalua": "k_B = jitter_B / predicho es menor que q/2 = 0,1509",
+   "via": "predicado"
+  },
+  {
+   "id": "K2",
+   "prediccion": "Dentro del acto B el piso es estacionario: |k_primera_mitad - k_ultima_mitad| < 0,1509, de modo que el piso medido al principio del acto sigue valiendo al final y una sola ventana basta para decidir.",
+   "estado": "evaluado",
+   "sobrevive": true,
+   "medido": {
+    "expr": 0.136932,
+    "rel": "lt",
+    "valor": 0.1509
+   },
+   "evalua": "|k_primera_mitad - k_ultima_mitad| < 0,1509, con k de una mitad = (max - min) de sus bloques / predicho",
+   "via": "predicado"
+  },
+  {
+   "id": "K3",
+   "prediccion": "El minimo es la unica cantidad que viaja entre actos: min_B / min_A cae en [0,90, 1,10] aunque el jitter no se parezca. Es lo que hace que una cotizacion pueda denominarse en el minimo y no en la banda.",
+   "estado": "evaluado",
+   "sobrevive": false,
+   "medido": {
+    "expr": 0.475753,
+    "rel": "entre",
+    "valor": [
+     0.9,
+     1.1
+    ]
+   },
+   "evalua": "min_B / min_A cae en [0,90, 1,10]",
+   "via": "predicado"
+  }
+ ],
+ "huella": "2bf1e78bc310927504445da4bf1647429a0a3aecc3c87ff39ac04bed046e8e07",
+ "pre_registro": {
+  "ruta": "prediccion-batch-8.json",
+  "sha256": "04181a19b9c01f108c03a4496f3c4656f7d7fbed8d6aa5424fd8d4d8fbb25d3e",
+  "predictions": 3,
+  "declared_before_computation": true
+ },
+ "dispersiones_por_sesion": {
+  "7": {
+   "n": 1,
+   "k_min": 0.6054,
+   "k_max": 0.6054,
+   "k_mediana": 0.6054,
+   "dispersion": null
+  },
+  "8": {
+   "n": 1,
+   "k_min": 0.2498,
+   "k_max": 0.2498,
+   "k_mediana": 0.2498,
+   "dispersion": null
+  }
+ },
+ "predicados": {
+  "ruta": "predicado-batch-8.json",
+  "sha256": "aaa2721656d3860d30639516f65b81cb4cf057a3fdc1f0a4550ae6ff90308da1",
+  "predicados": 3,
+  "cita_pre_registro": {
+   "ruta": "prediccion-batch-8.json",
+   "sha256": "04181a19b9c01f108c03a4496f3c4656f7d7fbed8d6aa5424fd8d4d8fbb25d3e"
+  }
+ },
+ "medicion_de_si_mismo": {
+  "coste_verificacion_s": 0.002112,
+  "coste_compuerta_total_s": 0.0,
+  "ratio_sobre_compuerta": null,
+  "P2_sobrevive": false,
+  "reproducible": true
+ }
+}

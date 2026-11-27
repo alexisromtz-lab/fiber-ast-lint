@@ -1,0 +1,46 @@
+{
+ "schema": "fiber-ast-lint/predicado/1",
+ "batch": 10,
+ "title": "M1, M2 y M3 traducidas a expresiones evaluables",
+ "cita_pre_registro": {
+  "ruta": "prediccion-batch-10.json",
+  "sha256": "787edb5c48c5b0c0f06430e59846d0bbf9ece6739518e847a5ac6cf6c075a752"
+ },
+ "predicados": [
+  {
+   "id": "M1",
+   "expresa": "dispersion(k) dentro de la sesion nueva (lote 10) <= 1,30 y razon entre las medianas de k de las dos sesiones (9 y 10) >= 3,00",
+   "evalua": {
+    "y": [
+     {"expr": {"de": "/dispersiones_por_sesion/10/dispersion", "agrega": "valor"},
+      "rel": "le", "valor": 1.3},
+     {"expr": {"op": "razon",
+               "a": {"de": "/dispersiones_por_sesion/10/k_mediana", "agrega": "valor"},
+               "b": {"de": "/dispersiones_por_sesion/9/k_mediana", "agrega": "valor"}},
+      "rel": "ge", "valor": 3.0}
+    ]
+   }
+  },
+  {
+   "id": "M2",
+   "expresa": "en los actos que declaran sonda, sonda_min / min <= 1,15 y sonda_jitter >= 0,50 x el jitter del acto. Los actos que no corrieron la sonda no votan: la poblacion es la que declara la magnitud",
+   "evalua": {
+    "y": [
+     {"de": "/actos/*/hechos/sonda_sobre_min", "todos": {"rel": "le", "valor": 1.15}},
+     {"de": "/actos/*/hechos/sonda_jitter_sobre_jitter", "todos": {"rel": "ge", "valor": 0.5}}
+    ]
+   }
+  },
+  {
+   "id": "M3",
+   "expresa": "coste_compuerta_s / (relojes x p50) cae en [3,0; 6,5] en los actos que declaran coste. Se aplica a los seis actos que lo declaran, no solo a los tres nuevos: la prueba es mas exigente que el texto, y se declara",
+   "evalua": {
+    "de": "/actos/*/hechos/coste_sobre_trabajo",
+    "todos": {"rel": "entre", "valor": [3.0, 6.5]}
+   }
+  }
+ ],
+ "no_se_traduce": [
+  "ninguna: las tres son expresables, aunque M2 y M3 acotan su poblacion por la via de la ausencia: un acto que no declara la magnitud no entra en el cuantificador"
+ ]
+}

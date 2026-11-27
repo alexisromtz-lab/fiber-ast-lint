@@ -8,6 +8,7 @@ vendored here; they stay dated and sourced, and no test pretends otherwise.
 """
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -128,4 +129,116 @@ def test_la_guarda_ve_comandos_y_discrimina() -> None:
     )
     assert not _pide_el_nombre_al_registro(
         "pip install git+https://github.com/alexisromtz-lab/fiber-ast-lint@v0.4.6"
+    )
+
+
+# --- The batch-14 tablas: a verdict published in prose must agree with the receipt ---------------
+#
+# The batch-14 section publishes thirteen verdicts and a four-row count. Both are recomputable from
+# the seals sitting next to the README, so a reader that recomputes them costs one test and removes
+# the only number in that section that could drift without anyone noticing.
+
+SECCION_14 = "## The verdict is a function of the predicate"
+
+
+def _seccion_14() -> list[str]:
+    dentro = False
+    salida: list[str] = []
+    for linea in README.splitlines():
+        if linea.startswith(SECCION_14):
+            dentro = True
+            continue
+        if dentro and linea.startswith("## "):
+            break
+        if dentro:
+            salida.append(linea)
+    assert salida, f"el README no publica la seccion `{SECCION_14}`"
+    return salida
+
+
+def _celdas(linea: str) -> list[str]:
+    return [c.strip() for c in linea.strip().strip("|").split("|")]
+
+
+def _veredictos_publicados() -> dict[str, str]:
+    publicados: dict[str, str] = {}
+    for linea in _seccion_14():
+        if not linea.startswith("| `"):
+            continue
+        celdas = _celdas(linea)
+        if len(celdas) != 3:
+            continue
+        m = re.fullmatch(r"`([KLMNP]\d)`", celdas[0])
+        if m:
+            publicados[m.group(1)] = celdas[2].replace("*", "").replace("`", "")
+    return publicados
+
+
+def _veredictos_reales() -> dict[str, str]:
+    reales: dict[str, str] = {}
+    for fichero in sorted(RAIZ.glob("recibo-banda-14-lote*.json")):
+        rec = json.loads(fichero.read_text(encoding="utf-8"))
+        assert rec["schema"] == "fiber-ast-lint/recibo/3", fichero.name
+        for v in rec["veredictos"]:
+            assert v["id"] not in reales, f"{v['id']} aparece en dos recibos del lote 14"
+            if v["estado"] == "evaluado":
+                reales[v["id"]] = "survives" if v["sobrevive"] else "falls"
+            else:
+                reales[v["id"]] = f"NO_MEDIDO · {v['causa']}"
+    return reales
+
+
+def test_la_tabla_de_veredictos_del_lote_14_se_recomputa() -> None:
+    publicados = _veredictos_publicados()
+    reales = _veredictos_reales()
+    assert reales, "no hay recibos del lote 14: el lector seria un verde vacio"
+    assert set(publicados) == set(reales), (
+        f"el README publica {sorted(publicados)}, los recibos declaran {sorted(reales)}"
+    )
+    for pid, celda in publicados.items():
+        assert celda.startswith(reales[pid]), f"{pid}: README dice `{celda}`, el recibo `{reales[pid]}`"
+
+
+def _recuento_publicado() -> dict[str, tuple[int, int, int]]:
+    filas: dict[str, tuple[int, int, int]] = {}
+    for linea in _seccion_14():
+        if not linea.startswith("| `fuera-de-dominio-"):
+            continue
+        celdas = _celdas(linea)
+        assert len(celdas) == 7, linea
+        filas[celdas[1].strip("`")] = tuple(int(c) for c in celdas[2:])
+    return filas
+
+
+def test_el_recuento_del_lote_14_se_recomputa() -> None:
+    """Declaradas, juzgadas y no medidas: la tabla que dice que nada quedo en silencio."""
+    publicadas = _recuento_publicado()
+    reales: dict[str, tuple[int, int, int]] = {}
+    for fichero in sorted(RAIZ.glob("recibo-banda-14-lote*.json")):
+        rec = json.loads(fichero.read_text(encoding="utf-8"))
+        vs = rec["veredictos"]
+        juzgadas = sum(1 for v in vs if v["estado"] == "evaluado")
+        reales[rec["pre_registro"]["ruta"]] = (
+            rec["resumen"]["actos"], sum(b["n"] for a in rec["actos"] for b in a["hechos"]["bloques"]),
+            len(vs), juzgadas, len(vs) - juzgadas,
+        )
+    assert set(publicadas) == set(reales), (
+        f"el README publica {sorted(publicadas)}, los recibos {sorted(reales)}"
+    )
+    for nombre, celdas in publicadas.items():
+        assert celdas == reales[nombre], f"{nombre}: README {celdas}, recibo {reales[nombre]}"
+
+
+def test_los_sellos_del_lote_14_publicados_son_los_de_los_recibos() -> None:
+    """Las cuatro huellas del README existen en los cuatro ficheros, por prefijo."""
+    texto = "\n".join(_seccion_14())
+    publicadas = re.findall(r"`([0-9a-f]{8})…`", texto)
+    reales = {
+        json.loads(f.read_text(encoding="utf-8"))["huella"][:8]
+        for f in RAIZ.glob("recibo-banda-14-lote*.json")
+    }
+    faltan = reales - set(publicadas)
+    assert not faltan, f"el README no publica el sello de {sorted(faltan)}"
+    assert len(publicadas) == 11, (
+        f"el README cita {len(publicadas)} sellos; son cuatro del lote 14 y siete anteriores"
     )

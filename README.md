@@ -1448,6 +1448,107 @@ sealed file. A contract that only the newest code can read is not a seal, it is 
 disk, refuses a `NO_MEDIDO` without a cause from the closed list, refuses a `fuera_de_la_huella`
 without the test that reads it, and re-runs the three old seals through `--check`.
 
+## The verdict is a function of the predicate, not of the identifier
+
+Batch 13 published every declaration but the machine still could not judge eleven of thirteen, and
+the reason was structural rather than missing data: `_veredictos` knew two identifiers by name. A
+third prediction meant editing the reader, so "generalise the reader" and "invent an evaluator per
+identifier" were the same sentence, and the second one is guessing.
+
+Batch 14 takes the identifier out of the judgement. A prediction is judged by its **shape**, read
+from a small translation file that cites the frozen pre-registration by `sha256` so a later edit to
+the prose invalidates the translation instead of silently redefining what was predicted:
+
+```
+puntero → agregado → relación
+```
+
+`/actos/B/k` is a pointer (the act named `B`, its `k`); `max` and `dispersion` aggregate over a
+pointer carrying `*`, applied after sorting so the result does not depend on the order the JSON was
+written in; `lt`, `entre` and `fuera_de` are relations. `bench/predicado.py` resolves the shape and
+`bench/recibo.py` asks it instead of asking `if "P1" in pred`. The degree of freedom that buys is the
+one that was absent: **adding a prediction stops costing code.**
+
+| id | shape, as translated | verdict |
+|---|---|---|
+| `K1` | `valor lt 0.1509` | **falls** — `k = 0.2498` |
+| `K2` | `abs(rango_primera − rango_ultima) / predicho lt 0.1509` | survives — `0.136932` |
+| `K3` | `razon entre [0.90, 1.10]` | **falls** — `0.475753` |
+| `L1` | `dispersion(ratio_min_jitter) le 1.30` **and** `dispersion(minimo_s) ge 1.80` | **falls** — `3.01392 > 1.30`, so the first clause alone refutes it |
+| `L2` | `todos entre [0.90, 1.40]` | **falls** — 2 of 5 meet, `[2.818779, 2.926895, 2.998959]` do not |
+| `L3` | — | `NO_MEDIDO · sin_predicado` |
+| `M1` | `dispersion(nueva sesión) le 1.30` **and** `razón entre medianas ge 3.00` | **falls** — `1.142553` holds, `2.641406` does not: a conjunction is refuted by one clause |
+| `M2` | `todos le 1.15` **and** `todos sonda_jitter_sobre_jitter ge 0.50` | survives — 3 of 3 |
+| `M3` | `todos entre [3.0, 6.5]` | survives — 6 of 6 |
+| `P1` | `cuenta de publicables con k gt mitad_umbral entre 1 y la mitad de los publicables` | survives — 4 publicables, 1 at risk, ratio `0.25` |
+| `P2` | — | `NO_MEDIDO · fuera_de_la_huella` |
+| `P3` | — | `NO_MEDIDO · fuera_de_la_huella` |
+| `P4` | `max entre [20, 40]` | **falls** — `2.0` |
+
+Ten of thirteen are expressible in the algebra. `L3` is not, and the pre-registration says so before
+the measurement rather than after: it needs dispersion *of the block dispersions*, an aggregate over
+an aggregate, which `AGREGADOS` cannot name. `P2` and `P3` are already measured by the test suite and
+are published `fuera_de_la_huella` with the test that reads them, which is a verdict and not a
+silence.
+
+Thirteen declarations, **ten judged, three not measured, zero omitted.** The four receipts of this
+batch keep the same table shape as batch 13, so the two are comparable cell by cell:
+
+| artefact | pre-registration | acts | clocks | declared | judged | `NO_MEDIDO` |
+|---|---|--:|--:|--:|--:|--:|
+| `fuera-de-dominio-8.json` | `prediccion-batch-8.json` | 2 | 180 | 3 | 3 | 0 |
+| `fuera-de-dominio-9.json` | `prediccion-batch-9.json` | 5 | 450 | 3 | 2 | 1 |
+| `fuera-de-dominio-10.json` | `prediccion-batch-10.json` | 8 | 720 | 3 | 3 | 0 |
+| `fuera-de-dominio-10.json` | `prediccion-batch-11.json` | 8 | 720 | 4 | 2 | 2 |
+| **total** | | | | **13** | **10** | **3** |
+
+Against batch 13's two judged and eleven `sin_evaluador`, the same artefacts and the same frozen
+pre-registrations now close at ten judged and three with a named cause. What changed is not the data:
+it is that the reader stopped needing to be told which prediction it was reading.
+
+The pre-registration of this batch states the rules the algebra has to obey, and the suite asserts
+each one on the code that shipped:
+
+| rule | what it refuses |
+|---|---|
+| `R1` | that the identifier do any work — the same predicate under two ids must give the same verdict |
+| `R2` | that the interpreter disagree with the reader it replaces: on `P1` and `P4`, the two identifiers the old evaluator still knows, they agree 2 of 2 |
+| `R3` | that a judgement be invented for a declaration the artefact cannot support: ten expressible, three not, exactly |
+| `R4` | that an empty population read as a population that complies — it is `poblacion_vacia`, a cause |
+| `R5` | that an illegible predicate read as a false one — `RC 5` and no receipt |
+
+`R2` is the one that would have caught a quiet regression: two evaluators that disagree leave no way
+to know which is lying, so the batch keeps the old one alive as an oracle on the two identifiers it
+was written for and deletes its authority over the other eleven.
+
+**A byte pinned once, read twice.** The receipt now carries `hechos` per act — the twenty measured
+fields rounded to six decimals, plus `ratio_min_jitter` and `coste_sobre_trabajo` where they are
+defined — and `dispersiones_por_sesion` at the root, so the dispersion that `L1` and `M1` refute is
+visible in the seal and not only in the verdict. `min_s`, `p50_s`, `max_s`, `jitter_s` and `n` travel
+per block, never the raw readings: the block is the unit of measurement, and publishing 450 readings
+would let a reader recompute a different statistic and call the receipt wrong.
+
+The commercial claim survives unchanged, and the count is now stated instead of implied: **four files
+for a v1 or v2 receipt, five for a v3.** A third party needs `bench/recibo.py`, the artefact, the
+pre-registration and the seal — and, only for v3, `bench/predicado.py` plus the translation. A v2
+seal verified with v3 code must not pay for a module its own contract never named, so the interpreter
+is imported lazily and only when the sealed file says `recibo/3`:
+
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-8.json --predicados predicado-batch-8.json --salida recibo-banda-14-lote8.json --prediccion prediccion-batch-8.json ```
+```bash PYTHONPATH=src:bench python bench/recibo.py --artefacto fuera-de-dominio-10.json --lote 11 --predicados predicado-batch-11.json --salida recibo-banda-14-lote11.json --prediccion prediccion-batch-11.json ```
+
+The four seals print `2bf1e78b…` (2 acts), `cfaadb30…` (5 acts), `44190141…` (8 acts) and
+`e800979f…` (8 acts, `--lote 11`). The seal is still recomputable by `jq` and `shasum` alone, with no
+Python in the loop and no trust in the interpreter that produced it:
+
+```bash jq -S -c 'del(.huella, .medicion_de_si_mismo)' recibo-banda-14-lote11.json | tr -d '\n' | shasum -a 256 ```
+
+The seven older seals still print the same bytes — `507303a9…`, `eb542aa9…`, `043ffa3e…`,
+`1b53515d…`, `689daf41…`, `a337a963…`, `80ae5dee…` — because the dispatch reads the contract out of
+the file it is verifying. `tests/test_recibo.py` recomputes every cell of both tables from the
+pre-registration files on disk, runs the ten mutants that would each have to survive for a rule to be
+untested, and asserts that a v2 seal needs neither the interpreter nor the translation.
+
 ## Fixtures census, recomputed by the test suite
 
 Every number below is recomputed on each test run by `tests/test_readme.py`, which builds the

@@ -1,0 +1,34 @@
+{
+ "schema": "fiber-ast-lint/predicado/1",
+ "batch": 9,
+ "title": "L1 y L2 traducidas; L3 declarada no expresable en el algebra vigente",
+ "cita_pre_registro": {
+  "ruta": "prediccion-batch-9.json",
+  "sha256": "5c3436b56d23a2f0832482c13d1fdf087609c1132004112f51279b20e0c5d34e"
+ },
+ "predicados": [
+  {
+   "id": "L1",
+   "expresa": "dispersion(min / jitter) <= 1,30 mientras dispersion(min) >= 1,80; dispersion = maximo / minimo sobre los actos del artefacto",
+   "evalua": {
+    "y": [
+     {"expr": {"de": "/actos/*/hechos/ratio_min_jitter", "agrega": "dispersion"},
+      "rel": "le", "valor": 1.3},
+     {"expr": {"de": "/actos/*/hechos/minimo_s", "agrega": "dispersion"},
+      "rel": "ge", "valor": 1.8}
+    ]
+   }
+  },
+  {
+   "id": "L2",
+   "expresa": "en los actos del artefacto, min / jitter cae en [0,90, 1,40]",
+   "evalua": {
+    "de": "/actos/*/hechos/ratio_min_jitter",
+    "todos": {"rel": "entre", "valor": [0.9, 1.4]}
+   }
+  }
+ ],
+ "no_se_traduce": [
+  "L3: pide una media sobre actos de un cociente calculado por acto (max del jitter de bloque / min del minimo de bloque) dividida por la dispersion del minimo. El algebra del lote 14 agrega sobre colecciones de punteros y compone expresiones binarias, pero no agrega el resultado de una expresion por elemento. No se escribe una semantica nueva despues de conocer los datos"
+ ]
+}

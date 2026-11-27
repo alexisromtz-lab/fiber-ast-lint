@@ -1,0 +1,61 @@
+{
+ "schema": "fiber-ast-lint/predicado/1",
+ "batch": 8,
+ "title": "K1, K2 y K3 traducidas a expresiones evaluables",
+ "cita_pre_registro": {
+  "ruta": "prediccion-batch-8.json",
+  "sha256": "04181a19b9c01f108c03a4496f3c4656f7d7fbed8d6aa5424fd8d4d8fbb25d3e"
+ },
+ "predicados": [
+  {
+   "id": "K1",
+   "expresa": "k_B = jitter_B / predicho es menor que q/2 = 0,1509",
+   "evalua": {
+    "expr": {"de": "/actos/B/k", "agrega": "valor"},
+    "rel": "lt",
+    "valor": 0.1509
+   }
+  },
+  {
+   "id": "K2",
+   "expresa": "|k_primera_mitad - k_ultima_mitad| < 0,1509, con k de una mitad = (max - min) de sus bloques / predicho",
+   "evalua": {
+    "expr": {
+     "op": "razon",
+     "a": {
+      "op": "abs_diferencia",
+      "a": {
+       "op": "diferencia",
+       "a": {"de": "/actos/B/hechos/bloques/[:4]/max_s", "agrega": "max"},
+       "b": {"de": "/actos/B/hechos/bloques/[:4]/min_s", "agrega": "min"}
+      },
+      "b": {
+       "op": "diferencia",
+       "a": {"de": "/actos/B/hechos/bloques/[4:]/max_s", "agrega": "max"},
+       "b": {"de": "/actos/B/hechos/bloques/[4:]/min_s", "agrega": "min"}
+      }
+     },
+     "b": {"de": "/actos/B/hechos/predicho_s", "agrega": "valor"}
+    },
+    "rel": "lt",
+    "valor": 0.1509
+   }
+  },
+  {
+   "id": "K3",
+   "expresa": "min_B / min_A cae en [0,90, 1,10]",
+   "evalua": {
+    "expr": {
+     "op": "razon",
+     "a": {"de": "/actos/B/hechos/minimo_s", "agrega": "valor"},
+     "b": {"de": "/actos/A/hechos/minimo_s", "agrega": "valor"}
+    },
+    "rel": "entre",
+    "valor": [0.9, 1.1]
+   }
+  }
+ ],
+ "no_se_traduce": [
+  "ninguna: K1, K2 y K3 son expresables con punteros, agregados y relaciones, y la traduccion no necesita agregacion por grupo"
+ ]
+}

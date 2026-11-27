@@ -1,0 +1,40 @@
+{
+ "schema": "fiber-ast-lint/predicado/1",
+ "batch": 11,
+ "title": "P1 y P4 traducidas; P2 y P3 siguen fuera de la huella",
+ "cita_pre_registro": {
+  "ruta": "prediccion-batch-11.json",
+  "sha256": "5108db85cdc2f39fd1257cce17185cc3e6b2adeb4e1ecb721fedc87774e5da53"
+ },
+ "predicados": [
+  {
+   "id": "P1",
+   "expresa": "hay al menos un publicable (publicables > 0), al menos un acto en banda de riesgo, y la proporcion de actos en banda de riesgo sobre los publicables es como mucho la mitad",
+   "evalua": {
+    "y": [
+     {"expr": {"de": "/resumen/publicables_como_booleano", "agrega": "valor"},
+      "rel": "gt", "valor": 0},
+     {"expr": {"de": "/resumen/en_banda_de_riesgo_n", "agrega": "valor"},
+      "rel": "ge", "valor": 1},
+     {"expr": {"op": "razon",
+               "a": {"de": "/resumen/en_banda_de_riesgo_n", "agrega": "valor"},
+               "b": {"de": "/resumen/publicables_como_booleano", "agrega": "valor"}},
+      "rel": "le", "valor": 0.5}
+    ]
+   }
+  },
+  {
+   "id": "P4",
+   "expresa": "usos_para_amortizar del acto mas caro cae entre 20 y 40 comprobaciones de nueve relojes; el maximo se toma sobre los actos que declaran cotizacion",
+   "evalua": {
+    "expr": {"de": "/actos/*/cotizacion/usos_para_amortizar", "agrega": "max"},
+    "rel": "entre",
+    "valor": [20, 40]
+   }
+  }
+ ],
+ "no_se_traduce": [
+  "P2: mide el coste de verificar el recibo, y un veredicto asi no puede viajar dentro de la huella que ese recibo firma",
+  "P3: mide la estabilidad de la huella, y por la misma razon se queda fuera de ella"
+ ]
+}
