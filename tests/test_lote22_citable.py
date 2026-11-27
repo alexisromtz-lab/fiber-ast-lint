@@ -9,15 +9,23 @@ los sostienen, y que el NO_MEDIDO no se lee como cero.
 Nada aqui se afirma por lectura del recibo: cada aserto recalcula desde las filas o desde el
 arbol. La aritmetica de P2 se rehace con los numeros del propio recibo, de modo que un recibo
 que cambie de datos y no de veredicto falle.
+
+El unico confirmado con ``poblacion == "pierde"`` no se custodia clonando su sujeto (una red y
+un sujeto movible por tres lineas) ni metiendo un fichero mas en ``tests/fixtures``, cuyo censo
+publica el README: se custodia con una reduccion escrita aqui, que el instrumento debe seguir
+clasificando igual y que, ejecutada, debe perder masa.
 """
 
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 from collections import Counter
 from fractions import Fraction
 from pathlib import Path
+
+from fiber_ast_lint.detect import analizar
 
 RAIZ = Path(__file__).resolve().parents[1]
 PRE_REGISTRO = RAIZ / "prediccion-batch-22.json"
@@ -121,6 +129,80 @@ def test_el_locus_citable_esta_dentro_de_la_superficie_publicada() -> None:
     fila = filas[(citable[0]["sujeto"], citable[0]["archivo"], citable[0]["linea"])]
     assert fila["veredicto"] == "CONFIRMADO"
     assert fila["licencia"] in OSI
+
+
+ANCLA = '''"""Seis claves dentro, tres identificadores fuera: el saneador es la proyeccion.
+
+La forma esta tomada del unico locus del lote 22 que sobrevivio a la lectura con
+``poblacion == "pierde"``: ``tempus2016/z2m-device-tracker@c5f13b8d``,
+``custom_components/z2m_tracker/const.py:66`` (MIT). Reducida a una funcion pura para que el
+positivo se pueda afirmar sin clonar al sujeto.
+
+``key.lower()`` y ``re.sub(r"[^a-z0-9_]+", "_", ...)`` funden ``Sensor.Battery``,
+``sensor_battery`` y ``sensor battery`` en un mismo id de reparacion, y el guardia pregunta al
+*dominio* (``key not in keys``), que no puede suprimir un nucleo: toda imagen de una colision
+sigue estando en ``keys``.
+"""
+import re
+
+KEYS = [
+    "Sensor.Battery",
+    "sensor_battery",
+    "sensor battery",
+    "Link.Quality",
+    "link quality",
+    "Battery",
+]
+
+# Una lista blanca de ids de reparacion: contiene la imagen de las dos fibras no triviales.
+REPAIRS = {"sensor_battery", "link_quality", "battery"}
+
+
+def reparaciones_pedidas(keys):
+    wanted = {}
+    for key in sorted(keys):
+        if key not in keys:
+            continue
+        wanted["issue_" + re.sub(r"[^a-z0-9_]+", "_", key.lower())] = key
+    return wanted
+
+
+def tarjeta_de_reparaciones(keys):
+    """Un llamante, para que el acumulador escape *y* alguien llame a la funcion."""
+    return reparaciones_pedidas(keys)
+'''
+
+
+def test_el_locus_citable_tiene_ancla_en_el_arbol(tmp_path) -> None:
+    """El positivo que sobrevivio a la lectura conserva un control que no depende del sujeto.
+
+    La forma que el instrumento debe seguir emitiendo no se escribe en el test: se lee de la
+    fila que el recibo confirmo. Asi un cambio de particion que borre este positivo falla aqui
+    y no en la siguiente cohorte, y el dia que la fila cambie el test nombra cual de las dos se
+    movio.
+    """
+    citable = [c for c in _cargar(RECIBO)["confirmados"] if c["poblacion"] == "pierde"][0]
+    ruta = tmp_path / "reparacion_por_regex.py"
+    ruta.write_text(ANCLA, encoding="utf-8")
+    a = analizar(tmp_path)
+    assert a.certifica()
+    # Un testigo dibujado sobre el dominio no cuenta como cubeta: ``key not in keys`` contiene
+    # la imagen de toda colision y por eso no suprime ninguna.
+    assert a.guardadas == 0
+    assert len(a.candidatos) == 1
+    loc = a.candidatos[0]
+    assert (loc.familia, loc.forma, loc.severidad) == (
+        citable["familia"],
+        citable["forma"],
+        citable["severidad"],
+    )
+    assert loc.op == "pierde"
+    assert loc.escapa is True and loc.llamadas >= 1
+    # La perdida es del sujeto y no del clasificador: ejecutada, la funcion pierde masa.
+    spec = importlib.util.spec_from_file_location("ancla_reparacion", ruta)
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    assert len(modulo.reparaciones_pedidas(modulo.KEYS)) < len(modulo.KEYS)
 
 
 def test_todo_confirmado_tiene_fila_y_licencia() -> None:
