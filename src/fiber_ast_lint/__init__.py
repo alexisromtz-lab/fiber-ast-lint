@@ -6,6 +6,7 @@ the code is valid Python and each row is valid on its own. This package names
 those loci, separates real overwrites from monoidal aggregation, and reports
 whether anyone measures (or publishes) the cardinal that betrays the loss.
 """
+from .adjudicador_ast import adjudicar, causa_de_escritura, causa_por_localidad
 from .detect import Analisis, Locus, analizar
 from .graph import Consumidor, Consumos, consumos, clave_de, modulo_de
 from .rc import combinar_rc, precedencia
@@ -17,5 +18,7 @@ __all__ = [
     "Consumidor", "Consumos", "consumos", "clave_de", "modulo_de",
     "combinar_rc", "precedencia",
     "Fibra", "fibra", "es_transversal", "verificar_transversal",
-    "verificar_conservacion", "__version__",
+    "verificar_conservacion",
+    "adjudicar", "causa_de_escritura", "causa_por_localidad",
+    "__version__",
 ]

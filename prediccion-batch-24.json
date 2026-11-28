@@ -1,0 +1,86 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 24,
+  "title": "la causa se calcula o no se vende: teorema, eco y lectura",
+  "declared_before_computation": true,
+  "que_es": "El lote 23 dejo escrito su proximo acto en recibo-lote23-20261127.json: un adjudicador mecanico que asigne causa desde el AST y reproduzca al menos el 90 por cien de los 117 veredictos adjudicados, sin tocar detect.py. Este fichero lo ejecuta, y lo primero que hace es separar el enunciado heredado en las dos cosas que mezcla. (a) Una parte de la causa de una refutacion es teorema de la sintaxis: la escritura posicional no tiene clave, luego no tiene fibra, y el predicado de perdida es vacuo por construccion. (b) Otra parte es una afirmacion sobre el dominio --`este campo es clave primaria`, `este contenedor es un conjunto de declaraciones`, `este nombre pertenece a un esquema fijo`-- y decidirla desde un arbol sintactico exige la identidad de un campo, que es una convencion de nombres y no una estructura. Un instrumento que respondiera (b) estaria copiando el vocabulario del lector y llamando medicion a la copia. El acto, por tanto, mide dos capas declaradas y una tercera que se abstiene, y publica el acuerdo estricto del enunciado heredado tal como se enuncio: abstenerse cuenta como desacuerdo. Lo que se decide con el resultado esta escrito aqui abajo, antes de medir, en `regla_de_decision`.",
+  "lo_ya_medido_antes_de_este_fichero": {
+    "el_acto_lo_declaro_el_lote_23": "recibo-lote23-20261127.json, proximo_acto: nombre `lote 24, el adjudicador mecanico: la causa se calcula o no se vende`, predicado `una regla mecanica que asigne causa desde el AST del locus, escrita antes de mirar los veredictos del lote 22 y sin tocar detect.py, reproduce al menos el 90 por cien de los 117 veredictos adjudicados cuando se aplica sobre los mismos veinte sujetos y los mismos sha`, falsador `menos del 75 por cien de acuerdo sobre los 117 adjudicados en recibo-lote24-20261127.json, o cualquier escritura en src/fiber_ast_lint/detect.py durante el acto`, coste `veinte clones de hasta 20 MiB, purgados uno a uno, cero relojes nuevos`.",
+    "los_textos_se_leyeron_antes_de_escribir_la_regla_y_eso_se_declara": "La regla T1 se escribio despues de leer los 125 campos `texto` de recibo-lote22-20261127.json, que estan publicados en el arbol desde el lote 22. `escrita antes de mirar los veredictos` es, por tanto, falso en su sentido fuerte y no se reclama: lo que se congela no es la ignorancia del lector, es la regla. La consecuencia se publica con el resultado: el numero que este acto produce NO es precision de descubrimiento, es precision de aplicacion sobre una regla disenada con los textos a la vista. El unico numero de este acto que no puede ser contaminado por esa lectura es el de P4, porque la compuerta del lote 23 se eligio mirando las mismas filas y lo que se mide es si el teorema la sostiene, no si acierta.",
+    "la_tabla_de_causas_publicada": "recibo-lote22-20261127.json sobre los 117 adjudicados: proyeccion_inyectiva 60, escritura_posicional 25, proyeccion_no_inyectiva_sin_medicion 10, uso_como_conjunto 9, clave_de_protocolo 6, colision_sin_perdida 3, agregacion_intencionada 2, normalizacion_para_consulta 2. Los 8 NO_MEDIDO tienen causa fichero_no_parsea (5) e invariante_externo_no_declarado (3): la causa `fichero_no_parsea` no aparece ni una vez entre los 117. El campo `causa` de un locus es, en 8 de 13 casos, un motivo de abstencion y no una refutacion; este acto lo trata como tal y no lo cuenta como acierto.",
+    "el_instrumento_congelado": "src/fiber_ast_lint/detect.py mide sha256 b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6 (31437 bytes) y version 0.5.0. El acto lo ejecuta --necesita el AST de cada sujeto-- pero no lo modifica: el sha se mide antes y despues y una diferencia detiene el acto sin publicar veredictos.",
+    "el_lector_nuevo_congelado": "src/fiber_ast_lint/adjudicador_ast.py, sha256 02ab4e4d6750bd8ab0779b74ceebff542ad9523f1e55c3fbddfd6886a6180b16, 4938 bytes, 120 lineas. Emite exclusivamente dos valores de causa, escritura_posicional y fichero_no_parsea, y NO_MEDIDO para todo lo demas; `CAUSAS_DECIDIBLES` es la lista cerrada y un valor fuera de ella seria una conjetura."
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "Precision de la capa teorema: de las filas que el adjudicador decide, el 100 por cien coincide con la causa que el lote 22 publico. No es una prediccion sobre el tamano sino sobre la verdad: T1 afirma que no hay clave y por tanto no hay fibra, y una sola fila decidida cuya causa humana sea otra refuta el teorema, no el umbral.",
+      "falsifier": "una sola fila decidida (causa predicha distinta de NO_MEDIDO) cuya causa publicada en recibo-lote22-20261127.json sea distinta de la predicha",
+      "locus": "recibo-lote24-20261127.json, tabla de adjudicacion",
+      "declared_before": "cualquier ejecucion del adjudicador sobre los veinte sujetos"
+    },
+    {
+      "id": "P2",
+      "claim": "Cobertura de la capa teorema: entre 22 y 27 de los 117 adjudicados quedan decididos, y todos ellos tienen causa publicada `escritura_posicional`. La banda se deriva de la tabla ya publicada --25 filas llevan esa causa y las 25 son de familia REBANADA-- y por eso no es un descubrimiento: es coherencia entre la regla y la implementacion. Que la banda sea estrecha es deliberado: si el codigo decide 40, esta decidiendo fuera de su teorema.",
+      "falsifier": "cobertura fuera de [22, 27] sobre los 117, o una fila decidida con causa publicada distinta de escritura_posicional",
+      "locus": "recibo-lote24-20261127.json, tabla de adjudicacion",
+      "declared_before": "cualquier ejecucion del adjudicador sobre los veinte sujetos"
+    },
+    {
+      "id": "P3",
+      "claim": "El enunciado heredado, medido como se enuncio, se refuta: el acuerdo estricto sobre los 117 --abstencion contada como desacuerdo-- queda por debajo del 75 por cien, con valor puntual 25/117 = 0.2137. Anadiendo la capa eco (las 10 filas cuya causa publicada es la afirmacion propia del detector, `proyeccion_no_inyectiva_sin_medicion`) el acuerdo sube a 35/117 = 0.2991 y sigue por debajo. La prediccion es que el umbral del 90 por cien no se alcanza, y que no se alcanza porque alcanzarlo exigiria adivinar en las 82 filas restantes, no porque falte instrumento.",
+      "falsifier": "acuerdo estricto mayor o igual que 0.75 sobre los 117 adjudicados",
+      "locus": "recibo-lote24-20261127.json, veredictos",
+      "declared_before": "cualquier ejecucion del adjudicador sobre los veinte sujetos"
+    },
+    {
+      "id": "P4",
+      "claim": "La compuerta post-hoc del lote 23 no esta sostenida por el teorema: de las 77 filas de los 117 que suprimiria la regla `familia en {COLUMNA, REBANADA}`, al menos 45 no son teorema de la sintaxis (valor puntual predicho: 52, es decir 25 sostenidas y 52 no). Si se cumple, la mejora x2.925 que el lote 23 publico se obtuvo mirando las mismas 125 filas y dos tercios de su masa no tienen invariante detras: se retira como producto y se sustituye por la capa teorema con su cobertura publicada. Es la unica prediccion de este acto que la lectura de los textos no puede contaminar, porque no mide si la compuerta acierta --eso ya se sabe-- sino si hay una razon detras de su acierto.",
+      "falsifier": "menos de 45 de las 77 filas suprimidas por la compuerta del lote 23 quedan fuera de la capa teorema",
+      "locus": "recibo-lote24-20261127.json, cruce con la compuerta del lote 23",
+      "declared_before": "cualquier cruce entre la causa adjudicada y la familia que la compuerta suprime"
+    },
+    {
+      "id": "P5",
+      "claim": "Coherencia de la cohorte: reejecutar detect.py 0.5.0 sobre los veinte sujetos congelados en sus sha reproduce los 125 loci con las mismas coordenadas (sujeto, archivo, linea) y el mismo recuento por familia. Si no reproduce, el recibo del lote 22 no es un denominador estable y todo lo demas de este acto se mide sobre un sujeto movil; en ese caso el acto se publica como NO_MEDIDO y no se emite veredicto.",
+      "falsifier": "cualquier coordenada del lote 22 que no aparezca en la reejecucion, o un recuento por familia distinto, o un sha de sujeto que no resuelva",
+      "locus": "recibo-lote24-20261127.json, reproduccion",
+      "declared_before": "cualquier clon de los veinte sujetos"
+    }
+  ],
+  "no_independencia": "P1 y P2 miden la misma ejecucion desde dos lados (verdad y tamano) y P3 es su complemento aritmetico: con 117 de denominador, P2 decide P3. Se declaran las cinco igual y se publican las cinco, incluidas las que se cumplen por aritmetica, porque el lector de un recibo tiene derecho a ver el denominador de cada cifra. P4 es la unica que se cuenta sobre una particion distinta --la compuerta del lote 23-- y por eso es la que decide la accion de producto. P5 es una condicion de validez, no un resultado: si falla, no hay acto.",
+  "regla_de_decision": {
+    "si_p1_falla": "el modulo se retira del paquete y no se publica compuerta: un teorema que miente en una fila no es un teorema",
+    "si_p1_y_p4_se_cumplen": "se retira la compuerta post-hoc del lote 23 como producto y se publica la capa teorema con su cobertura: decide el 21 por cien de la salida sin lector y el resto se vende con el nombre que tiene, lectura",
+    "si_p3_se_cumple": "el enunciado heredado `reproduce al menos el 90 por cien` queda REFUTADO en el recibo, con su numero al lado, y no se reescribe: se mide otra cosa aparte y se publica junto",
+    "si_p5_falla": "NO_MEDIDO, cero veredictos, y el proximo acto es re-congelar la cohorte, no adjudicarla"
+  },
+  "universo": {
+    "poblacion": "los 125 loci de recibo-lote22-20261127.json sobre los veinte sujetos de censo-22-20261127.json, reejecutados desde sus sha congelados",
+    "adjudicados": "117 = 10 CONFIRMADO + 107 REFUTADO; es el denominador de P1, P2 y P3",
+    "no_medidos": "8, con causa fichero_no_parsea (5) e invariante_externo_no_declarado (3); quedan fuera del denominador y se publican aparte",
+    "definiciones": {
+      "capa_teorema": "causa predicha en {escritura_posicional, fichero_no_parsea}: la sintaxis del locus prueba el enunciado sin consultar el dominio",
+      "capa_eco": "causa publicada `proyeccion_no_inyectiva_sin_medicion`: el detector repite su propia afirmacion. Se publica aparte y no se cuenta como acierto del adjudicador, porque coincide por construccion y el lote 23 ya la declaro tautologia",
+      "capa_lectura": "causa predicha NO_MEDIDO: el enunciado es sobre el dominio y este instrumento se abstiene",
+      "compuerta_del_lote_23": "la regla post-hoc que el lote 23 midio: suprimir las filas de familia COLUMNA o REBANADA. Sobre los 117 suprime 77 (COLUMNA 50, REBANADA 27); sobre los 125 suprime 82"
+    },
+    "invariante": "confirmados + refutados + no_medidos = 125, y ninguna fila cambia de veredicto en este acto",
+    "limite": "el acto mide causas, no veredictos: que la causa de una refutacion sea un teorema no dice que el locus sea benigno en todos los dominios, dice que el predicado de perdida no se aplica a esa escritura"
+  },
+  "instrumento_antes": {
+    "version": "0.5.0",
+    "arbol": "e521333",
+    "detect_py_sha256": "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6",
+    "adjudicador_sha256": "02ab4e4d6750bd8ab0779b74ceebff542ad9523f1e55c3fbddfd6886a6180b16",
+    "dependencias": [],
+    "regla": "detect.py se ejecuta y se mide antes y despues: si el sha cambia, el acto se detiene. El adjudicador no importa detect ni comparte vocabulario con el: recibe el arbol ya parseado y la linea del locus, y no lee familias ni formas."
+  },
+  "cost": {
+    "relojes_nuevos": 0,
+    "clones": 20,
+    "bytes_temporales_tope": "20 clones de hasta 20 MiB, uno a uno, purgados inmediatamente despues de leer el archivo de cada locus",
+    "persistido_fuera_de_tmp": "cero",
+    "justificacion": "el sujeto ya esta congelado en censo-22-20261127.json con sha por fila, pero un AST no viaja en el recibo: para decidir sobre el arbol hay que tenerlo. El clon es el coste minimo de mirar el objeto en vez de la copia, y por eso el acto se paga veinte clones y no cero. Lo que se gana con ese coste, ademas de P1, es P5: la reejecucion demuestra que el denominador del lote 22 se reproduce, cosa que ninguna lectura del recibo puede demostrar."
+  }
+}
