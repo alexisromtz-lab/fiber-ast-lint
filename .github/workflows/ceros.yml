@@ -23,3 +23,4 @@ jobs:
       permitir: |
         a.llamadas.get(n.func.id, 0)
         a.llamadas.get(loc.fn, 0)
+        registro.get("saldo_pendiente", 0)
