@@ -12,6 +12,14 @@ on:
 
 jobs:
   ceros:
-    uses: alexisromtz-lab/frontera-runner/.github/workflows/reusable-ceros.yml@v0.2.0
+    uses: alexisromtz-lab/frontera-runner/.github/workflows/reusable-ceros.yml@v0.2.1
     with:
       excluir: "bench,tests"
+      # `a.llamadas` es un contador, no una metrica del repo: `.get(clave, 0)` es su forma
+      # de sumar y el cero es el estado inicial legitimo. Las dos expresiones van por
+      # `permitir` —una por linea— porque llevan coma dentro y `permitidos` se parte por
+      # comas: ahi quedarian en fragmentos que no casan con nada.
+      # Cualquier otro cero, y cualquier cambio en estas dos lineas, sigue siendo hallazgo.
+      permitir: |
+        a.llamadas.get(n.func.id, 0)
+        a.llamadas.get(loc.fn, 0)
