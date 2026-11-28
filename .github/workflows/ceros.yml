@@ -12,7 +12,7 @@ on:
 
 jobs:
   ceros:
-    uses: alexisromtz-lab/frontera-runner/.github/workflows/reusable-ceros.yml@v0.2.1
+    uses: alexisromtz-lab/frontera-runner/.github/workflows/reusable-ceros.yml@v0.2.2
     with:
       excluir: "bench,tests"
       # `a.llamadas` es un contador, no una metrica del repo: `.get(clave, 0)` es su forma
