@@ -1,0 +1,210 @@
+{
+ "schema": "fiber-ast-lint/censo-25/1",
+ "medido_utc": "2026-11-28T01:54Z",
+ "origen": "tres busquedas de search/repositories leidas por gh api, en orden de actualizacion descendente, cincuenta filas por busqueda",
+ "comando": "language:python license:<spdx> pushed:>2026-09-01 stars:>10 size:<20480 archived:false fork:false, con <spdx> en mit, apache-2.0 y bsd-3-clause; una sola consulta GraphQL con un alias por repositorio para defaultBranchRef.target.oid",
+ "regla_de_seleccion": "siete de mit, siete de apache-2.0 y seis de bsd-3-clause, tomadas en el orden devuelto saltando sin mirar los que estan en la lista de gastados; el orden es el mismo que produjo censo-22-20261127.json y por eso la cohorte nueva son las filas siguientes, no las mismas",
+ "lista_de_gastados": {
+  "__nota__": "deny-list construida antes de la busqueda: todo nombre owner/repo que aparece en cualquier fichero versionado del repositorio",
+  "ficheros_leidos": 125,
+  "nombres": 278,
+  "saltados_en_esta_busqueda": {
+   "mit": 43,
+   "apache-2.0": 43,
+   "bsd-3-clause": 44
+  }
+ },
+ "total_filas": 20,
+ "filtro": {
+  "tope_kib": 20480,
+  "kib_max_medido": 17261,
+  "kib_min_medido": 855,
+  "por_spdx": {
+   "MIT": 7,
+   "Apache-2.0": 7,
+   "BSD-3-Clause": 6
+  }
+ },
+ "filas": [
+  {
+   "repo": "lonexreb/site2cli",
+   "spdx": "MIT",
+   "rama": "main",
+   "sha": "20a569044357eb6c1383758a6c8a9258cacee359",
+   "kib": 4150,
+   "stars": 66,
+   "pushed": "2026-11-28T01:53:47Z"
+  },
+  {
+   "repo": "gambolputty/wiktionary-de-parser",
+   "spdx": "MIT",
+   "rama": "main",
+   "sha": "8694a0ea4adada1dea22da2b74a2ecc38f359975",
+   "kib": 917,
+   "stars": 26,
+   "pushed": "2026-11-28T01:51:58Z"
+  },
+  {
+   "repo": "shrek-abaper/sap-watt",
+   "spdx": "MIT",
+   "rama": "main",
+   "sha": "62e5d0bae83aadb6dfc03a0d30a276ba26f10192",
+   "kib": 2042,
+   "stars": 51,
+   "pushed": "2026-11-28T01:49:20Z"
+  },
+  {
+   "repo": "yushulx/Android-IP-Camera",
+   "spdx": "MIT",
+   "rama": "master",
+   "sha": "69d8a2f27a73bc125e9c04a47fffd94b93af1ac7",
+   "kib": 855,
+   "stars": 210,
+   "pushed": "2026-11-28T01:49:07Z"
+  },
+  {
+   "repo": "KOSASIH/quantum-pi-network",
+   "spdx": "MIT",
+   "rama": "main",
+   "sha": "0951c0ceec0febc4fc66b75eaa5173889bd38249",
+   "kib": 4224,
+   "stars": 163,
+   "pushed": "2026-11-28T01:48:33Z"
+  },
+  {
+   "repo": "agentchatme/agentchat-hermes",
+   "spdx": "MIT",
+   "rama": "main",
+   "sha": "f39f138a058d3843fd3810e89f3907f4ecff8b41",
+   "kib": 2676,
+   "stars": 36,
+   "pushed": "2026-11-28T01:48:11Z"
+  },
+  {
+   "repo": "webdjoe/pyvesync",
+   "spdx": "MIT",
+   "rama": "dev",
+   "sha": "5abfa51ccae0f8554b0843d3a4673b7aee2331ed",
+   "kib": 14523,
+   "stars": 253,
+   "pushed": "2026-11-28T01:47:39Z"
+  },
+  {
+   "repo": "Valen-Team/Roller",
+   "spdx": "Apache-2.0",
+   "rama": "main",
+   "sha": "a23e287e0e8938850de2aa29b74eb748b834dc82",
+   "kib": 17261,
+   "stars": 173,
+   "pushed": "2026-11-28T01:48:02Z"
+  },
+  {
+   "repo": "hashgraph-online/awesome-ai-plugins",
+   "spdx": "Apache-2.0",
+   "rama": "main",
+   "sha": "9f14d13a13ca2ff6f40be07cd9d96dd84501099a",
+   "kib": 8179,
+   "stars": 1097,
+   "pushed": "2026-11-28T01:47:35Z"
+  },
+  {
+   "repo": "Snaplii-Inc/agent-to-merchant-payments",
+   "spdx": "Apache-2.0",
+   "rama": "main",
+   "sha": "292a5ebec2d29abf02f229ebfb94274ad31a1c27",
+   "kib": 1006,
+   "stars": 812,
+   "pushed": "2026-11-28T01:38:30Z"
+  },
+  {
+   "repo": "wislertt/leetcode-py",
+   "spdx": "Apache-2.0",
+   "rama": "main",
+   "sha": "af41c6310a289b764cf003e7b6cd32345480ef66",
+   "kib": 13412,
+   "stars": 149,
+   "pushed": "2026-11-28T01:31:02Z"
+  },
+  {
+   "repo": "Rtwotwo/Awesome-Autonomous-Driving-Research",
+   "spdx": "Apache-2.0",
+   "rama": "main",
+   "sha": "a32c0c1122ab314737786151415153b58d1f27f4",
+   "kib": 4297,
+   "stars": 13,
+   "pushed": "2026-11-28T01:21:45Z"
+  },
+  {
+   "repo": "verl-project/verl-omni",
+   "spdx": "Apache-2.0",
+   "rama": "main",
+   "sha": "3ecb71ab3c602708c235c3e2b47328e179a9e4cf",
+   "kib": 14657,
+   "stars": 1605,
+   "pushed": "2026-11-28T01:19:50Z"
+  },
+  {
+   "repo": "zhaoxinghua09-cell/uibc-core",
+   "spdx": "Apache-2.0",
+   "rama": "main",
+   "sha": "99b43549e0a5b61c140438c823192245d2a91e33",
+   "kib": 9449,
+   "stars": 11,
+   "pushed": "2026-11-28T01:36:16Z"
+  },
+  {
+   "repo": "selimfirat/pysad",
+   "spdx": "BSD-3-Clause",
+   "rama": "master",
+   "sha": "742e727bd53277ffa5f5fd7336902bfb53b1d3bc",
+   "kib": 5626,
+   "stars": 322,
+   "pushed": "2026-11-28T01:52:40Z"
+  },
+  {
+   "repo": "lustre-tools/lustre-test-vms",
+   "spdx": "BSD-3-Clause",
+   "rama": "master",
+   "sha": "5330ec6335f059e2e06dd8f620aa56ff82ae2647",
+   "kib": 5536,
+   "stars": 19,
+   "pushed": "2026-11-28T00:46:12Z"
+  },
+  {
+   "repo": "conda-forge/conda-forge-pinning-feedstock",
+   "spdx": "BSD-3-Clause",
+   "rama": "main",
+   "sha": "0db51591ac8f41c6785fd20f5fa95bcf0d0bb8c8",
+   "kib": 11502,
+   "stars": 75,
+   "pushed": "2026-11-28T00:27:58Z"
+  },
+  {
+   "repo": "D4Vinci/Scrapling",
+   "spdx": "BSD-3-Clause",
+   "rama": "main",
+   "sha": "006ca10c141f838f5e08c84083715230e7c847f7",
+   "kib": 16105,
+   "stars": 106423,
+   "pushed": "2026-11-28T00:24:39Z"
+  },
+  {
+   "repo": "cocotb/cocotb",
+   "spdx": "BSD-3-Clause",
+   "rama": "master",
+   "sha": "326d6369f48bb6f561d3d5c7e22adc5480fc9534",
+   "kib": 13684,
+   "stars": 2590,
+   "pushed": "2026-11-27T23:17:56Z"
+  },
+  {
+   "repo": "mavlink/MAVSDK-Python",
+   "spdx": "BSD-3-Clause",
+   "rama": "main",
+   "sha": "4f308ac641ada8d5c6e93d251a58edfba313b582",
+   "kib": 2768,
+   "stars": 460,
+   "pushed": "2026-11-27T22:49:49Z"
+  }
+ ]
+}

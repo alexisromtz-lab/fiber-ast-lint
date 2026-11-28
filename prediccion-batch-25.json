@@ -1,0 +1,91 @@
+{
+  "schema": "fiber-ast-lint/prediccion/1",
+  "batch": 25,
+  "title": "la direccion no esta en la cota: v1.1 decide el borde y se mide fuera de muestra",
+  "declared_before_computation": true,
+  "que_es": "El lote 24 dejo dos cosas abiertas y este acto las cierra con un solo movimiento. (a) Un borde no decidido: huggingface/speech-to-speech@d52090a5346bccbf2f6b64b2b99bd46447f62ab3:tests/test_chattts_streaming.py:134 escribe `wavs[i, : len(row)] = row`, la etiqueta humana lo publica como escritura_posicional y el modulo se abstiene porque su regla sellada exige que el indice no contenga ninguna llamada. La llamada esta dentro de la cota de la rebanada, no en la direccion: la direccion sigue siendo una direccion. (b) Un numero de aplicacion: los 24/24 del lote 24 se midieron sobre los mismos sujetos que inspiraron la regla, asi que valen lo que vale un ajuste. El acto (1) escribe la regla v1.1 -- un componente del indice que es una rebanada es una cota, y una llamada dentro de una cota es una longitud; un componente que no es rebanada es una clave, y ahi una llamada sigue prohibida -- y (2) la mide sobre una cohorte de veinte sujetos que no ha producido ninguna etiqueta. El certificado algebraico que sostiene la distincion es que `hash(slice(1,2))` lanza `TypeError: unhashable type: 'slice'`: un indice que contiene una rebanada no puede ser clave de un diccionario, luego no puede ser la fibra de una escritura por clave. El residuo honesto: un despachador etiquetado (`serie.loc[etiqueta, :]`) tiene la misma forma sintactica que un posicional (`serie.iloc[i, :]`) y esta regla no los distingue; se mide cuantas filas caen ahi y se publica el numero, sea cero o no. Lo que se decide con el resultado esta escrito abajo, antes de medir, en `regla_de_decision`.",
+  "lo_ya_medido_antes_de_este_fichero": {
+    "el_acto_lo_declaro_el_lote_24": "recibo-lote24-20261127.json, proximo_acto: nombre `lote 25 - la capa teorema fuera de muestra, y el borde resuelto por una regla nueva`, predicado `Pre-registrar adjudicador_ast 1.1 con la distincion del borde -- una llamada dentro de la cota de una rebanada es una cota, no una clave -- y medirlo sobre los 117 historicos`, falsador `que 1.1 decida alguna fila de los 117 con causa distinta de la publicada, o precision fuera de muestra menor que 0,90 sobre cohorte nueva N=20 congelada por sha`, coste `20 clones de hasta 20 MiB, purgados uno a uno, 0 relojes, 0 escrituras en otros repositorios`.",
+    "el_borde_leido_del_sujeto_y_no_del_recibo": "El campo `texto` de recibo-lote22-20261127.json esta truncado a una linea y el borde se habia leido de ahi. Antes de escribir la regla se leyo la linea real del sujeto congelado, en un clon de un solo commit purgado en el mismo acto: `wavs[i, : len(row)] = row`, con `wavs = np.zeros((len(rows), max(len(row) for row in rows)), dtype=np.float32)` doce lineas antes. El clon se purgo antes de escribir este fichero: no queda copia.",
+    "la_tabla_de_causas_publicada": "recibo-lote22-20261127.json sobre los 125: escritura_posicional 25 (las 25 adjudicadas), proyeccion_inyectiva 60, proyeccion_no_inyectiva_sin_medicion 10, uso_como_conjunto 9, clave_de_protocolo 6, fichero_no_parsea 5, colision_sin_perdida 3, invariante_externo_no_declarado 3, agregacion_intencionada 2, normalizacion_para_consulta 2. El lote 24 decidio 24 de esas 25; la que falta es el borde.",
+    "el_instrumento_congelado": "src/fiber_ast_lint/detect.py mide sha256 b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6 (31437 bytes, version 0.5.0). Se ejecuta y se mide antes y despues; una diferencia detiene el acto sin publicar veredictos.",
+    "el_lector_v10_sigue_congelado": "src/fiber_ast_lint/adjudicador_ast.py, sha256 02ab4e4d6750bd8ab0779b74ceebff542ad9523f1e55c3fbddfd6886a6180b16. NO se edita: v1.1 es un artefacto nuevo (src/fiber_ast_lint/adjudicador_ast_11.py) para que el recibo del lote 24 siga siendo verificable sobre el fichero que midio. Un instrumento que se corrige en el sitio borra la medida que lo refuto.",
+    "el_interprete_mueve_el_denominador": "recibo-lote24-20261127.json, corrida_por_interprete: el mismo corredor sobre los mismos veinte sha decide 29 filas bajo 3.9.6 y 24 bajo 3.12, y las cinco que cambian son de causa fichero_no_parsea porque custom_components/ha_govee_led_ble/music_commands.py:46 usa PEP 695. T2 no mide un estado del sujeto: mide el piso del parser que lo lee."
+  },
+  "predictions": [
+    {
+      "id": "P1",
+      "ratio_orientation": "decididas/filas = 25/125: el denominador es el total de filas publicadas por el lote 22, no los adjudicados.",
+      "claim": "v1.1 decide exactamente veinticinco de las ciento veinticinco filas del lote 22 bajo el interprete declarado 3.12, y las veinticinco llevan causa publicada escritura_posicional: las veinticuatro que ya decidia v1.0, sin una sola excepcion, mas el borde. Ni una mas y ni una menos: si decide veintiseis, la regla acepta algo que su enunciado no cubre; si decide veinticuatro, la distincion del borde no se implemento.",
+      "falsifier": "decididas distinto de 25 sobre las 125 filas, o una fila decidida cuya causa publicada no sea escritura_posicional",
+      "locus": "recibo-lote25-20261127.json, tabla de adjudicacion",
+      "declared_before": "cualquier ejecucion de v1.1 sobre los veinte sujetos del lote 22"
+    },
+    {
+      "id": "P2",
+      "claim": "Cero contradicciones sobre los 117 adjudicados: ninguna de las veinticuatro filas que v1.0 decidia cambia de causa, y el conjunto decidido crece exactamente en la coordenada del borde (huggingface/speech-to-speech, tests/test_chattts_streaming.py, linea 134). Una sola fila del lote 22 que cambie de dictamen refuta la regla entera, no el umbral.",
+      "falsifier": "cualquier fila de los 117 cuya causa decidida por v1.1 difiera de la publicada, o un crecimiento del conjunto decidido distinto de la coordenada del borde",
+      "locus": "recibo-lote25-20261127.json, contradicciones",
+      "declared_before": "cualquier ejecucion de v1.1 sobre los veinte sujetos del lote 22"
+    },
+    {
+      "id": "P3",
+      "ratio_orientation": "aciertos/decididas sobre la cohorte nueva: el denominador son las filas que v1.1 decide en censo-25, no el total de filas que detect emite.",
+      "claim": "Fuera de muestra, sobre los veinte sujetos de censo-25-20261127.json congelados por sha y sin ninguna etiqueta previa, la precision puntual de la capa T1 es al menos 0,90: de las filas que v1.1 decide, al menos nueve de cada diez coinciden con la causa que asigna la lectura del locus entero. La aritmetica del intervalo se declara aqui y no despues: con cero errores, el extremo inferior del intervalo de Wilson al 95 por ciento solo supera 0,90 a partir de treinta y cinco filas decididas; por debajo de esa cuenta el recibo publica el valor puntual con su nombre y el intervalo junto a el, y no reclama el intervalo como si fuera el punto. Un numero decidido pequeno no se vende como precision alta aunque el cociente sea 1.",
+      "falsifier": "aciertos/decididas menor que 0,90 sobre las filas decididas de censo-25, contando como error toda fila cuya lectura del locus no sostenga la causa decidida",
+      "locus": "recibo-lote25-20261127.json, fuera de muestra",
+      "declared_before": "cualquier ejecucion de v1.1 sobre los veinte sujetos de censo-25-20261127.json"
+    },
+    {
+      "id": "P4",
+      "claim": "La capa T1 no depende del piso del parser: el mismo conjunto de filas queda decidido por T1 bajo el parser nativo del interprete de la corrida y bajo el piso `ast.parse(feature_version=(3,9))`, porque T1 necesita el arbol y sobre un fichero que no parsea se abstiene en los dos pisos. Lo unico que se mueve con el piso es T2, y por eso el recibo publica las dos columnas en vez de una cuenta. Si T1 se moviera, el defecto del lote 24 no seria de T2 sino del adjudicador entero.",
+      "falsifier": "un conjunto de filas decididas por T1 distinto entre el parser nativo y el piso 3.9",
+      "locus": "recibo-lote25-20261127.json, columnas por piso",
+      "declared_before": "cualquier ejecucion del adjudicador sobre los veinte sujetos de censo-25"
+    },
+    {
+      "id": "P5",
+      "claim": "Validez de la cohorte nueva: los veinte sujetos clonan desde su sha congelado y su HEAD coincide con el sha declarado, cada clon se purga inmediatamente despues de leer, y el acto no abre ningun issue ni deja ningun clon vivo. Si un sujeto no resuelve, no hay acto: el recibo se publica como NO_MEDIDO sobre ese sujeto y P3 se mide sobre los que si resolvieron, con el denominador corregido y declarado.",
+      "falsifier": "un sujeto cuyo HEAD no sea el sha congelado en censo-25-20261127.json, o un clon vivo al terminar, o un issue abierto",
+      "locus": "recibo-lote25-20261127.json, corrida",
+      "declared_before": "cualquier clon de los veinte sujetos"
+    }
+  ],
+  "no_independencia": "P1 y P2 miden la misma ejecucion desde dos lados: P1 cuenta, P2 mira fila por fila, y P2 puede refutar sin que P1 se mueva. P3 es la unica que se mide sobre sujetos nuevos y por eso es la que convierte la regla en instrumento; P1 y P2 son condiciones de aplicacion, no de descubrimiento, y se publican igual para que el lector vea que la regla hace lo que dice antes de creerle lo que promete. P4 es una condicion de forma: si falla, el numero de P3 seria funcion del interprete y no del sujeto. P5 es una condicion de validez, no un resultado.",
+  "regla_de_decision": {
+    "si_p1_falla": "la regla no se publica como v1.1: se publica el desvio con su cuenta y el borde vuelve a `no decidido`, porque una regla que decide de mas no es una regla mas amplia, es otra regla",
+    "si_p2_falla": "v1.1 se retira y se conserva v1.0 como lector; el borde queda declarado como limite del instrumento y no se corrige otra vez",
+    "si_p3_se_cumple": "la capa teorema se publica como instrumento fuera de muestra con su valor puntual, su cuenta decidida y su intervalo, y el producto deja de vender la adjudicacion automatica como lectura sin denominador",
+    "si_p3_falla": "la capa T1 vuelve a ser in-sample y el recibo lo dice: el siguiente acto no es ampliarla sino encontrar la lectura que la refuta",
+    "si_p4_falla": "el piso del parser se fija como parametro obligatorio del adjudicador y toda cuenta sin el piso se publica como NO_MEDIDO",
+    "si_p5_falla": "NO_MEDIDO sobre los sujetos que no resolvieron, denominador corregido y declarado, cero veredictos sobre lo no clonado"
+  },
+  "universo": {
+    "en_muestra": "los 125 loci de recibo-lote22-20261127.json sobre los veinte sujetos de censo-22-20261127.json, 117 adjudicados (10 CONFIRMADO, 107 REFUTADO) y 8 NO_MEDIDO. Denominador de P1 y P2.",
+    "fuera_de_muestra": "los veinte sujetos de censo-25-20261127.json (7 MIT, 7 Apache-2.0, 6 BSD-3-Clause, todos por debajo de 20480 KiB), congelados por sha antes de clonar, disjuntos por nombre de los veinte del lote 22 y de los lotes 19 a 24. Denominador de P3.",
+    "que_es_una_fila_fuera_de_muestra": "un locus que detect 0.5.0 emite con poblacion `pierde` y forma candidata, sobre el que v1.1 se pronuncia. No hay etiqueta previa: la etiqueta se produce leyendo el locus entero, y la lectura se publica junto al veredicto para que un tercero pueda discutirla.",
+    "definiciones": {
+      "capa_t1": "causa decidida escritura_posicional: la escritura direcciona una localizacion, no calcula una clave, luego el predicado de perdida es vacuo por construccion",
+      "capa_t2": "causa decidida fichero_no_parsea: el fichero no se deja leer por el piso del parser declarado",
+      "cota": "el limite de una rebanada, `Slice.lower`, `Slice.upper`, `Slice.step`. Una expresion aqui selecciona que posiciones se direccionan; no produce una clave",
+      "clave": "todo componente del indice que no es una rebanada. Una llamada aqui puede fusionar dos filas distintas en una sola direccion, y por eso sigue prohibida"
+    },
+    "limite": "el acto mide causas, no veredictos: que la escritura sea posicional dice que el predicado de perdida no se aplica, no que el locus sea benigno en todos los dominios. Y la regla no distingue despachadores etiquetados de posicionales: mismo AST, distinta semantica"
+  },
+  "instrumento_antes": {
+    "version": "0.5.0",
+    "arbol": "a75b176",
+    "detect_py_sha256": "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6",
+    "adjudicador_v10_sha256": "02ab4e4d6750bd8ab0779b74ceebff542ad9523f1e55c3fbddfd6886a6180b16",
+    "adjudicador_v11": "artefacto nuevo, src/fiber_ast_lint/adjudicador_ast_11.py; su sha256 se publica en el recibo y no antes, porque el recibo es el que lo mide",
+    "dependencias": [],
+    "regla": "detect.py se ejecuta y se mide antes y despues. El adjudicador no importa detect ni comparte vocabulario con el: recibe el arbol ya parseado y la linea del locus"
+  },
+  "cost": {
+    "relojes_nuevos": 0,
+    "clones": 40,
+    "bytes_temporales_tope": "cuarenta clones de hasta 20 MiB (veinte del lote 22 para P1, P2 y P4; veinte de censo-25 para P3), cada uno purgado inmediatamente despues de leer sus ficheros",
+    "persistido_fuera_de_tmp": "cero",
+    "justificacion": "un AST no viaja en el recibo: para decidir sobre el arbol hay que tener el arbol. Lo que se compra con los cuarenta clones es la unica cosa que el recibo del lote 24 no tenia, la medida fuera de muestra, mas la columnas por piso de P4"
+  }
+}
