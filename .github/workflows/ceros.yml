@@ -1,7 +1,8 @@
-# HUELLA-CEROS-GATE-20261127
-# Una compuerta, no un censo: el censo publica hallazgos, el delta pide que el cambio no
-# anada ninguno. El minuendo es el arbol de la base, asi que los ceros heredados no se
-# declaran uno por uno: se restan solos.
+# HUELLA-COMPUERTA-UNA-LINEA-20261127
+# La compuerta vive en frontera-runner y se referencia por pin; aqui no se copia.
+# Scope declarado: `bench/` cuenta una poblacion de benchmark y `tests/` mide fixtures,
+# ninguno fabrica una metrica. La superficie de producto, incluidos modulos nuevos en la
+# raiz, queda dentro.
 name: ceros
 
 # Un solo disparador: la base de un PR tiene sha; un dispatch no, y una compuerta que no
@@ -11,21 +12,6 @@ on:
 
 jobs:
   ceros:
-    runs-on: ubuntu-latest
-    steps:
-      # Historial completo: la base del PR se materializa como worktree por su sha.
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: install the gate
-        run: pip install "git+https://github.com/alexisromtz-lab/frontera-runner@v0.1.0"
-      - name: the base tree, as its own witness
-        run: git worktree add --detach "$RUNNER_TEMP/base" "${{ github.event.pull_request.base.sha }}"
-      # Scope declared: `bench/` tally dictionaries count a benchmark population and
-      # `tests/` measures fixtures -- neither fabricates a metric. Production surface,
-      # including modules added at top level, stays inside the gate.
-      - name: no new implicit zero
-        run: ceros-implicitos --excluir bench,tests --base "$RUNNER_TEMP/base" .
+    uses: alexisromtz-lab/frontera-runner/.github/workflows/reusable-ceros.yml@v0.2.0
+    with:
+      excluir: "bench,tests"
