@@ -441,3 +441,35 @@ def test_ninguna_etiqueta_de_version_miente_sobre_el_arbol_que_nombra() -> None:
     assert not mentirosas, (
         f"etiquetas cuyo arbol no declara la version que su nombre promete: {mentirosas}"
     )
+
+
+def test_toda_etiqueta_de_version_es_anotada_y_todo_puntero_es_ligero() -> None:
+    """The object type is part of the promise: an exact tag keeps its date, a pointer cannot.
+
+    This repository publishes no floating pointer today, so that half guards the day one appears;
+    the half that bites now is the exact tags, each of which must be an annotated object.
+    """
+    _exigir_arbol_git()
+    exactas = [
+        t
+        for t in _git("tag", "--list", "v*").stdout.split()
+        if re.fullmatch(r"v\d+\.\d+\.\d+", t)
+    ]
+    assert exactas, "no hay etiquetas de version: la guarda seria un verde vacio"
+    ligeras = [
+        t for t in exactas if _git("cat-file", "-t", f"refs/tags/{t}").stdout.strip() != "tag"
+    ]
+    assert not ligeras, (
+        f"etiquetas de release sin fecha propia (ligeras): {ligeras}: una anotada sella el dia "
+        "en que se corto, una ligera no se distingue de un pin que alguien movio"
+    )
+    flotantes = sorted(
+        t for t in _git("tag", "--list").stdout.split() if re.fullmatch(r"v\d*", t)
+    )
+    anotadas = [
+        t for t in flotantes if _git("cat-file", "-t", f"refs/tags/{t}").stdout.strip() != "commit"
+    ]
+    assert not anotadas, (
+        f"punteros flotantes anotados: {anotadas}: flotan, y al moverse arrastran una fecha "
+        "que ya no es cierta"
+    )

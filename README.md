@@ -80,6 +80,22 @@ pip install git+https://github.com/alexisromtz-lab/fiber-ast-lint@v0.6.1
 
 Python ≥ 3.11, zero runtime dependencies (stdlib `ast` only).
 
+## What it is worth inside a pull request
+
+The candidates this pass names are the ones a rewrite leaves behind: an accumulation without a
+guard, a loop that keeps adding past the point its storage can hold. In CI the exit code is the
+answer — `0` nothing to review, `1` candidates with their `archivo:línea`, `2` no Python file was
+analysed — and the run touches neither the network nor the working directory.
+
+```yaml
+- run: uvx --from git+https://github.com/alexisromtz-lab/fiber-ast-lint@v0.6.1 fiber-ast-lint src --json
+```
+
+A non-zero code fails the step, so the choice is yours and worth making explicitly: read the JSON
+and decide which candidates block, instead of turning every candidate into a red build. A
+fixed-scope audit — every candidate in your tree either refuted or reconciled with its locus, as a
+receipt — is quoted per project: open an issue on this repository with the paths involved.
+
 ## Exit codes (the contract)
 
 | code | meaning |
