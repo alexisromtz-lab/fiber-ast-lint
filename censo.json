@@ -1,8 +1,8 @@
 {
   "schema": "fiber-ast-lint/censo/1",
   "instrument": "fiber-ast-lint",
-  "instrument_version": "0.5.0",
-  "measured_at": "2026-11-25",
+  "instrument_version": "0.6.0",
+  "measured_at": "2026-11-28",
   "interpreter": "CPython 3.12.13",
   "method": "PyPI wheel downloaded, SHA-256 checked against PyPI's own digest, unzipped, and the subtree named in `scope` analysed. No install, no site-packages, no network during analysis.",
   "reproduce": "for each corpus: download <artifact>, check sha256, unzip, then run `fiber-ast-lint <unzipped>/<scope> --json` and compare the six fields.",

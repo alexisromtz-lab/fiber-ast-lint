@@ -6,8 +6,11 @@ worse than no tool, so each of those paths is asserted here.
 from __future__ import annotations
 
 import json
+import sys
 
-from fiber_ast_lint.cli import main
+from fiber_ast_lint.adjudicador_ast import POSICIONAL, SIN_CAUSA
+from fiber_ast_lint.causa import ADJUDICADOR, INTERPRETE
+from fiber_ast_lint.cli import construir, main
 
 FIXTURES = "tests/fixtures"
 
@@ -132,3 +135,66 @@ def test_el_payload_nombra_el_binario_que_lo_escribio(capsys):
     assert rc == 1
     assert salida["instrument"] == "fiber-ast-lint"
     assert salida["instrument_version"] == fiber_ast_lint.__version__
+
+# --------------------------------------------------------------------------- #
+# The cause column: the adjudicator's verdict, published next to the row.
+# --------------------------------------------------------------------------- #
+REBANADA = '''\
+def tapar(largos):
+    mascara = crear_tensor(len(largos), 8)
+    for i, n in enumerate(largos):
+        mascara[i, :n] = 1
+    return mascara
+
+
+def resumen(largos):
+    return tapar(largos)
+'''
+
+CLAVE = '''\
+def por_codigo(entries):
+    indice = {}
+    for entry in entries:
+        indice[entry.code] = entry
+    return indice
+
+
+def resumen(entries):
+    return por_codigo(entries)
+'''
+
+
+def _construir(tmp_path, nombre, fuente):
+    (tmp_path / f"{nombre}.py").write_text(fuente, encoding="utf-8")
+    return construir(str(tmp_path))
+
+
+def test_la_fila_lleva_la_causa_que_el_arbol_decide(tmp_path):
+    """``mascara[i, :n]`` direcciona posiciones: ese indice no puede ser clave."""
+    d = _construir(tmp_path, "rebanada", REBANADA)
+    (c,) = d["candidatos"]
+    assert c["causa"] == POSICIONAL
+    assert d["causas"][(c["archivo"], c["linea"])] == POSICIONAL
+
+
+def test_un_candidato_que_el_arbol_no_decide_no_es_un_cero(tmp_path):
+    """Una clave calculada no se decide: se publica ``NO_MEDIDO``, no una causa."""
+    d = _construir(tmp_path, "clave", CLAVE)
+    (c,) = d["candidatos"]
+    assert c["causa"] == SIN_CAUSA
+
+
+def test_el_payload_nombra_el_adjudicador_y_el_interprete(tmp_path, capsys):
+    """T2 mide el piso del parser: sin el interprete, ``fichero_no_parsea`` no tiene sujeto."""
+    _construir(tmp_path, "rebanada", REBANADA)
+    assert main([str(tmp_path), "--json"]) == 1
+    salida = json.loads(capsys.readouterr().out)
+    assert salida["adjudicador"] == ADJUDICADOR
+    assert salida["interprete"] == INTERPRETE == sys.version.split()[0]
+
+
+def test_la_causa_no_mueve_el_contrato_de_codigos(tmp_path):
+    """Es una columna, no un veredicto: el censo y el codigo de salida no se mueven."""
+    d = _construir(tmp_path, "clave", CLAVE)
+    assert d["reconcilia"] is True
+    assert (d["archivos"], d["almacenes"], len(d["candidatos"])) == (1, 1, 1)

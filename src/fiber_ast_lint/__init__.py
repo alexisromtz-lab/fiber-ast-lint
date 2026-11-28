@@ -7,18 +7,19 @@ those loci, separates real overwrites from monoidal aggregation, and reports
 whether anyone measures (or publishes) the cardinal that betrays the loss.
 """
 from .adjudicador_ast import adjudicar, causa_de_escritura, causa_por_localidad
+from .causa import causas
 from .detect import Analisis, Locus, analizar
 from .graph import Consumidor, Consumos, consumos, clave_de, modulo_de
 from .rc import combinar_rc, precedencia
 from .transversal import Fibra, es_transversal, fibra, verificar_conservacion, verificar_transversal
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 __all__ = [
     "Analisis", "Locus", "analizar",
     "Consumidor", "Consumos", "consumos", "clave_de", "modulo_de",
     "combinar_rc", "precedencia",
     "Fibra", "fibra", "es_transversal", "verificar_transversal",
     "verificar_conservacion",
-    "adjudicar", "causa_de_escritura", "causa_por_localidad",
+    "adjudicar", "causa_de_escritura", "causa_por_localidad", "causas",
     "__version__",
 ]

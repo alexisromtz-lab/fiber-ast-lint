@@ -188,6 +188,26 @@ that could not be resolved at all are published under `por_nombre` and are **nev
 identity. Treat `INTERPROC` as *a reader exists*, not as *losses are observable*: the remaining 23
 candidates keep their honest `SIN_LEN` verdict.
 
+## The cause is a second reading, not a second detector
+
+`detect.py` says *where* a write loses rows. *Why* it loses them — an intentional fold, a dedup
+index, a positional write into an array — is a different question, and answering it inside the
+detector would have changed the blob every receipt measures. So the cause is a separate read of
+the same file, published as a column:
+
+```
+CANDIDATO rebanada.py:5  op=pierde  fam=...  causa=escritura_posicional  <clave>
+```
+
+`adjudicador` names the frozen rulebook (`v1.1`) and `interprete` the parser that ran, because
+the count of files that do not parse measures the parser, not the subject. Three states, never
+two: a decided cause, `NO_MEDIDO` when the syntax does not decide, and `fichero_no_parsea` when
+the file cannot be read at all. `NO_MEDIDO` is a reading of this rule, not a zero.
+
+The second pass costs one parse per file **that already carries a candidate**, so the files the
+first pass never blamed are never re-read. `detect.py` stays at `b03f3ac3`; the census replays
+identical with the column on.
+
 ## Evidence
 
 Measured 2026-11-25 with this package; every number is reproducible with
@@ -2263,7 +2283,7 @@ store whose blind write would matter. That is the same coarseness `pregunta_pert
 had — it accepts a membership test *anywhere* in the loop body — and the fixture battery is what
 holds it: `espacio_no_transversal.py:31` still reports its colliding store because
 `REPORTER_NAMES` is read and never grown. The census replays clean against the new pin:
-`REPLAY IDENTICO · 13 filas · instrumento 0.5.0`, RC 0.
+`REPLAY IDENTICO · 13 filas · instrumento 0.6.0`, RC 0.
 
 ## License
 

@@ -18,21 +18,25 @@ import json
 import sys
 
 from . import __version__, graph
+from .adjudicador_ast import SIN_CAUSA
+from .causa import ADJUDICADOR, INTERPRETE, causas
 from .detect import RC_CANDIDATO, RC_CONSERVACION, RC_OK, RC_VACIO, Analisis, analizar
 from .rc import combinar_rc
 
 
-def _fila(loc) -> str:
+def _fila(loc, causa: str = "") -> str:
     extra = f" [{loc.nota}]" if loc.nota else ""
     pub = f" pub={loc.publica}" if loc.publica not in ("", "SIN_LEN") else ""
+    caus = f" causa={causa}" if causa else ""
     nombre = loc.qn or loc.fn or "<modulo>"
     return (f"{loc.severidad:9s} {loc.rel}:{loc.linea}  op={loc.op:11s} "
             f"fam={loc.familia:22s} forma={loc.forma:28s} "
-            f"fn={nombre}{pub}  {loc.clave}{extra}")
+            f"fn={nombre}{pub}{caus}  {loc.clave}{extra}")
 
 
 def construir(raiz: str, interproc: bool = True) -> dict:
     a = analizar(raiz)
+    caus = causas(raiz, a.loci)
     claves = {graph.clave_de(loc.rel, loc.qn or loc.fn)
               for loc in a.candidatos if (loc.qn or loc.fn)}
     consumos = graph.consumos(raiz, claves) if (interproc and claves) else graph.Consumos()
@@ -54,6 +58,7 @@ def construir(raiz: str, interproc: bool = True) -> dict:
         "posicional": a.posicional,
         "sin_len": a.sin_len,
         "reconcilia": a.reconcilia(),
+        "causas": caus,
         "candidatos": [
             {
                 "archivo": x.rel, "linea": x.linea, "clave": x.clave,
@@ -61,6 +66,7 @@ def construir(raiz: str, interproc: bool = True) -> dict:
                 "qualname": x.qn, "poblacion": x.poblacion, "escapa": x.escapa,
                 "llamadas": x.llamadas, "publica": x.publica,
                 "severidad": x.severidad, "consumidor": x.consumidor,
+                "causa": caus.get((x.rel, x.linea), SIN_CAUSA),
             }
             for x in sorted(a.loci, key=lambda y: (y.rel, y.linea)) if x.candidato
         ],
@@ -95,6 +101,7 @@ def _payload(r: dict) -> dict:
     c = r["consumos"]
     return {
         "instrument": "fiber-ast-lint", "instrument_version": __version__,
+        "adjudicador": ADJUDICADOR, "interprete": INTERPRETE,
         "raiz": r["raiz"], "archivos": r["archivos"], "fallas": r["fallas"],
         "for_medidos": r["for_medidos"], "almacenes": r["almacenes"],
         "pierde": r["pierde"], "guardadas": r["guardadas"],
@@ -116,7 +123,7 @@ def _informe(r: dict, solo_candidatos: bool) -> None:
     for loc in sorted(a.loci, key=lambda y: (not y.candidato, y.rel, y.linea)):
         if solo_candidatos and not loc.candidato:
             continue
-        print(_fila(loc))
+        print(_fila(loc, r["causas"].get((loc.rel, loc.linea), "")))
     print(f"CENSO archivos={a.archivos} fallas={a.fallas} for_medidos={a.for_medidos}")
     print(f"CONSERVACION almacenes={a.almacenes} == pierde={a.pierde} + guardadas={a.guardadas}"
           f" + acumulacion={a.acumulacion} + posicional={a.posicional}"
