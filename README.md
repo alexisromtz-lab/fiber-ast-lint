@@ -2029,7 +2029,7 @@ repository in about 54 s, which is the intended use.
 ```yaml
 repos:
   - repo: https://github.com/alexisromtz-lab/fiber-ast-lint
-    rev: v0.4.6
+    rev: v0.6.1
     hooks:
       - id: fiber-ast-lint
 ```
@@ -2039,6 +2039,10 @@ individual codes under `4 > 1 > 2 > 0`. Exit `1` stops the commit with candidate
 that is the intended friction, and it is why the finding is *named* rather than called a defect.
 `--sin-interproc` skips the second pass when you only want the local census; `-q` prints the code
 and nothing else.
+
+`--rc-decidido` makes that `1` count only the rows the certificate did not refute, so a corpus
+whose slices are provably positional stops stopping the commit on its own refutations. Add it to
+the hook with `args: [--rc-decidido]` when you want the gate to speak only about what it decided.
 
 ## Library use
 
@@ -2284,6 +2288,27 @@ had — it accepts a membership test *anywhere* in the loop body — and the fix
 holds it: `espacio_no_transversal.py:31` still reports its colliding store because
 `REPORTER_NAMES` is read and never grown. The census replays clean against the new pin:
 `REPLAY IDENTICO · 13 filas · instrumento 0.6.0`, RC 0.
+
+`0.6.1` gives the cause column a reader in the exit code, and it is opt-in. The default code was
+measured out of sample on `smolagents@474bb331`: it answered `1`, and every row it counted carried
+`causa=NO_MEDIDO` — an abstention, which is a result and not a defect. The sharper case is the one
+v1.1 was built for: nine lines of array code,
+
+```python
+def recorta(filas, tabla):
+    for i, r in enumerate(filas):
+        tabla[1:3] = r          # this very instrument decides: causa=escritura_posicional
+    return tabla
+```
+
+gave `RC 1` on a row the certificate had already refuted, so the corpus that motivated the Slice
+certificate still turned a pull request red. `--rc-decidido` narrows code `1` to the rows still
+open: `T1` clears a row, `T2` does not — a file that does not parse measures `INTERPRETE`, never the
+subject, so a row it touches stays open. The default is unchanged and so is every published
+receipt's number; the payload gains `abiertas` (how many rows the cause left open) and
+`rc_decidido`. On the same nine lines: `1` without the flag, `0` with it. On `smolagents@474bb331`:
+`1` both ways, because its six rows are all `NO_MEDIDO` — the flag removes false reds, not
+abstentions.
 
 ## License
 

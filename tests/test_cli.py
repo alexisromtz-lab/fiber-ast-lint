@@ -198,3 +198,23 @@ def test_la_causa_no_mueve_el_contrato_de_codigos(tmp_path):
     d = _construir(tmp_path, "clave", CLAVE)
     assert d["reconcilia"] is True
     assert (d["archivos"], d["almacenes"], len(d["candidatos"])) == (1, 1, 1)
+
+
+def test_el_rc_decidido_no_pinta_rojo_sobre_una_fila_que_la_causa_refuta(tmp_path):
+    """``mascara[i, :n] = 1`` da RC 1 con la causa ya decidida: un falso rojo.
+
+    Medido fuera de muestra sobre ``src/smolagents/local_python_executor.py``: el
+    codigo por defecto no consulta la causa, asi que el codigo de arrays que el
+    certificado de v1.1 absuelve sigue bloqueando un PR.
+    """
+    d = _construir(tmp_path, "rebanada", REBANADA)
+    assert d["abiertas"] == 0
+    assert main([str(tmp_path), "-q"]) == 1
+    assert main([str(tmp_path), "-q", "--rc-decidido"]) == 0
+
+
+def test_el_rc_decidido_no_absuelve_una_fila_que_no_se_decidio(tmp_path):
+    """Una clave calculada sigue abierta: la abstencion cuesta cobertura, no precision."""
+    d = _construir(tmp_path, "clave", CLAVE)
+    assert d["abiertas"] == 1
+    assert main([str(tmp_path), "-q", "--rc-decidido"]) == 1

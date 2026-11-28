@@ -4,6 +4,9 @@ Exit codes (the tool's own contract, stable):
   0  no candidates: every write either aggregates, is guarded, is positional
      or has no measurable cardinal
   1  candidates to review (never "defects": a static pass can only name them)
+     ``--rc-decidido`` narrows that 1 to the rows the certificate did not
+     refute; the default code is unchanged, so a published receipt keeps its
+     number.
   2  empty universe (no Python file was analysed) - never reported as 0
   4  the instrument does not reconcile, or a file could not be parsed
 
@@ -19,7 +22,7 @@ import sys
 
 from . import __version__, graph
 from .adjudicador_ast import SIN_CAUSA
-from .causa import ADJUDICADOR, INTERPRETE, causas
+from .causa import ADJUDICADOR, INTERPRETE, REFUTADAS, causas
 from .detect import RC_CANDIDATO, RC_CONSERVACION, RC_OK, RC_VACIO, Analisis, analizar
 from .rc import combinar_rc
 
@@ -59,6 +62,7 @@ def construir(raiz: str, interproc: bool = True) -> dict:
         "sin_len": a.sin_len,
         "reconcilia": a.reconcilia(),
         "causas": caus,
+        "abiertas": abiertas(a, caus),
         "candidatos": [
             {
                 "archivo": x.rel, "linea": x.linea, "clave": x.clave,
@@ -75,15 +79,32 @@ def construir(raiz: str, interproc: bool = True) -> dict:
     }
 
 
-def rc_de(a: Analisis) -> int:
-    """Per-universe code. Order matters: a broken file is not an empty universe."""
+def abiertas(a: Analisis, caus: dict) -> int:
+    """How many candidates the certificate did not refute.
+
+    A row with ``causa`` in ``REFUTADAS`` is decided and asks no reader. Every
+    other row stays open, ``fichero_no_parsea`` included: it measures the parser.
+    """
+    return sum(1 for x in a.candidatos
+               if caus.get((x.rel, x.linea), SIN_CAUSA) not in REFUTADAS)
+
+
+def rc_de(a: Analisis, abiertas_: int | None = None) -> int:
+    """Per-universe code. Order matters: a broken file is not an empty universe.
+
+    ``abiertas_`` is the opt-in reading (``--rc-decidido``): the code counts only
+    the rows still open, so a corpus whose slices are provably positional stops
+    turning the gate red on its own refutations.
+    """
     if a.fallas:
         return RC_CONSERVACION
     if not a.archivos:
         return RC_VACIO
     if not a.reconcilia():
         return RC_CONSERVACION
-    return RC_CANDIDATO if a.candidatos else RC_OK
+    if abiertas_ is None:
+        return RC_CANDIDATO if a.candidatos else RC_OK
+    return RC_CANDIDATO if abiertas_ else RC_OK
 
 
 def rc_certificado(a: Analisis) -> int:
@@ -107,7 +128,9 @@ def _payload(r: dict) -> dict:
         "pierde": r["pierde"], "guardadas": r["guardadas"],
         "acumulacion": r["acumulacion"], "posicional": r["posicional"],
         "sin_len": r["sin_len"], "reconcilia": r["reconcilia"],
+        "abiertas": r["abiertas"],
         "rc": rc_de(a), "rc_certificado": rc_certificado(a),
+        "rc_decidido": rc_de(a, r["abiertas"]),
         "certifica": a.certifica(), "candidatos": r["candidatos"],
         "consumidores": {k: [str(x) for x in v] for k, v in c.exactos.items()},
         "consumidores_por_nombre": c.sitios_por_nombre,
@@ -153,6 +176,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--solo-candidatos", action="store_true",
                    help="no imprime los loci LATENTE/INFO")
     p.add_argument("-q", "--quiet", action="store_true", help="solo el codigo de salida")
+    p.add_argument("--rc-decidido", action="store_true",
+                   help="el codigo solo cuenta las filas que la causa no refuta")
     args = p.parse_args(argv)
 
     resultados = [construir(ruta, interproc=not args.sin_interproc)
@@ -168,7 +193,7 @@ def main(argv: list[str] | None = None) -> int:
         if not a.fallas and a.archivos and not a.reconcilia():
             print(f"INSTRUMENTO NO RECONCILIA en {a.raiz}:"
                   f" el censo de descartes no cuadra", file=sys.stderr)
-        codigos.append(rc_de(a))
+        codigos.append(rc_de(a, r["abiertas"] if args.rc_decidido else None))
         if args.json or args.quiet:
             continue
         if len(resultados) > 1:

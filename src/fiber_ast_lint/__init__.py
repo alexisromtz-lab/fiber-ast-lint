@@ -13,7 +13,7 @@ from .graph import Consumidor, Consumos, consumos, clave_de, modulo_de
 from .rc import combinar_rc, precedencia
 from .transversal import Fibra, es_transversal, fibra, verificar_conservacion, verificar_transversal
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 __all__ = [
     "Analisis", "Locus", "analizar",
     "Consumidor", "Consumos", "consumos", "clave_de", "modulo_de",

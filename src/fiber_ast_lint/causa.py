@@ -16,10 +16,16 @@ from __future__ import annotations
 import ast
 import pathlib
 
-from .adjudicador_ast import NO_PARSEA, nodo_de_escritura
+from .adjudicador_ast import NO_PARSEA, POSICIONAL, nodo_de_escritura
 from .adjudicador_ast_11 import INTERPRETE, adjudicar  # noqa: F401  (published)
 
 ADJUDICADOR = "v1.1"
+
+#: The causes that clear a row. T1 only: a slice is a location, so the loss
+#: predicate is vacuous and nothing is left to review. T2 abstains -- a file that
+#: does not parse measures ``INTERPRETE``, never the subject -- so a row it
+#: touches stays open.
+REFUTADAS = (POSICIONAL,)
 
 
 def _base(raiz) -> pathlib.Path:
