@@ -11,8 +11,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 from fiber_ast_lint.cli import construir
 from fiber_ast_lint.detect import RC_CANDIDATO, RC_CONSERVACION, RC_OK, RC_VACIO
@@ -368,3 +371,73 @@ def test_la_guarda_de_tags_ve_y_discrimina() -> None:
     assert _tags_citados("uvx --from git+https://x/y@v0.6.1 y --json") == ["0.6.1"]
     assert _tags_citados("uvx --from git+https://x/y y --json") == []
     assert _tags_citados("...@v0.6.1 y tambien @v0.6.0") == ["0.6.0", "0.6.1"]
+
+
+# --- the object behind the pin: a tag is a claim about a tree -----------------
+
+
+def _git(*args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", "-C", str(RAIZ), "--no-pager", *args], capture_output=True, text=True
+    )
+
+
+def _exigir_arbol_git() -> None:
+    if not (RAIZ / ".git").exists():
+        pytest.skip("NO_MEDIDO: sin .git (sdist, rueda o archivo), una etiqueta no se resuelve")
+
+
+def _version_declarada(manifiesto: str) -> str | None:
+    encontrado = re.search(r'^version\s*=\s*"([^"]+)"', manifiesto, re.MULTILINE)
+    return encontrado.group(1) if encontrado else None
+
+
+def _commit_introduce_la_version() -> bool:
+    """True si este commit es el salto: su etiqueta se crea despues, nunca antes."""
+    padre = _git("show", "HEAD^:pyproject.toml")
+    if padre.returncode != 0:
+        return True
+    actual = _version_declarada((RAIZ / "pyproject.toml").read_text(encoding="utf-8"))
+    return _version_declarada(padre.stdout) != actual
+
+
+def test_la_etiqueta_que_el_readme_ensena_es_un_objeto_con_la_version_que_promete() -> None:
+    """El pin se vigila en el texto; esto vigila el objeto que ese texto manda instalar."""
+    _exigir_arbol_git()
+    from fiber_ast_lint import __version__
+
+    tag = f"v{__version__}"
+    punta = _git("rev-parse", "--verify", "--quiet", f"refs/tags/{tag}^{{commit}}")
+    if punta.returncode != 0:
+        if _git("rev-parse", "--is-shallow-repository").stdout.strip() == "true":
+            pytest.skip(
+                f"NO_MEDIDO: clon superficial sin `{tag}`: ausencia y no-traido no se distinguen"
+            )
+        if _commit_introduce_la_version():
+            pytest.skip(f"NO_MEDIDO: `{tag}` aun no existe y este commit introduce la version")
+        raise AssertionError(f"el README ensena `{tag}` y el repositorio no tiene esa etiqueta")
+    manifiesto = _git("show", f"{punta.stdout.strip()}:pyproject.toml")
+    assert manifiesto.returncode == 0, f"`{tag}` no contiene pyproject.toml"
+    assert _version_declarada(manifiesto.stdout) == __version__, (
+        f"`{tag}` declara {_version_declarada(manifiesto.stdout)}: "
+        "instalar la etiqueta devuelve otro instrumento"
+    )
+
+
+def test_ninguna_etiqueta_de_version_miente_sobre_el_arbol_que_nombra() -> None:
+    """Mover una etiqueta es la unica forma de que un pin publicado mienta sin editar el README."""
+    _exigir_arbol_git()
+    etiquetas = [
+        t
+        for t in _git("tag", "--list", "v*").stdout.split()
+        if re.fullmatch(r"v\d+\.\d+\.\d+", t)
+    ]
+    assert etiquetas, "no hay etiquetas de version: la guarda seria un verde vacio"
+    mentirosas = []
+    for tag in etiquetas:
+        manifiesto = _git("show", f"{tag}:pyproject.toml")
+        if manifiesto.returncode != 0 or _version_declarada(manifiesto.stdout) != tag[1:]:
+            mentirosas.append(tag)
+    assert not mentirosas, (
+        f"etiquetas cuyo arbol no declara la version que su nombre promete: {mentirosas}"
+    )
