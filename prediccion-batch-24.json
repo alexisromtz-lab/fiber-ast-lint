@@ -21,6 +21,7 @@
     },
     {
       "id": "P2",
+      "ratio_orientation": "decididas/adjudicadas = 24/117: el denominador es el total adjudicado (125 menos los 8 NO_MEDIDO), no el total de filas.",
       "claim": "Cobertura de la capa teorema: entre 22 y 27 de los 117 adjudicados quedan decididos, y todos ellos tienen causa publicada `escritura_posicional`. La banda se deriva de la tabla ya publicada --25 filas llevan esa causa y las 25 son de familia REBANADA-- y por eso no es un descubrimiento: es coherencia entre la regla y la implementacion. Que la banda sea estrecha es deliberado: si el codigo decide 40, esta decidiendo fuera de su teorema.",
       "falsifier": "cobertura fuera de [22, 27] sobre los 117, o una fila decidida con causa publicada distinta de escritura_posicional",
       "locus": "recibo-lote24-20261127.json, tabla de adjudicacion",
@@ -28,6 +29,7 @@
     },
     {
       "id": "P3",
+      "ratio_orientation": "acuerdo_estricto = decididas/adjudicadas = 24/117; con capa eco = (decididas + eco)/adjudicadas = 34/117. Las dos lecturas comparten denominador para que puedan compararse.",
       "claim": "El enunciado heredado, medido como se enuncio, se refuta: el acuerdo estricto sobre los 117 --abstencion contada como desacuerdo-- queda por debajo del 75 por cien, con valor puntual 25/117 = 0.2137. Anadiendo la capa eco (las 10 filas cuya causa publicada es la afirmacion propia del detector, `proyeccion_no_inyectiva_sin_medicion`) el acuerdo sube a 35/117 = 0.2991 y sigue por debajo. La prediccion es que el umbral del 90 por cien no se alcanza, y que no se alcanza porque alcanzarlo exigiria adivinar en las 82 filas restantes, no porque falte instrumento.",
       "falsifier": "acuerdo estricto mayor o igual que 0.75 sobre los 117 adjudicados",
       "locus": "recibo-lote24-20261127.json, veredictos",
@@ -35,6 +37,7 @@
     },
     {
       "id": "P4",
+      "ratio_orientation": "no_sostenidas/suprimidas = 53/77: el denominador es lo que la compuerta suprime, no el universo.",
       "claim": "La compuerta post-hoc del lote 23 no esta sostenida por el teorema: de las 77 filas de los 117 que suprimiria la regla `familia en {COLUMNA, REBANADA}`, al menos 45 no son teorema de la sintaxis (valor puntual predicho: 52, es decir 25 sostenidas y 52 no). Si se cumple, la mejora x2.925 que el lote 23 publico se obtuvo mirando las mismas 125 filas y dos tercios de su masa no tienen invariante detras: se retira como producto y se sustituye por la capa teorema con su cobertura publicada. Es la unica prediccion de este acto que la lectura de los textos no puede contaminar, porque no mide si la compuerta acierta --eso ya se sabe-- sino si hay una razon detras de su acierto.",
       "falsifier": "menos de 45 de las 77 filas suprimidas por la compuerta del lote 23 quedan fuera de la capa teorema",
       "locus": "recibo-lote24-20261127.json, cruce con la compuerta del lote 23",

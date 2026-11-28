@@ -1,0 +1,1555 @@
+{
+ "schema": "fiber-ast-lint/recibo/1",
+ "fecha": "2026-11-27",
+ "acto": "lote 24 - adjudicador mecanico puro sobre AST: la causa se decide o se abstiene",
+ "pre_registro": {
+  "fichero": "prediccion-batch-24.json",
+  "sha256": "1881043389e74135e7f262a1c6c05cfa0c0f3892b4e19f7c7893d34560b4a26f",
+  "declared_before_computation": true
+ },
+ "instrumento": {
+  "detector": {
+   "fichero": "src/fiber_ast_lint/detect.py",
+   "sha256": "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6",
+   "sha256_al_terminar": "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6",
+   "intacto": true,
+   "version": "0.5.0",
+   "modificado": false
+  },
+  "adjudicador": {
+   "fichero": "src/fiber_ast_lint/adjudicador_ast.py",
+   "sha256": "02ab4e4d6750bd8ab0779b74ceebff542ad9523f1e55c3fbddfd6886a6180b16",
+   "bytes": 4938,
+   "causas_decidibles": [
+    "escritura_posicional",
+    "fichero_no_parsea"
+   ],
+   "abstencion": "NO_MEDIDO"
+  }
+ },
+ "corrida": {
+  "sujetos": 20,
+  "clonados": 20,
+  "clone_por_sha": true,
+  "purga_tras_cada_sujeto": true,
+  "red": "GitHub sobre sha alcanzable, fetch --depth 1",
+  "relojes_de_pared": 0,
+  "coste": "20 clones de hasta 17 MiB, purgados uno a uno",
+  "comando": "/tmp/lote24_run.py (efimero, no commiteado)"
+ },
+ "reproduccion": {
+  "P5": {
+   "veredicto": "CUMPLIDA",
+   "coordenadas_del_lote_22": 125,
+   "no_parsean": 8,
+   "coordenadas_esperadas": 120,
+   "coordenadas_ausentes": 0,
+   "loci_que_emite_detect": 1037,
+   "sobrantes_respecto_del_recibo": 917,
+   "lectura_de_los_sobrantes": "El recibo del lote 22 es un subconjunto filtrado de la salida de detect (poblacion=pierde y formas candidatas): detect emite 1037 loci, el recibo publica 125. Los 917 sobrantes son el filtro, no una discrepancia: el falsador de P5 pedia que no faltase ninguna coordenada, y no falta ninguna.",
+   "fallas_de_parseo_por_sujeto": {
+    "teh-hippo/ha-govee-led-ble": 32,
+    "tempus2016/z2m-device-tracker": 1,
+    "madrury/py-glm": 2
+   }
+  }
+ },
+ "medicion": {
+  "filas": 125,
+  "adjudicados": 117,
+  "no_medidos": 8,
+  "decididas": 24,
+  "aciertos": 24,
+  "precision_capa_teorema": 1.0,
+  "cobertura_capa_teorema": 0.2051,
+  "acuerdo_estricto": 0.2051,
+  "acuerdo_con_capa_eco": {
+   "numerador": 34,
+   "denominador": 117,
+   "valor": 0.2906,
+   "definicion": "decisiones mas las filas cuya causa publicada es la afirmacion propia del detector (proyeccion_no_inyectiva_sin_medicion): coincidencia de abstencion, no de causa"
+  },
+  "matriz_predicha_por_publicada": [
+   {
+    "predicha": "NO_MEDIDO",
+    "publicada": "proyeccion_inyectiva",
+    "filas": 60
+   },
+   {
+    "predicha": "escritura_posicional",
+    "publicada": "escritura_posicional",
+    "filas": 24
+   },
+   {
+    "predicha": "NO_MEDIDO",
+    "publicada": "proyeccion_no_inyectiva_sin_medicion",
+    "filas": 10
+   },
+   {
+    "predicha": "NO_MEDIDO",
+    "publicada": "uso_como_conjunto",
+    "filas": 9
+   },
+   {
+    "predicha": "NO_MEDIDO",
+    "publicada": "clave_de_protocolo",
+    "filas": 6
+   },
+   {
+    "predicha": "fichero_no_parsea",
+    "publicada": "fichero_no_parsea",
+    "filas": 5
+   },
+   {
+    "predicha": "NO_MEDIDO",
+    "publicada": "colision_sin_perdida",
+    "filas": 3
+   },
+   {
+    "predicha": "NO_MEDIDO",
+    "publicada": "invariante_externo_no_declarado",
+    "filas": 3
+   },
+   {
+    "predicha": "NO_MEDIDO",
+    "publicada": "agregacion_intencionada",
+    "filas": 2
+   },
+   {
+    "predicha": "NO_MEDIDO",
+    "publicada": "normalizacion_para_consulta",
+    "filas": 2
+   },
+   {
+    "predicha": "NO_MEDIDO",
+    "publicada": "escritura_posicional",
+    "filas": 1
+   }
+  ],
+  "decididas_por_veredicto": {
+   "REFUTADO": 24
+  },
+  "decididas_por_familia": {
+   "REBANADA": 24
+  },
+  "decididas_por_forma": {
+   "PROYECCION_VISIBLE": 24
+  },
+  "decididas_por_sujeto": {
+   "zayphir/spp-to-pawpaint": 9,
+   "huggingface/speech-to-speech": 1,
+   "PriorLabs/relarena": 5,
+   "bjcoombs/ai-native-toolkit": 1,
+   "madrury/py-glm": 1,
+   "SheffieldML/PyDeepGP": 3,
+   "chapmanjacobd/library": 4
+  },
+  "confirmados_tocados_por_la_capa_teorema": 0,
+  "efecto_sobre_la_precision_del_producto": {
+   "antes": {
+    "confirmados": 10,
+    "filas": 117,
+    "precision": 0.0855
+   },
+   "despues": {
+    "confirmados": 10,
+    "filas": 93,
+    "precision": 0.1075
+   },
+   "lectura": "La capa teorema no sube la precision del producto: quita 24 filas y las 24 eran refutaciones. Es un instrumento de contabilidad -- reduce el trabajo de lectura un 20,5 por cien -- no un filtro que separe candidatos buenos de malos. Solo lo haria si tocara confirmados, y no toca ninguno: el teorema solo decide del lado negativo."
+  }
+ },
+ "cruce_con_la_compuerta_del_lote_23": {
+  "regla_de_la_compuerta": "familia en {COLUMNA, REBANADA}",
+  "pre_registro": "recibo-lote23-20261127.json",
+  "filas_suprimidas": 77,
+  "de": 117,
+  "sostenidas_por_el_teorema": 24,
+  "no_sostenidas": 53,
+  "no_sostenidas_por_causa_publicada": {
+   "proyeccion_inyectiva": 46,
+   "uso_como_conjunto": 3,
+   "agregacion_intencionada": 2,
+   "escritura_posicional": 1,
+   "clave_de_protocolo": 1
+  },
+  "confirmados_suprimidos": 0,
+  "lectura": "La compuerta suprime 77 filas sin tocar ningun confirmado, y por eso su precision sube (10/40 = 0,25). Pero solo 24 de las 77 tienen un invariante de sintaxis detras; las otras 53 se suprimen por la familia a la que pertenecen, no por un teorema. La mejora es real como numero y no es un invariante: es la misma lectura que produjo la etiqueta, aplicada otra vez sin escribirse."
+ },
+ "borde_no_decidido": {
+  "sujeto": "huggingface/speech-to-speech",
+  "archivo": "tests/test_chattts_streaming.py",
+  "linea": 134,
+  "texto": "wavs[i, : len(row)] = row",
+  "causa_publicada": "escritura_posicional",
+  "causa_predicha": "NO_MEDIDO",
+  "diagnostico": "La etiqueta humana es correcta y el modulo se abstiene: la regla sellada exige que el indice no contenga ninguna llamada, y aqui la llamada esta dentro de la cota de la rebanada, no en la direccion. La direccion sigue siendo una direccion. El defecto es de la regla, no de la fila, y no se corrige hoy: el sello esta congelado por hash y corregirlo despues de ver el resultado seria post-ajuste. La correccion es una hipotesis del lote 25.",
+  "es_la_unica_fila_que_explica_todas_las_desviaciones": true
+ },
+ "veredictos": [
+  {
+   "id": "P1",
+   "enunciado": "precision de la capa teorema = 100 por cien",
+   "veredicto": "CUMPLIDA",
+   "medido": {
+    "decididas": 24,
+    "aciertos": 24,
+    "precision": 1.0
+   },
+   "nota": "Ninguna fila decidida fue contradicha por la etiqueta humana. In-sample: los textos se leyeron al escribir la regla, asi que esto mide aplicacion, no descubrimiento."
+  },
+  {
+   "id": "P2",
+   "enunciado": "cobertura en banda [22,27] de 117, y toda fila decidida con causa publicada escritura_posicional",
+   "veredicto": "CUMPLIDA",
+   "medido": {
+    "cobertura": 24,
+    "banda": [
+     22,
+     27
+    ],
+    "causas_publicadas_de_las_decididas": [
+     "escritura_posicional"
+    ]
+   },
+   "nota": "24 cae dentro de la banda. Las 5 filas de fichero_no_parsea que el modulo tambien decide estan las 5 fuera de los 117 (son NO_MEDIDO en el lote 22), asi que no entran en el denominador de P2."
+  },
+  {
+   "id": "P3",
+   "enunciado": "acuerdo estricto < 0,75; puntual 25/117 = 0,2137; con capa eco 35/117 = 0,2991",
+   "veredicto": "CUMPLIDA",
+   "medido": {
+    "acuerdo_estricto": 0.2051,
+    "puntual_predicho": 0.2137,
+    "capa_eco": 0.2906,
+    "capa_eco_predicha": 0.2991
+   },
+   "nota": "El umbral heredado del 90 por cien queda REFUTADO, y no por falta de instrumento: para alcanzarlo habria que adivinar en 93 de las 117 filas. El valor puntual fallo por una fila, y esa fila es el borde."
+  },
+  {
+   "id": "P4",
+   "enunciado": "de las 77 filas que suprime la compuerta del lote 23, al menos 45 no son teorema (puntual 52)",
+   "veredicto": "CUMPLIDA",
+   "medido": {
+    "suprimidas": 77,
+    "no_sostenidas": 53,
+    "sostenidas": 24,
+    "puntual_predicho": 52
+   },
+   "nota": "53 >= 45. El puntual fallo por una fila, la misma. Dos tercios de la compuerta no tienen invariante detras."
+  },
+  {
+   "id": "P5",
+   "enunciado": "detect 0.5.0 reproduce los 125 loci de la cohorte congelada",
+   "veredicto": "CUMPLIDA",
+   "medido": {
+    "coordenadas_ausentes": 0,
+    "esperadas": 120,
+    "no_parsean": 5,
+    "detect_intacto": true
+   },
+   "nota": "Cero coordenadas ausentes y cero sha que no resuelvan. Los 917 sobrantes son el filtro del recibo, declarados arriba."
+  }
+ ],
+ "regla_de_decision_aplicada": {
+  "condiciones": {
+   "P1_cumplida": true,
+   "P4_cumplida": true,
+   "P5_cumplida": true,
+   "P3_cumplida": true
+  },
+  "consecuencias": [
+   "El '>= 90 por cien de acuerdo' del enunciado heredado queda REFUTADO en este recibo, con su numero al lado: 24/117 = 0,2051. No se reescribe el enunciado.",
+   "La compuerta post-hoc del lote 23 se retira como producto: 53 de sus 77 supresiones no tienen teorema detras. Se conserva como lectura declarada, con ese nombre.",
+   "La capa teorema se publica con su cobertura: 24 de 117 filas (20,5 por cien) y precision 24/24 in-sample. No sube la precision del producto (10/117 -> 10/93); reduce el trabajo de lectura.",
+   "El adjudicador no se retira: P1 se cumplio, ninguna fila decidida miente."
+  ]
+ },
+ "no_se_hizo": [
+  "No se toco detect.py (sha256 identica antes y despues: b03f3ac3...).",
+  "No se corrio el adjudicador sobre ninguna cohorte fuera de muestra: los 20 sujetos son los mismos que produjeron las etiquetas. La precision de 24/24 es de aplicacion, no de descubrimiento.",
+  "No se corrigio la regla del borde: el sello esta congelado por hash y corregirlo tras ver el resultado seria post-ajuste.",
+  "No se abrieron issues en ningun repositorio externo y no se dejo ningun clon vivo: los 20 se purgaron uno a uno.",
+  "No se abrio la capa eco como teorema: coincide en 34 de 117 por construccion de la definicion, no por medicion."
+ ],
+ "proximo_acto": {
+  "nombre": "lote 25 - la capa teorema fuera de muestra, y el borde resuelto por una regla nueva",
+  "por_que": "Este acto midio la aplicacion de una regla sobre las mismas filas que la inspiraron. Lo unico que falta para poder vender la capa teorema es medirla sobre una cohorte que no haya producido ninguna etiqueta: ahi 24/24 vale lo que vale un teorema, y 24/24 medido in-sample vale lo que vale un ajuste.",
+  "predicado": "Pre-registrar adjudicador_ast 1.1 con la distincion del borde -- una llamada dentro de la cota de una rebanada es una cota, no una clave -- y medirlo sobre los 117 historicos para concordancia (>= 24/25 sin perder una sola de las 24) y sobre una cohorte nueva N=20 congelada por sha para precision fuera de muestra (>= 0,90 sobre las filas que decida).",
+  "falsador": "que 1.1 decida alguna fila de los 117 con causa distinta de la publicada, o que su precision fuera de muestra caiga por debajo de 0,90.",
+  "coste": "20 clones de hasta 20 MiB purgados uno a uno, 0 relojes, 0 escrituras en otros repositorios."
+ },
+ "politica": {
+  "escrituras_fuera_de_este_repositorio": 0,
+  "instrumento_congelado_por_hash": true,
+  "decision_publicada_antes_de_medir": true,
+  "post_ajuste": false,
+  "sello_completado_despues_de_medir": true
+ },
+ "tabla_adjudicacion": [
+  {
+   "sujeto": "teh-hippo/ha-govee-led-ble",
+   "archivo": "custom_components/ha_govee_led_ble/effect_preview.py",
+   "linea": 983,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "teh-hippo/ha-govee-led-ble",
+   "archivo": "custom_components/ha_govee_led_ble/music_commands.py",
+   "linea": 575,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "NO_MEDIDO",
+   "publicada": "fichero_no_parsea",
+   "predicha": "fichero_no_parsea"
+  },
+  {
+   "sujeto": "teh-hippo/ha-govee-led-ble",
+   "archivo": "custom_components/ha_govee_led_ble/music_commands.py",
+   "linea": 577,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "NO_MEDIDO",
+   "publicada": "fichero_no_parsea",
+   "predicha": "fichero_no_parsea"
+  },
+  {
+   "sujeto": "teh-hippo/ha-govee-led-ble",
+   "archivo": "custom_components/ha_govee_led_ble/music_commands.py",
+   "linea": 581,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "NO_MEDIDO",
+   "publicada": "fichero_no_parsea",
+   "predicha": "fichero_no_parsea"
+  },
+  {
+   "sujeto": "teh-hippo/ha-govee-led-ble",
+   "archivo": "custom_components/ha_govee_led_ble/music_commands.py",
+   "linea": 585,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "NO_MEDIDO",
+   "publicada": "fichero_no_parsea",
+   "predicha": "fichero_no_parsea"
+  },
+  {
+   "sujeto": "teh-hippo/ha-govee-led-ble",
+   "archivo": "custom_components/ha_govee_led_ble/music_commands.py",
+   "linea": 596,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "NO_MEDIDO",
+   "publicada": "fichero_no_parsea",
+   "predicha": "fichero_no_parsea"
+  },
+  {
+   "sujeto": "teh-hippo/ha-govee-led-ble",
+   "archivo": "custom_components/ha_govee_led_ble/music_semantics.py",
+   "linea": 1885,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "teh-hippo/ha-govee-led-ble",
+   "archivo": "custom_components/ha_govee_led_ble/music_semantics.py",
+   "linea": 1899,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "teh-hippo/ha-govee-led-ble",
+   "archivo": "custom_components/ha_govee_led_ble/music_semantics.py",
+   "linea": 1901,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/images.py",
+   "linea": 140,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/install.py",
+   "linea": 165,
+   "familia": "CAJA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/refine.py",
+   "linea": 567,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/refine.py",
+   "linea": 639,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/refine.py",
+   "linea": 640,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/refine.py",
+   "linea": 1049,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/refine.py",
+   "linea": 1170,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/strokes2d.py",
+   "linea": 221,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/strokes2d.py",
+   "linea": 222,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "zayphir/spp-to-pawpaint",
+   "archivo": "converter/spp2pawpaint/strokes2d.py",
+   "linea": 274,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "0xRadikal/Free-Telegram-Proxy",
+   "archivo": "tgproxy/fetch.py",
+   "linea": 101,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "agregacion_intencionada",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "0xRadikal/Free-Telegram-Proxy",
+   "archivo": "tgproxy/publish.py",
+   "linea": 83,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "agregacion_intencionada",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "tempus2016/z2m-device-tracker",
+   "archivo": "custom_components/z2m_tracker/const.py",
+   "linea": 66,
+   "familia": "CAJA+REGEX",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "tempus2016/z2m-device-tracker",
+   "archivo": "z2m_tracker/app/community.py",
+   "linea": 171,
+   "familia": "CAJA+ESPACIO+REGEX",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "uso_como_conjunto",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "tempus2016/z2m-device-tracker",
+   "archivo": "z2m_tracker/app/ha.py",
+   "linea": 185,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "tempus2016/z2m-device-tracker",
+   "archivo": "z2m_tracker/app/health.py",
+   "linea": 473,
+   "familia": "CAJA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "tempus2016/z2m-device-tracker",
+   "archivo": "z2m_tracker/app/health.py",
+   "linea": 475,
+   "familia": "CAJA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "tempus2016/z2m-device-tracker",
+   "archivo": "z2m_tracker/app/main.py",
+   "linea": 284,
+   "familia": "CONJUNTO+ESPACIO",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "colision_sin_perdida",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "tempus2016/z2m-device-tracker",
+   "archivo": "z2m_tracker/app/matter.py",
+   "linea": 158,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "YossiKon/geely-connect",
+   "archivo": "tests/test_transport.py",
+   "linea": 218,
+   "familia": "RUTA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "uso_como_conjunto",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "src/mcp_unifi/dispatcher.py",
+   "linea": 288,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "src/mcp_unifi/dispatcher.py",
+   "linea": 290,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "src/mcp_unifi/dispatcher.py",
+   "linea": 299,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "src/mcp_unifi/dispatcher.py",
+   "linea": 302,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "src/mcp_unifi/dispatcher.py",
+   "linea": 304,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "src/mcp_unifi/dispatcher.py",
+   "linea": 313,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "src/mcp_unifi/dispatcher.py",
+   "linea": 320,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "src/mcp_unifi/dispatcher.py",
+   "linea": 322,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "src/mcp_unifi/dispatcher.py",
+   "linea": 330,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "pete-builds/mcp-unifi",
+   "archivo": "tests/test_tls_pinning.py",
+   "linea": 616,
+   "familia": "ESPACIO",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "uso_como_conjunto",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "rooktwo/rectg",
+   "archivo": "crawler/source_engine.py",
+   "linea": 38,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "rooktwo/rectg",
+   "archivo": "crawler/source_engine.py",
+   "linea": 40,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "plasma-ai/wiki",
+   "archivo": "wiki/core/_search.py",
+   "linea": 275,
+   "familia": "NORMALIZA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "plasma-ai/wiki",
+   "archivo": "wiki/core/wiki.py",
+   "linea": 4411,
+   "familia": "NORMALIZA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "plasma-ai/wiki",
+   "archivo": "wiki/core/wiki.py",
+   "linea": 4412,
+   "familia": "NORMALIZA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "huggingface/speech-to-speech",
+   "archivo": "src/speech_to_speech/LLM/responses_api_language_model.py",
+   "linea": 270,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "huggingface/speech-to-speech",
+   "archivo": "src/speech_to_speech/LLM/responses_api_language_model.py",
+   "linea": 273,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "huggingface/speech-to-speech",
+   "archivo": "src/speech_to_speech/LLM/responses_api_language_model.py",
+   "linea": 279,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "huggingface/speech-to-speech",
+   "archivo": "src/speech_to_speech/LLM/tool_call/function_call.py",
+   "linea": 181,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "huggingface/speech-to-speech",
+   "archivo": "src/speech_to_speech/api/openai_realtime/echo_canceller.py",
+   "linea": 102,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "huggingface/speech-to-speech",
+   "archivo": "src/speech_to_speech/api/openai_realtime/handlers/response.py",
+   "linea": 643,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "uso_como_conjunto",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "huggingface/speech-to-speech",
+   "archivo": "tests/test_chattts_streaming.py",
+   "linea": 134,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "huggingface/speech-to-speech",
+   "archivo": "tests/test_tts_handler_gate_contract.py",
+   "linea": 31,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "PriorLabs/relarena",
+   "archivo": "packages/relarena/src/relarena/models/relflow/raw.py",
+   "linea": 186,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "PriorLabs/relarena",
+   "archivo": "packages/relarena/src/relarena/models/relflow/raw.py",
+   "linea": 480,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "PriorLabs/relarena",
+   "archivo": "packages/relarena/src/relarena/models/relgt/tokenize.py",
+   "linea": 338,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "PriorLabs/relarena",
+   "archivo": "packages/relarena/src/relarena/models/relgt/tokenize.py",
+   "linea": 339,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "PriorLabs/relarena",
+   "archivo": "packages/relarena/src/relarena/models/relgt/tokenize.py",
+   "linea": 340,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "PriorLabs/relarena",
+   "archivo": "packages/relarena/src/relarena/models/relgt/tokenize.py",
+   "linea": 341,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "PriorLabs/relarena",
+   "archivo": "packages/relarena/src/relarena/models/relgt/tokenize.py",
+   "linea": 351,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/agent-platform-alert-configuration/scripts/check_telemetry.py",
+   "linea": 50,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "uso_como_conjunto",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/agent-platform-autorater-customization/scripts/run_metrics.py",
+   "linea": 105,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/api-gateway-openapi-spec-authoring/scripts/validate_apigw_openapi.py",
+   "linea": 246,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "clave_de_protocolo",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/assured-workloads-basics/scripts/validate_params.py",
+   "linea": 517,
+   "familia": "ESPACIO",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/assuredworkloads-frameworks-navigator/scripts/db_output_match_analyzer.py",
+   "linea": 597,
+   "familia": "CAJA+ESPACIO",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "uso_como_conjunto",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/bigquery-migration-data-loader/assets/bq_loader_template.py",
+   "linea": 138,
+   "familia": "CAJA+RUTA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/bigquery-migration-data-loader/assets/bq_loader_template.py",
+   "linea": 165,
+   "familia": "CAJA+SEPARADOR",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/bigquery-migration-data-loader/assets/bq_loader_template.py",
+   "linea": 177,
+   "familia": "CAJA+RUTA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/bigquery-migration-metadata-extractor/assets/extraction_stats_template.py",
+   "linea": 780,
+   "familia": "CAJA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "clave_de_protocolo",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/cloud-monitoring-alert-configuration/scripts/agent_platform/check_telemetry.py",
+   "linea": 50,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "uso_como_conjunto",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/cloud-monitoring-alert-configuration/scripts/discover_metric_schema.py",
+   "linea": 200,
+   "familia": "NORMALIZA+SEPARADOR",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "uso_como_conjunto",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/gke-kueue-troubleshooting/scripts/log_envelopes.py",
+   "linea": 621,
+   "familia": "CAJA+REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/cloud/gke-kueue-troubleshooting/scripts/snapshot_facts.py",
+   "linea": 1112,
+   "familia": "RUTA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/developers/gerrit-code-review/scripts/gerrit.py",
+   "linea": 950,
+   "familia": "ESPACIO",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/platform-devices/litert-google-tensor/scripts/benchmark_on_device.py",
+   "linea": 529,
+   "familia": "CAJA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "clave_de_protocolo",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "google/skills",
+   "archivo": "skills/platform-devices/litert-google-tensor/scripts/package_ai_pack.py",
+   "linea": 1201,
+   "familia": "CONJUNTO+ESPACIO+REGEX",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "colision_sin_perdida",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "TheFab21/ha-samsungtv-smart",
+   "archivo": "custom_components/samsungtv_smart/__init__.py",
+   "linea": 522,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "TheFab21/ha-samsungtv-smart",
+   "archivo": "custom_components/samsungtv_smart/api/art.py",
+   "linea": 3301,
+   "familia": "RUTA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "TheFab21/ha-samsungtv-smart",
+   "archivo": "custom_components/samsungtv_smart/api/smartthings.py",
+   "linea": 860,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "scripts/contract/verifier.py",
+   "linea": 314,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/complexity-treemap.py",
+   "linea": 290,
+   "familia": "RUTA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/complexity-treemap.py",
+   "linea": 292,
+   "familia": "RUTA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/complexity-treemap.py",
+   "linea": 345,
+   "familia": "RUTA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/complexity-treemap.py",
+   "linea": 347,
+   "familia": "RUTA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/complexity-treemap.py",
+   "linea": 1292,
+   "familia": "RUTA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/backlog_ready.py",
+   "linea": 319,
+   "familia": "CAJA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "clave_de_protocolo",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/ci/ci_unsure.py",
+   "linea": 395,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/docs/doc_links.py",
+   "linea": 110,
+   "familia": "CAJA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/docs/doc_links.py",
+   "linea": 111,
+   "familia": "CAJA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "CONFIRMADO",
+   "publicada": "proyeccion_no_inyectiva_sin_medicion",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/docs/vault_queries.py",
+   "linea": 141,
+   "familia": "CAJA+REGEX",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/fleet/fleet_learn_from.py",
+   "linea": 116,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/fleet/fleet_scanner_diff.py",
+   "linea": 284,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/fleet/fleet_scanner_diff.py",
+   "linea": 288,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/report/run_wiki.py",
+   "linea": 89,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/report/run_wiki.py",
+   "linea": 91,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/report/run_wiki.py",
+   "linea": 93,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/report/run_wiki.py",
+   "linea": 95,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/report/run_wiki.py",
+   "linea": 97,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/report/wiki_writer.py",
+   "linea": 266,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/run/context_blocks.py",
+   "linea": 144,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/run/signals.py",
+   "linea": 437,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/runner_envs.py",
+   "linea": 102,
+   "familia": "PREFIJO",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "clave_de_protocolo",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/scripts/lib/unit_components.py",
+   "linea": 86,
+   "familia": "RUTA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "colision_sin_perdida",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/tests/test_catalog_merge.py",
+   "linea": 75,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/tests/test_glossary.py",
+   "linea": 54,
+   "familia": "ESPACIO+REBANADA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "uso_como_conjunto",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/assess/tests/test_no_wall_clock.py",
+   "linea": 104,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "skills/fleet/scripts/fleet_publish_plan.py",
+   "linea": 101,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "tests/contract/test_readiness.py",
+   "linea": 251,
+   "familia": "ESPACIO",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "normalizacion_para_consulta",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "bjcoombs/ai-native-toolkit",
+   "archivo": "tests/contract/test_readiness.py",
+   "linea": 254,
+   "familia": "ESPACIO",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "normalizacion_para_consulta",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "madrury/py-glm",
+   "archivo": "glm/simulation.py",
+   "linea": 124,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "SheffieldML/PyDeepGP",
+   "archivo": "deepgp/functional/uncollapsed.py",
+   "linea": 157,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "SheffieldML/PyDeepGP",
+   "archivo": "deepgp/layers/mrd.py",
+   "linea": 264,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "SheffieldML/PyDeepGP",
+   "archivo": "deepgp/testing/test_uncollapsed.py",
+   "linea": 42,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "library/completions.py",
+   "linea": 228,
+   "familia": "SEPARADOR",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "NO_MEDIDO",
+   "publicada": "invariante_externo_no_declarado",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "library/database/add/computer_info.py",
+   "linea": 219,
+   "familia": "RUTA",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "NO_MEDIDO",
+   "publicada": "invariante_externo_no_declarado",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "library/table/mcda.py",
+   "linea": 168,
+   "familia": "CAJA+ESPACIO",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "NO_MEDIDO",
+   "publicada": "invariante_externo_no_declarado",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "library/table/mcda.py",
+   "linea": 279,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "library/table/mcda.py",
+   "linea": 281,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "library/table/mcda.py",
+   "linea": 283,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "library/table/mcda.py",
+   "linea": 361,
+   "familia": "REBANADA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "escritura_posicional",
+   "predicha": "escritura_posicional"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "library/text/cluster_sort.py",
+   "linea": 345,
+   "familia": "ESPACIO",
+   "forma": "PROYECCION_ARRIBA_CON_PERDIDA",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "library/utils/arggroups.py",
+   "linea": 59,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "tests/conftest.py",
+   "linea": 154,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "tests/conftest.py",
+   "linea": 156,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "chapmanjacobd/library",
+   "archivo": "tests/conftest.py",
+   "linea": 158,
+   "familia": "COLUMNA",
+   "forma": "SELECCION_COLUMNA_BUCLE",
+   "veredicto": "REFUTADO",
+   "publicada": "proyeccion_inyectiva",
+   "predicha": "NO_MEDIDO"
+  },
+  {
+   "sujeto": "openwisp/docker-openwisp",
+   "archivo": "images/common/utils.py",
+   "linea": 218,
+   "familia": "CAJA+ESPACIO+NORMALIZA",
+   "forma": "PROYECCION_VISIBLE",
+   "veredicto": "REFUTADO",
+   "publicada": "clave_de_protocolo",
+   "predicha": "NO_MEDIDO"
+  }
+ ],
+ "sello": {
+  "sha256_en_el_commit_del_sello": "8f1b9c1c65fd121ef98f3c398aa5e98ed7542254c23e4ae5c87141289958e5a0",
+  "commit_del_sello": "6bdc036",
+  "sha256_vigente": "1881043389e74135e7f262a1c6c05cfa0c0f3892b4e19f7c7893d34560b4a26f",
+  "completado_despues_de_medir": true,
+  "campos_anadidos": [
+   "P2.ratio_orientation",
+   "P3.ratio_orientation",
+   "P4.ratio_orientation"
+  ],
+  "por_que": "El guardian tests/test_censo_fuera.py::test_toda_prediccion_con_cociente_declara_su_orientacion exige la llave `ratio_orientation` en toda prediccion cuyo enunciado nombre un cociente con un lado medido y otro predicho. El sello se escribio sin ella y el guardian lo acuso despues de la corrida.",
+  "que_no_cambio": "Ningun claim, ningun falsador, ningun umbral, ningun valor puntual y ninguna banda. El diff contra 6bdc036 es exactamente tres lineas anadidas, y se verifica con `git diff 6bdc036 -- prediccion-batch-24.json`.",
+  "lectura": "Se publica como defecto del sello, no como correccion silenciosa. La llave es metadato de lectura --que lado es el denominador-- y no toca lo que se predijo; re-sellar sin declararlo habria sido exactamente el post-ajuste que este acto persigue. El defecto es de forma, no de fondo: los cinco veredictos se midieron con la regla original y no dependen de esta llave."
+ }
+}

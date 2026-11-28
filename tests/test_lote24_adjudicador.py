@@ -116,3 +116,150 @@ def test_adjudicar_prefiere_el_teorema_de_la_escritura_a_la_localidad() -> None:
 def test_t1_la_rebanada_pura_se_decide(indice: str) -> None:
     nodo = _primera_escritura(f"def f(a, v, x):\n    {indice} = v\n")
     assert causa_de_escritura(nodo) == POSICIONAL
+
+
+# --- el recibo: lo que se afirma se recalcula, no se lee --------------------
+
+import hashlib  # noqa: E402
+import json  # noqa: E402
+from fractions import Fraction  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+RAIZ = Path(__file__).resolve().parents[1]
+PRE_REGISTRO = RAIZ / "prediccion-batch-24.json"
+RECIBO = RAIZ / "recibo-lote24-20261127.json"
+ADJUDICADOR = RAIZ / "src" / "fiber_ast_lint" / "adjudicador_ast.py"
+DETECTOR = RAIZ / "src" / "fiber_ast_lint" / "detect.py"
+ECO = "proyeccion_no_inyectiva_sin_medicion"
+COMPUERTA = ("COLUMNA", "REBANADA")
+
+
+def _cargar(ruta: Path) -> dict:
+    return json.loads(ruta.read_text(encoding="utf-8"))
+
+
+def _sha(ruta: Path) -> str:
+    return hashlib.sha256(ruta.read_bytes()).hexdigest()
+
+
+def _filas() -> list[dict]:
+    return _cargar(RECIBO)["tabla_adjudicacion"]
+
+
+def _adjudicadas() -> list[dict]:
+    return [f for f in _filas() if f["veredicto"] != "NO_MEDIDO"]
+
+
+def _decididas() -> list[dict]:
+    return [f for f in _adjudicadas() if f["predicha"] != SIN_CAUSA]
+
+
+def test_el_pre_registro_se_sello_antes_de_medir() -> None:
+    pre = _cargar(PRE_REGISTRO)
+    assert pre["declared_before_computation"] is True
+    assert _cargar(RECIBO)["pre_registro"]["sha256"] == _sha(PRE_REGISTRO)
+
+
+def test_el_detector_no_se_movio() -> None:
+    inst = _cargar(RECIBO)["instrumento"]
+    assert _sha(DETECTOR) == inst["detector"]["sha256"]
+    assert inst["detector"]["sha256"] == (
+        "b03f3ac31a1f843c453a38bb834156328f0f1a073e6fe39b12ad2e75db8bb6d6"
+    )
+    assert inst["detector"]["intacto"] is True
+    assert inst["detector"]["modificado"] is False
+
+
+def test_el_adjudicador_sigue_siendo_el_que_se_sello() -> None:
+    """Si alguien edita el modulo, el recibo deja de describirlo."""
+    sellado = _cargar(PRE_REGISTRO)["instrumento_antes"]["adjudicador_sha256"]
+    assert _sha(ADJUDICADOR) == sellado
+    assert _cargar(RECIBO)["instrumento"]["adjudicador"]["sha256"] == sellado
+
+
+def test_las_decisiones_llevan_la_causa_publicada() -> None:
+    decididas = _decididas()
+    assert decididas
+    assert all(f["predicha"] == f["publicada"] for f in decididas)
+
+
+def test_la_cobertura_cae_dentro_de_la_banda_sellada() -> None:
+    # La banda [22, 27] esta sellada en el enunciado de P2 y se deriva de la
+    # tabla del lote 22: 25 filas con causa escritura_posicional, todas REBANADA.
+    assert 22 <= len(_decididas()) <= 27
+
+
+def test_la_capa_teorema_no_toca_ningun_confirmado() -> None:
+    """El teorema solo decide del lado negativo: no sube la precision del producto."""
+    decididas = _decididas()
+    assert not [f for f in decididas if f["veredicto"] == "CONFIRMADO"]
+    med = _cargar(RECIBO)["medicion"]["efecto_sobre_la_precision_del_producto"]
+    confirmados = sum(1 for f in _adjudicadas() if f["veredicto"] == "CONFIRMADO")
+    assert med["antes"]["confirmados"] == med["despues"]["confirmados"] == confirmados
+    assert med["despues"]["filas"] == len(_adjudicadas()) - len(decididas)
+    assert med["despues"]["precision"] == round(confirmados / med["despues"]["filas"], 4)
+
+
+def test_las_cifras_del_recibo_se_recalculan() -> None:
+    med = _cargar(RECIBO)["medicion"]
+    adjudicadas = _adjudicadas()
+    decididas = _decididas()
+    eco = [f for f in adjudicadas if f["predicha"] != SIN_CAUSA or f["publicada"] == ECO]
+    assert med["filas"] == len(_filas())
+    assert med["adjudicados"] == len(adjudicadas)
+    assert med["decididas"] == len(decididas)
+    assert med["aciertos"] == sum(1 for f in decididas if f["predicha"] == f["publicada"])
+    assert med["precision_capa_teorema"] == round(
+        float(Fraction(med["aciertos"], len(decididas))), 4)
+    assert med["acuerdo_estricto"] == round(
+        float(Fraction(len(decididas), len(adjudicadas))), 4)
+    assert med["acuerdo_con_capa_eco"]["numerador"] == len(eco)
+    assert med["acuerdo_con_capa_eco"]["valor"] == round(
+        float(Fraction(len(eco), len(adjudicadas))), 4)
+
+
+def test_la_compuerta_del_lote_23_se_cruza_sin_leer_el_veredicto() -> None:
+    cruce = _cargar(RECIBO)["cruce_con_la_compuerta_del_lote_23"]
+    gate = [f for f in _adjudicadas() if f["familia"] in COMPUERTA]
+    sostenidas = [f for f in gate if f["predicha"] == POSICIONAL]
+    assert cruce["filas_suprimidas"] == len(gate)
+    assert cruce["sostenidas_por_el_teorema"] == len(sostenidas)
+    assert cruce["no_sostenidas"] == len(gate) - len(sostenidas)
+    assert cruce["confirmados_suprimidos"] == 0
+    assert cruce["no_sostenidas"] >= 45
+
+
+def test_el_borde_es_una_sola_fila_y_explica_toda_desviacion() -> None:
+    """La unica causa publicada `escritura_posicional` que el modulo no decide."""
+    borde = _cargar(RECIBO)["borde_no_decidido"]
+    sobrantes = [f for f in _adjudicadas()
+                 if f["publicada"] == POSICIONAL and f["predicha"] == SIN_CAUSA]
+    assert len(sobrantes) == 1
+    fila = sobrantes[0]
+    assert (fila["sujeto"], fila["archivo"], fila["linea"]) == (
+        borde["sujeto"], borde["archivo"], borde["linea"])
+    # y la razon estructural: la rebanada esta, pero su cota lleva una llamada.
+    arbol = ast.parse(f"def f(wavs, i, row):\n    {borde['texto']}\n")
+    nodo = _primera_escritura(f"def f(wavs, i, row):\n    {borde['texto']}\n", 2)
+    assert nodo is not None
+    indices = [n.slice for n in ast.walk(nodo) if isinstance(n, ast.Subscript)]  # type: ignore[attr-defined]
+    hojas = [x for i in indices for x in ast.walk(i)]
+    assert any(isinstance(x, ast.Slice) for x in hojas)
+    assert any(isinstance(x, ast.Call) for x in hojas)
+
+
+def test_los_veredictos_del_recibo_son_los_cinco_sellados() -> None:
+    pre = _cargar(PRE_REGISTRO)
+    veredictos = _cargar(RECIBO)["veredictos"]
+    assert [v["id"] for v in veredictos] == [p["id"] for p in pre["predictions"]]
+    assert {v["veredicto"] for v in veredictos} <= {"CUMPLIDA", "REFUTADA", "NO_MEDIDO"}
+
+
+def test_los_cocientes_del_sello_declaran_su_denominador() -> None:
+    """El guardian del esquema se cumple aqui tambien, y su cumplimiento se declara."""
+    sello = _cargar(RECIBO)["sello"]
+    assert sello["completado_despues_de_medir"] is True
+    assert sello["sha256_vigente"] == _sha(PRE_REGISTRO)
+    for p in _cargar(PRE_REGISTRO)["predictions"]:
+        if p["id"] in ("P2", "P3", "P4"):
+            assert "/" in p["ratio_orientation"]
