@@ -58,20 +58,24 @@ Two consequences this tool implements instead of mentioning:
 
 ## Install
 
-`uvx` builds from `main` and runs it in one step: no install, no PyPI, nothing to activate.
+`uvx` builds and runs in one step: no install, no PyPI, nothing to activate. Pin the tag you
+measured, not `main` — a moving branch makes two runs of the same command different instruments.
 
 ```console
-uvx --from git+https://github.com/alexisromtz-lab/fiber-ast-lint fiber-ast-lint [ruta]
+uvx --from git+https://github.com/alexisromtz-lab/fiber-ast-lint@v0.6.1 fiber-ast-lint [ruta]
 ```
 
-Measured 2026-11-26: **11.2 s cold**, **5.5 s warm** — the first run pays the build.
+Measured 2026-11-26: **11.2 s cold**, **5.5 s warm** — the first run pays the build. Measured
+2026-11-28 from `/` under `env -i` against `@v0.6.1`: builds, installs, audits, and the payload
+declares the interpreter it used (`3.14.0` on that run). Nothing in the invocation depends on the
+working directory or on anything outside the target.
 
 `pip install fiber-ast-lint` is the short form and it works **once that name is published on
-PyPI**; today the name does not resolve, so the line above is the one that runs. To install from
-the tree instead, pin a release tag:
+PyPI**; today the name does not resolve, so the `uvx` line above is the one that runs. To install
+from the tree instead:
 
 ```console
-pip install git+https://github.com/alexisromtz-lab/fiber-ast-lint@v0.4.6
+pip install git+https://github.com/alexisromtz-lab/fiber-ast-lint@v0.6.1
 ```
 
 Python ≥ 3.11, zero runtime dependencies (stdlib `ast` only).
