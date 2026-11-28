@@ -35,7 +35,21 @@
   "red": "GitHub sobre sha alcanzable, fetch --depth 1",
   "relojes_de_pared": 0,
   "coste": "20 clones de hasta 17 MiB, purgados uno a uno",
-  "comando": "/tmp/lote24_run.py (efimero, no commiteado)"
+  "comando": "python bench/lote24.py --out /tmp/lote24_resultado.json (la corrida original uso el mismo codigo desde /tmp; commitado despues de repetirlo sobre los 20 sha congelados: 125 de 125 filas y 29 de 29 decididas identicas)",
+  "interprete": "3.9.6"
+ },
+ "corrida_por_interprete": {
+  "que_mide": "el mismo bench/lote24.py, sobre los mismos 20 sha congelados, en dos interpretes",
+  "corridas": [
+   {"interprete": "3.9.6", "filas": 125, "decididas": 29},
+   {"interprete": "3.12", "filas": 125, "decididas": 24}
+  ],
+  "filas_que_cambian_de_dictamen": 5,
+  "causa_de_las_5": "fichero_no_parsea",
+  "filas_de_los_117_que_cambian": 0,
+  "por_que": "custom_components/ha_govee_led_ble/music_commands.py:46 declara `type MusicWrite = tuple[bytes, Mapping[str, Any]]` (PEP 695): 3.9 y 3.11 no lo parsean, 3.12 si. T2 no mide un estado del sujeto, mide el piso del parser que lo lee.",
+  "consecuencia": "ninguno de los cinco veredictos cambia: las 117 filas adjudicadas dan el mismo dictamen en los dos interpretes y las 5 que se mueven son las 5 NO_MEDIDO de causa fichero_no_parsea, que estan fuera de los 117",
+  "deuda_que_abre": "T2 se abstiene sin declarar con que interprete se obtuvo, asi que el mismo recibo reproducio en dos patas de la matriz 3.11-3.13 da dos cuentas de decididas (29 en 3.11, 24 en 3.12 y 3.13). Se declara aqui y no se corrige: adjudicador_ast esta congelado por hash y renombrar la causa seria post-ajuste"
  },
  "reproduccion": {
   "P5": {

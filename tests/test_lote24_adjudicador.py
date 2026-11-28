@@ -263,3 +263,30 @@ def test_los_cocientes_del_sello_declaran_su_denominador() -> None:
     for p in _cargar(PRE_REGISTRO)["predictions"]:
         if p["id"] in ("P2", "P3", "P4"):
             assert "/" in p["ratio_orientation"]
+
+
+def test_el_comando_que_el_recibo_cita_existe_y_congela_el_detector() -> None:
+    """Una corrida que solo se puede repetir desde /tmp no es una medicion."""
+    comando = _cargar(RECIBO)["corrida"]["comando"]
+    citado = next(t for t in comando.split() if t.startswith("bench/"))
+    corredor = RAIZ / citado
+    assert corredor.is_file()
+    fuente = corredor.read_text(encoding="utf-8")
+    assert _sha(DETECTOR) in fuente
+
+
+def test_las_dos_corridas_difieren_solo_en_lo_que_no_es_del_sujeto() -> None:
+    """T2 mide el piso del parser, no un estado del sujeto: la cuenta se declara."""
+    bloque = _cargar(RECIBO)["corrida_por_interprete"]
+    corridas = {c["interprete"]: c for c in bloque["corridas"]}
+    assert all(c["filas"] == len(_filas()) for c in corridas.values())
+    diferencia = corridas["3.9.6"]["decididas"] - corridas["3.12"]["decididas"]
+    assert diferencia == bloque["filas_que_cambian_de_dictamen"]
+    # las que se mueven son exactamente las de causa T2, y ninguna de ellas esta entre los 117
+    t2 = [f for f in _filas() if f["publicada"] == bloque["causa_de_las_5"]]
+    assert len(t2) == diferencia
+    assert all(f["veredicto"] == "NO_MEDIDO" for f in t2)
+    adjudicadas = [f for f in _filas() if f["veredicto"] != "NO_MEDIDO"]
+    assert len(adjudicadas) == 117
+    assert all(f["predicha"] != bloque["causa_de_las_5"] for f in adjudicadas)
+    assert _cargar(RECIBO)["corrida"]["interprete"] in corridas
