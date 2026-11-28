@@ -345,3 +345,26 @@ def test_el_readme_del_lote_16_cita_su_pre_registro_por_hash() -> None:
     assert f"`prediccion-batch-{pred['batch']}.json`" in texto
     correccion = pred["correccion_posterior"]
     assert correccion["efecto_medido"] and "denominador" in correccion["que"]
+
+
+def _tags_citados(texto: str) -> list[str]:
+    """Los tags `@vX.Y.Z` que un lector copiaria tal cual desde el README."""
+    return sorted(set(re.findall(r"@v(\d+\.\d+\.\d+)", texto)))
+
+
+def test_el_tag_que_el_readme_ensena_es_la_version_del_arbol() -> None:
+    """Un pin sin lector envejece: el README ensenaba `@v0.4.6` con el arbol en 0.6.1."""
+    from fiber_ast_lint import __version__
+
+    citados = _tags_citados(README)
+    assert citados, "el README no cita ningun tag: la guarda seria un verde vacio"
+    assert citados == [__version__], (
+        f"el README ensena {citados} y el arbol declara {__version__}: "
+        "copiar la linea instala otro instrumento"
+    )
+
+
+def test_la_guarda_de_tags_ve_y_discrimina() -> None:
+    assert _tags_citados("uvx --from git+https://x/y@v0.6.1 y --json") == ["0.6.1"]
+    assert _tags_citados("uvx --from git+https://x/y y --json") == []
+    assert _tags_citados("...@v0.6.1 y tambien @v0.6.0") == ["0.6.0", "0.6.1"]
